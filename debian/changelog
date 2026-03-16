@@ -1,6 +1,13 @@
-multiflexi-web (0.1.0) UNRELEASED; urgency=low
+multiflexi-web (2.3.1) UNRELEASED; urgency=medium
 
+  * separated to its own project
+
+ -- vitex <info@vitexsoftware.cz>  Mon, 16 Mar 2026 15:51:02 +0100
+
+multiflexi-web (0.1.0) unstable; urgency=low
+
+  [ Vítězslav Dvořák ]
   * Initial release. Closes: #nnnn
     <nnnn is the bug number of your ITP>
 
- -- Vítězslav Dvořák <info@vitexsoftware.cz>  Sun, 15 Mar 2026 22:46:05 +0100
+ -- vitex <info@vitexsoftware.cz>  Mon, 16 Mar 2026 15:50:28 +0100
