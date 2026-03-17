@@ -7,3 +7,12 @@
 
 %:
 	dh $@
+
+override_dh_install:
+	mkdir -p debian/tmp/
+	jq '.version = "'`dpkg-parsechangelog | sed -n 's/^Version: //p'| sed 's/~.*//'`'"'  debian/conf/composer.json |sponge debian/tmp/composer.json
+	dh_install
+	install -m0755 -d debian/multiflexi-web/usr/share/pkg-php-tools/autoloaders
+	echo 'vitexsoftware multiflexi-web multiflexi-web/autoload.php' > debian/multiflexi-web/usr/share/pkg-php-tools/autoloaders/multiflexi-web
+	# Fix vendor references to use Debian autoloader path
+	sed -i -e 's/.\.\/vendor\/autoload\.php/\/usr\/share\/php\/multiflexi-web\/autoload.php/g' debian/multiflexi-web/usr/share/multiflexi-web/init.php

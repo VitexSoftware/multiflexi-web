@@ -1,5 +1,5 @@
 {
-  "name": "vitexsoftware/multiflexi",
+  "name": "vitexsoftware/multiflexi-web",
   "description": "Tool used to setup AbraFlexi multiinstance",
   "type": "project",
   "require": {

@@ -21,3 +21,6 @@ composer.lock
 nbproject/project.properties
 nbproject/project.xml
 src/php_errors.log
+debian/multiflexi-web.debhelper.log
+debian/multiflexi-web.substvars
+debian/multiflexi-web/
