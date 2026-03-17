@@ -18,3 +18,5 @@ composer.lock
 /.build/
 !/composer.lock
 /tests/selenium/.env
+nbproject/project.properties
+nbproject/project.xml
