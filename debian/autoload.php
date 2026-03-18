@@ -18,7 +18,7 @@ require_once '/usr/share/php/EaseTWB4/autoload.php';
 require_once '/usr/share/php/EaseTWB4Widgets/autoload.php';
 require_once '/usr/share/php/SvgGraph/autoload.php';
 require_once '/usr/share/php/SensioLabs/AnsiConverter/autoload.php';
-
+require_once '/usr/share/php/Rcubitto/JsonPretty/autoload.php';
 
 // PSR-4 autoloader for MultiFlexi web-specific classes
 // These extend/complement the core MultiFlexi namespace with Ui, GDPR, Security, etc.
