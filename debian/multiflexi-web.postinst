@@ -49,10 +49,10 @@ apache_install() {
 case "$1" in
     configure)
         # Set proper permissions for web files
-        if [ -d /usr/share/multiflexi ]; then
-            chown -R multiflexi:www-data /usr/share/multiflexi/
-            chmod -R 644 /usr/share/multiflexi/
-            find /usr/share/multiflexi/ -type d -exec chmod 755 {} \;
+        if [ -d /usr/share/multiflexi-web ]; then
+            chown -R multiflexi:www-data /usr/share/multiflexi-web/
+            chmod -R 644 /usr/share/multiflexi-web/
+            find /usr/share/multiflexi-web/ -type d -exec chmod 755 {} \;
         fi
 
         # Encryption master key is now managed by multiflexi-common package
@@ -60,8 +60,8 @@ case "$1" in
         # Legacy file-based key at /var/lib/multiflexi/.encryption_master_key is deprecated
 
         # Run GDPR Article 16 database migration
-        if [ -f /usr/share/multiflexi/gdpr-article16-migration.php ]; then
-            cd /usr/share/multiflexi
+        if [ -f /usr/share/multiflexi-web/gdpr-article16-migration.php ]; then
+            cd /usr/share/multiflexi-web
             if php -f gdpr-article16-migration.php 2>/dev/null; then
                 echo "GDPR Article 16 database migration completed successfully"
             else

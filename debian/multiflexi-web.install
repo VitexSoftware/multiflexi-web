@@ -1,4 +1,4 @@
-#debian/tmp/composer.json                  usr/lib/multiflexi-web
+debian/tmp/composer.json                  usr/lib/multiflexi-web
 debian/autoload.php			  usr/share/php/multiflexi-web
 src/*.php                                 usr/share/multiflexi-web
 src/favicon.ico                           usr/share/multiflexi-web
@@ -10,19 +10,7 @@ src/assets/Buttons-1.5.6/css/*            usr/share/multiflexi-web/assets/Button
 src/assets/Buttons-1.5.6/swf/*            usr/share/multiflexi-web/assets/Buttons-1.5.6/swf/
 src/images/*                              usr/share/multiflexi-web/images
 src/css/*                                 usr/share/multiflexi-web/css
-src/MultiFlexi/*.php                      usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Audit                      usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Command                    usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Consent                    usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/DataErasure                usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/DataExport                 usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/DataRetention              usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Email                      usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/GDPR                       usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Notifications              usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Security                   usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Ui                         usr/lib/multiflexi-web/MultiFlexi/
-src/MultiFlexi/Ui/Action                  usr/lib/multiflexi-web/MultiFlexi/Ui/
+src/MultiFlexi/*                         usr/lib/multiflexi-web/MultiFlexi/
 
 debian/conf/multiflexi.conf    		      etc/apache2/conf-available
 debian/conf/multiflexi.service 		      etc/avahi/services
