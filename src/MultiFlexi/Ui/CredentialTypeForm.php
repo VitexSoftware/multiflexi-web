@@ -47,35 +47,39 @@ class CredentialTypeForm extends SecureForm
         $helperCol = $credTypeRow1->addColumn(6, new \Ease\TWB4\FormGroup(_('Credential Prototype'), new CredentialPrototypeSelect('class', [], (string) $credtype->getDataValue('class'))));
 
         if ($credtype->getDataValue('class')) {
-            $credtype->getHelper()->prepareConfigForm();
+            if ($credtype->getHelper()) {
+                $credtype->getHelper()->prepareConfigForm();
 
-            $helperCol->addItem(new FieldsForm($credtype->getHelper()->fieldsInternal(), $credtype->getDataValue('class')));
+                $helperCol->addItem(new FieldsForm($credtype->getHelper()->fieldsInternal(), $credtype->getDataValue('class')));
+            }
 
             $provided = new \Ease\TWB4\Panel(new \Ease\Html\H4Tag(_('Fields provided')));
 
             $assigned = $credtype->getFields();
 
-            foreach ($credtype->getHelper()->fieldsProvided() as $fieldProvided) {
-                $fieldRow = new \Ease\TWB4\Row(null, ['style' => 'padding: 5px']);
+            if ($credtype->getHelper()) {
+                foreach ($credtype->getHelper()->fieldsProvided() as $fieldProvided) {
+                    $fieldRow = new \Ease\TWB4\Row(null, ['style' => 'padding: 5px']);
 
-                $fieldRow->addColumn(4, $fieldProvided->getCode().'<br><small>'.($fieldProvided->isRequired() ? _('Required') : _('Optional')).' '.$fieldProvided->getType().'</small>');
-                $fieldRow->addColumn(6, $fieldProvided->getName().'<br>'.$fieldProvided->getDescription());
+                    $fieldRow->addColumn(4, $fieldProvided->getCode().'<br><small>'.($fieldProvided->isRequired() ? _('Required') : _('Optional')).' '.$fieldProvided->getType().'</small>');
+                    $fieldRow->addColumn(6, $fieldProvided->getName().'<br>'.$fieldProvided->getDescription());
 
-                $flags = new \Ease\Html\SpanTag();
+                    $flags = new \Ease\Html\SpanTag();
 
-                if (\is_object($assigned->getFieldByCode($fieldProvided->getCode()))) {
-                    $flags->addItem(new \Ease\TWB4\LinkButton('#', '➕', 'disabled', ['title' => _('Already assigned')]));
-                } else {
-                    if ($fieldProvided->isRequired()) {
-                        $credtype->addStatusMessage(sprintf(_('The %s field is required for %s'), $fieldProvided->getCode(), $credtype->getHelper()->name()), 'warning');
+                    if (\is_object($assigned->getFieldByCode($fieldProvided->getCode()))) {
+                        $flags->addItem(new \Ease\TWB4\LinkButton('#', '➕', 'disabled', ['title' => _('Already assigned')]));
+                    } else {
+                        if ($fieldProvided->isRequired()) {
+                            $credtype->addStatusMessage(sprintf(_('The %s field is required for %s'), $fieldProvided->getCode(), $credtype->getHelper()->name()), 'warning');
+                        }
+
+                        $flags->addItem(new \Ease\TWB4\LinkButton('?id='.$credtype->getMyKey().'&addField='.$fieldProvided->getCode(), '➕', 'success', ['title' => _('Add Field to ')]));
                     }
 
-                    $flags->addItem(new \Ease\TWB4\LinkButton('?id='.$credtype->getMyKey().'&addField='.$fieldProvided->getCode(), '➕', 'success', ['title' => _('Add Field to ')]));
+                    $fieldRow->addColumn(2, $flags);
+
+                    $provided->addItem($fieldRow);
                 }
-
-                $fieldRow->addColumn(2, $flags);
-
-                $provided->addItem($fieldRow);
             }
 
             $helperCol->addItem($provided);
