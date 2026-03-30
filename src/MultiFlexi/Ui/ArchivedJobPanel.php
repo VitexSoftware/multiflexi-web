@@ -33,9 +33,9 @@ class ArchivedJobPanel extends Panel
 
     public function __construct(\MultiFlexi\Job $job, $content = null, $footer = null)
     {
-        $cid = $job->application->getMyKey();
+        $cid = $job->getApplication()->getMyKey();
         $this->headRow = new Row();
-        $this->headRow->addColumn(4, [new \Ease\Html\ATag('app.php?id='.$cid, new AppLogo($job->application, ['style' => 'height: 120px'])), '&nbsp;', $job->application->getRecordName()]);
+        $this->headRow->addColumn(4, [new \Ease\Html\ATag('app.php?id='.$cid, new AppLogo($job->getApplication(), ['style' => 'height: 120px'])), '&nbsp;', $job->getApplication()->getRecordName()]);
         //            new LinkButton('joblist.php?app_id='.$cid, '🧑‍💻&nbsp;'._('Jobs history'), 'secondary btn-lg')]);
 
         $ca = new \MultiFlexi\CompanyApp(null);
@@ -47,8 +47,8 @@ class ArchivedJobPanel extends Panel
             foreach ($usedIncompanies as $companyInfo) {
                 $companyInfo['id'] = $companyInfo['company_id'];
                 $kumpan = new \MultiFlexi\Company($companyInfo, ['autoload' => false]);
-                $calb = new CompanyAppLink($kumpan, $job->application, ['class' => 'card-img-top']);
-                $crls = new \MultiFlexi\Ui\CompanyRuntemplatesLinks($kumpan, $job->application, [], ['class' => 'btn btn-outline-secondary btn-sm']);
+                $calb = new CompanyAppLink($kumpan, $job->getApplication(), ['class' => 'card-img-top']);
+                $crls = new \MultiFlexi\Ui\CompanyRuntemplatesLinks($kumpan, $job->getApplication(), [], ['class' => 'btn btn-outline-secondary btn-sm']);
 
                 $usedByCompany->addItem(new \Ease\TWB4\Card([new \Ease\Html\DivTag([new \Ease\Html\H5Tag($calb, ['class' => 'card-title']), $crls], ['class' => 'card-body'])], ['style' => 'width: 6rem;']));
             }
@@ -58,7 +58,7 @@ class ArchivedJobPanel extends Panel
             $this->headRow->addColumn(6, new LinkButton('?id='.$cid.'&action=delete', '🪦&nbsp;'._('Remove'), 'danger'));
         }
 
-        $this->headRow->addItem(new RuntemplateButton($job->runTemplate));
+        $this->headRow->addItem(new RuntemplateButton($job->getRunTemplate()));
 
         //        $headRow->addColumn(2, new \Ease\TWB4\LinkButton('tasks.php?application_id=' . $cid, '🔧&nbsp;' . _('Setup tasks'), 'secondary btn-lg btn-block'));
         //        $headRow->addColumn(2, new \Ease\TWB4\LinkButton('adhoc.php?application_id=' . $cid, '🚀&nbsp;' . _('Application launcher'), 'secondary btn-lg btn-block'));

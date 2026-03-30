@@ -24,3 +24,6 @@ src/php_errors.log
 debian/multiflexi-web.debhelper.log
 debian/multiflexi-web.substvars
 debian/multiflexi-web/
+src/css/dataTables.bootstrap4.css
+src/js/dataTables.bootstrap4.js
+src/js/jquery.dataTables.js

@@ -45,10 +45,10 @@ if (!$runTemplate->getMyKey()) {
     $infoDiv = new \Ease\Html\DivTag();
     $infoDiv->addItem(new \Ease\Html\StrongTag(_('Job ID: ')));
     $infoDiv->addItem($jobID);
-    $infoDiv->addItem(new \Ease\Html\BRTag());
+    $infoDiv->addItem(new \Ease\Html\Tag('br'));
     $infoDiv->addItem(new \Ease\Html\StrongTag(_('RunTemplate ID: ')));
     $infoDiv->addItem($jobber->getDataValue('runtemplate_id').' '._('(deleted)'));
-    $infoDiv->addItem(new \Ease\Html\BRTag());
+    $infoDiv->addItem(new \Ease\Html\Tag('br'));
     $infoDiv->addItem(new \Ease\Html\StrongTag(_('Status: ')));
     $infoDiv->addItem($jobber->getDataValue('exitcode') !== null ? _('Completed') : _('Pending'));
 
