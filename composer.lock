@@ -8694,8 +8694,8 @@
             "version": "2.2.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/8acfa3876b05be91d398d5f171cee45be0398401",
-                "reference": "8acfa3876b05be91d398d5f171cee45be0398401",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e38383a528a0472ca406a2d3264166db9b155b43",
+                "reference": "e38383a528a0472ca406a2d3264166db9b155b43",
                 "shasum": ""
             },
             "require": {
@@ -8741,7 +8741,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-30T14:56:13+00:00"
+            "time": "2026-03-30T19:41:49+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",

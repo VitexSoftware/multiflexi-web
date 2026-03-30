@@ -129,8 +129,8 @@ class CredentialProtoTypeForm extends SecureForm
             if (!empty($loc)) {
                 $currentLang = substr($loc, 0, 2);
             }
-        } elseif (getenv('LANG')) {
-            $langEnv = getenv('LANG');
+        } elseif (\Ease\Shared::cfg('LANG')) {
+            $langEnv = \Ease\Shared::cfg('LANG');
 
             if (!empty($langEnv)) {
                 $currentLang = substr($langEnv, 0, 2);

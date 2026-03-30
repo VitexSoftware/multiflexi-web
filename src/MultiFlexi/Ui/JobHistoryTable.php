@@ -86,9 +86,9 @@ class JobHistoryTable extends \Ease\TWB4\Table
             unset($job['appname'], $job['app_id']);
 
             if ($job['begin']) {
-                $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(\DateTime::createFromFormat('!Y-m-d H:i:s', $job['begin'])->getTimestamp()))];
+                $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(\DateTime::createFromFormat('!Y-m-d H:i:s', $job['begin'])))];
             } else {
-                $job['begin'] = '⏳'.($job['schedule'] ? new \Ease\Html\DivTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['schedule'])->getTimestamp())) : '');
+                $job['begin'] = '⏳'.($job['schedule'] ? new \Ease\Html\DivTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['schedule']))) : '');
             }
 
             unset($job['exitcode']);
