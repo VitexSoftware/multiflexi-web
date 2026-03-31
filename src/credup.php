@@ -75,7 +75,7 @@ if (empty($oldCreds)) {
                 $credTypeId = $credTypeObj->insertToSQL();
                 $credType = $credTypeObj->getData();
 
-                $helper = $credTypeObj->getHelper();
+                $helper = $credTypeObj->getPrototype();
 
                 if (method_exists($helper, 'query')) {
                     $fields = $helper->query(true)->getFields();

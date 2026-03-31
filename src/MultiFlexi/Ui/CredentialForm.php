@@ -91,7 +91,7 @@ class CredentialForm extends SecureForm
                 $formContents[] = self::confiField($kredenc, $field);
             }
 
-            $credtypeHelper = $fieldsSource->getHelper();
+            $credtypeHelper = $fieldsSource->getPrototype();
 
             if ($credtypeHelper) {
                 $baseClass = \Ease\Functions::baseClassName($credtypeHelper);

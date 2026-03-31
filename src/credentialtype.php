@@ -20,8 +20,13 @@ require_once './init.php';
 WebPage::singleton()->onlyForLogged();
 
 $credTypeId = WebPage::getRequestValue('id', 'int');
+$class = WebPage::getRequestValue('prototype');
 
 $crtype = new \MultiFlexi\CredentialType($credTypeId, ['autoload' => true]);
+
+if ((null === $class) === false) {
+    $crtype->setPrototypeClass($class);
+}
 
 $delete = WebPage::getRequestValue('delete', 'int');
 $removeField = WebPage::getRequestValue('removefield', 'int');
@@ -54,7 +59,6 @@ $addField = WebPage::getRequestValue('addField');
 
 if (WebPage::singleton()->isPosted()) {
     $new = WebPage::getRequestValue('new');
-    $class = WebPage::getRequestValue('class');
 
     unset($_POST[$class]);
 
@@ -80,7 +84,7 @@ if (WebPage::singleton()->isPosted()) {
             $credTypeClass = '\\MultiFlexi\\CredentialType\\'.$class;
 
             if (class_exists($credTypeClass)) {
-                $credentialTypeData['logo'] = $credTypeClass::logo();
+                $credentialTypeData['logo'] = $credTypeClass->logo();
             } else {
                 $credentialTypeData['logo'] = '';
             }
@@ -181,14 +185,10 @@ if (WebPage::singleton()->isPosted()) {
     if ((null === WebPage::getRequestValue('company_id')) === false) {
         $crtype->setDataValue('company_id', WebPage::getRequestValue('company_id', 'int'));
     }
-
-    if ((null === WebPage::getRequestValue('class')) === false) {
-        $crtype->setDataValue('class', WebPage::getRequestValue('class'));
-    }
 }
 
 if ($addField) {
-    $columnProvided = $crtype->getHelper()->query()->getFieldByCode($addField);
+    $columnProvided = $crtype->getPrototype()->query()->getFieldByCode($addField);
 
     if (\is_object($columnProvided)) {
         $fielder->dataReset();

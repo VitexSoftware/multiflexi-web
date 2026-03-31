@@ -80,25 +80,8 @@ class CredentialPrototypeSelect extends \Ease\Html\SelectTag
      */
     private static function isPhpClassPrototype(array $credType): bool
     {
-        // Check if UUID looks like a valid UUID format
-        $uuid = $credType['uuid'] ?? '';
+        $fullClassName = "\\MultiFlexi\\CredentialType\\{$credType['code']}";
 
-        if (empty($uuid) || !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid)) {
-            return false;
-        }
-
-        // Try to match against known PHP class UUIDs by checking if a corresponding class exists
-        $code = $credType['code'] ?? '';
-        $fullClassName = "\\MultiFlexi\\CredentialType\\{$code}";
-
-        if (class_exists($fullClassName) && method_exists($fullClassName, 'uuid')) {
-            try {
-                return $fullClassName::uuid() === $uuid;
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        return false;
+        return class_exists($fullClassName);
     }
 }

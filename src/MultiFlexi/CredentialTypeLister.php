@@ -44,14 +44,14 @@ class CredentialTypeLister extends CredentialType
         $this->setData($dataRowRaw);
         $data = parent::completeDataRow($dataRowRaw);
 
-        $helperClass = \get_class($this->getHelper() ?? new CredentialType\Common());
+        $helper = $this->getPrototype();
 
         if (empty($data['logo'])) {
-            $data['logo'] = 'images/'.$helperClass::logo();
+            $data['logo'] = 'images/'.$helper->logo();
         }
 
         if (empty($data['name'])) {
-            $data['name'] = $helperClass::name();
+            $data['name'] = $helper->name();
         }
 
         $data['logo'] = (string) new \Ease\Html\ATag('credentialtype.php?id='.$this->getMyKey(), new \Ease\Html\ImgTag($data['logo'], $data['name'], ['title' => $data['name'], 'style' => 'height: 50px;']));
