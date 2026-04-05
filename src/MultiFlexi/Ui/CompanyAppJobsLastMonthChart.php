@@ -35,9 +35,8 @@ class CompanyAppJobsLastMonthChart extends JobChart
     public function getJobs()
     {
         $today = date('Y-m-d');
-        $lastMonth = date('Y-m-d', strtotime('-30 days', strtotime($today)));
+        $tomorrow = date('Y-m-d', strtotime('+1 day', strtotime($today)));
 
-        return parent::getJobs()->where('app_id', $this->engine->app->getMyKey())->where("begin BETWEEN date('".$lastMonth."') AND  date('".$today."')");
-        //        return parent::getJobs()->where('begin BETWEEN (CURDATE() - INTERVAL 30 DAY) AND CURDATE()');
+        return parent::getJobs()->where('app_id', $this->engine->app->getMyKey())->where('begin < ?', $tomorrow);
     }
 }

@@ -31,12 +31,9 @@ class CompanyJobChart extends JobChart
 {
     public function getJobs()
     {
-        //  BETWEEN date('2014-10-09') AND date('2014-10-10')
-        // Retrive only jobs from the same company and last month
         $today = date('Y-m-d');
-        $lastMonth = date('Y-m-d', strtotime('-30 days', strtotime($today)));
+        $tomorrow = date('Y-m-d', strtotime('+1 day', strtotime($today)));
 
-        return parent::getJobs()->where(['company_id' => $this->engine->getDataValue('company_id')])->where("begin BETWEEN date('".$lastMonth."') AND  date('".$today."')");
-        //        return parent::getJobs()->where(['company_id' => $this->engine->getDataValue('company_id')])->where('begin BETWEEN (CURDATE() - INTERVAL 30 DAY) AND CURDATE()');
+        return parent::getJobs()->where(['company_id' => $this->engine->getDataValue('company_id')])->where('begin < ?', $tomorrow);
     }
 }

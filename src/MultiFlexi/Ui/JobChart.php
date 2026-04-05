@@ -80,10 +80,12 @@ class JobChart extends \Ease\Html\DivTag
         $data = [];
         $count = 0;
 
+        $todayStr = $today->format('Y-m-d');
+
         foreach ($days as $date => $day) {
             $data[] = [
                 'day' => $count++,
-                'date' => substr($date, 2),
+                'date' => ($date === $todayStr) ? _('today') : substr($date, 2),
                 'success' => $day['success'],
                 'waiting' => $day['waiting'],
                 'fail' => $day['fail'],
@@ -101,7 +103,7 @@ class JobChart extends \Ease\Html\DivTag
 
         $settings = [
             'auto_fit' => true,
-            'graph_title' => _('Last 30 Days jobs'),
+            'graph_title' => _('Jobs in the last 30 days'),
             'back_stroke_width' => 0,
             'back_stroke_colour' => '#eee',
             'structured_data' => true,

@@ -35,8 +35,8 @@ class RunTemplateJobsLastMonthChart extends JobChart
     public function getJobs()
     {
         $today = date('Y-m-d');
-        $lastMonth = date('Y-m-d', strtotime('-30 days', strtotime($today)));
+        $tomorrow = date('Y-m-d', strtotime('+1 day', strtotime($today)));
 
-        return parent::getJobs()->where("begin BETWEEN date('".$lastMonth."') AND  date('".$today."')")->where('runtemplate_id', $this->engine->getMyKey());
+        return parent::getJobs()->where('begin < ?', $tomorrow)->where('runtemplate_id', $this->engine->getMyKey());
     }
 }
