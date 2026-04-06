@@ -383,13 +383,24 @@ EOD,
         $app = new \MultiFlexi\Application();
         $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
 
+        // Get app IDs assigned to this company
+        $companyApp = new \MultiFlexi\CompanyApp($company);
+        $assignedAppIds = array_keys($companyApp->getAssigned()->fetchAll('app_id'));
+
+        if (empty($assignedAppIds)) {
+            $container->addItem(new \Ease\TWB4\Alert('warning', _('No applications assigned to this company.').' '.
+                '<a href="companyapps.php?company_id='.$this->wizardData['company_id'].'">'._('Assign applications').'</a>'));
+
+            return $container;
+        }
+
         $applications = $app->getFluentPDO()
             ->from('apps')
             ->select('apps.*')
             ->select('COALESCE(app_translations.name, apps.name) AS localized_name')
             ->select('COALESCE(app_translations.description, apps.description) AS localized_description')
             ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
-            ->where('enabled', true)
+            ->where('apps.id', $assignedAppIds)
             ->orderBy('COALESCE(app_translations.name, apps.name)')
             ->fetchAll();
 
@@ -909,14 +920,14 @@ EOD,
         foreach ($requirements as $requirement) {
             $form->addItem(new \Ease\Html\H4Tag($requirement));
 
-            // Find credential type by class name
+            // Find credential type by prototype name
             $credType = $credentialType->listingQuery()
-                ->where('class', $requirement)
+                ->where('prototype', $requirement)
                 ->fetch();
 
             if (!$credType) {
                 $alert = new \Ease\TWB4\Alert('warning', sprintf(_('Credential type %s not found.'), $requirement));
-                $alert->addItem(new \Ease\TWB4\LinkButton('credentialtype.php?class='.$requirement, _('Create Credential Type'), 'primary btn-sm'));
+                $alert->addItem(new \Ease\TWB4\LinkButton('credentialtype.php?prototype='.$requirement, _('Create Credential Type'), 'primary btn-sm'));
                 $form->addItem($alert);
 
                 continue;
