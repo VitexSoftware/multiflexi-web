@@ -54,7 +54,7 @@ $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
 
 $allApps = $apper->getFluentPDO()
     ->from('apps')
-    ->select('apps.id, apps.name, apps.description, apps.uuid, apps.image, apps.topics')
+    ->select('apps.id, apps.name, apps.description, apps.uuid, apps.image, apps.tags')
     ->select('COALESCE(app_translations.name, apps.name) AS localized_name')
     ->select('COALESCE(app_translations.description, apps.description) AS localized_description')
     ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
@@ -68,8 +68,8 @@ $assigned = empty($assignedRaw) ? [] : array_keys($assignedRaw);
 $allTopics = [];
 
 foreach ($allApps as $app) {
-    if (!empty($app['topics'])) {
-        $topics = explode(',', $app['topics']);
+    if (!empty($app['tags'])) {
+        $topics = explode(',', $app['tags']);
 
         foreach ($topics as $topic) {
             $topic = trim($topic);
@@ -141,7 +141,7 @@ foreach ($allApps as $app) {
     $isAssigned = \in_array($app['id'], $assigned, true);
 
     // Add data-topics attribute for JavaScript filtering
-    $topicsList = !empty($app['topics']) ? explode(',', $app['topics']) : [];
+    $topicsList = !empty($app['tags']) ? explode(',', $app['tags']) : [];
     $topicsDataAttr = implode(',', array_map('trim', $topicsList));
 
     $cardDiv = new DivTag(null, ['class' => 'col-md-4 col-lg-3 mb-3 app-card-wrapper', 'data-app-name' => strtolower($app['name']), 'data-app-desc' => strtolower($app['description'] ?? ''), 'data-topics' => $topicsDataAttr]);
@@ -182,7 +182,7 @@ foreach ($allApps as $app) {
     }
 
     // Show topics as badges
-    if (!empty($app['topics'])) {
+    if (!empty($app['tags'])) {
         $topicBadges = new DivTag(null, ['class' => 'mb-2 topic-badges text-center']);
 
         foreach ($topicsList as $topic) {

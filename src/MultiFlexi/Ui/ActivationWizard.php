@@ -414,8 +414,8 @@ EOD,
         $allTopics = [];
 
         foreach ($applications as $appData) {
-            if (!empty($appData['topics'])) {
-                $topics = explode(',', $appData['topics']);
+            if (!empty($appData['tags'])) {
+                $topics = explode(',', $appData['tags']);
 
                 foreach ($topics as $topic) {
                     $topic = trim($topic);
@@ -466,7 +466,7 @@ EOD,
             $cardClass = $isSelected ? 'border-primary bg-light' : '';
 
             // Add data-topics attribute for JavaScript filtering
-            $topicsList = !empty($appData['topics']) ? explode(',', $appData['topics']) : [];
+            $topicsList = !empty($appData['tags']) ? explode(',', $appData['tags']) : [];
             $topicsDataAttr = implode(',', array_map('trim', $topicsList));
 
             $card = new \Ease\Html\DivTag(null, [
@@ -498,7 +498,7 @@ EOD,
             }
 
             // Show topics as badges
-            if (!empty($appData['topics'])) {
+            if (!empty($appData['tags'])) {
                 $topicBadges = new \Ease\Html\DivTag(null, ['class' => 'mb-2 topic-badges']);
 
                 foreach ($topicsList as $topic) {

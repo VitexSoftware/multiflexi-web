@@ -98,7 +98,7 @@ class ConfigurationWizard extends Wizard
     {
         $apps = new \MultiFlexi\Application();
 
-        $allAppData = $apps->listingQuery()->select(['id', 'image', 'name', 'description', 'topics'], true);
+        $allAppData = $apps->listingQuery()->select(['id', 'image', 'name', 'description', 'tags'], true);
 
         $fbtable = new \Ease\TWB4\Table();
         $fbtable->addRowHeaderColumns([_('Image'), _('Name'), _('Description')]);
@@ -106,8 +106,8 @@ class ConfigurationWizard extends Wizard
         foreach ($allAppData as $appData) {
             $appData['image'] = new \Ease\Html\ImgTag($appData['image'], _('Icon'), ['height' => 40]);
             $appData['name'] = new \Ease\Html\ATag('activation-wizard.php?company_id='.$this->company->getMyKey().'&app_id='.$appData['id'].'&step='.$this->getNextStep(), _($appData['name']));
-            $appData['description'] = _($appData['description']).'<br>'.new \Ease\Html\SmallTag($appData['topics']);
-            unset($appData['id'], $appData['topics']);
+            $appData['description'] = _($appData['description']).'<br>'.new \Ease\Html\SmallTag($appData['tags']);
+            unset($appData['id'], $appData['tags']);
 
             $fbtable->addRowColumns($appData);
         }

@@ -36,7 +36,7 @@ class ApplicationLister extends Application
             ['name' => 'name', 'type' => 'text', 'label' => _('Name')],
             ['name' => 'description', 'type' => 'text', 'label' => _('Description')],
             ['name' => 'version', 'type' => 'text', 'label' => _('Version')],
-            ['name' => 'topics', 'type' => 'text', 'label' => _('Topics')],
+            ['name' => 'tags', 'type' => 'text', 'label' => _('Tags')],
             ['name' => 'executable', 'type' => 'text', 'label' => _('Executable')],
             ['name' => 'uuid', 'type' => 'text', 'label' => _('UUID')],
             ['name' => 'ociimage', 'type' => 'text', 'label' => _('OCI Image')],
@@ -51,12 +51,12 @@ class ApplicationLister extends Application
 
         $topics = new \Ease\Html\DivTag();
 
-        if (empty($dataRow['topics']) === false) {
-            foreach (explode(',', $dataRow['topics']) as $topic) {
+        if (empty($dataRow['tags']) === false) {
+            foreach (explode(',', $dataRow['tags']) as $topic) {
                 $topics->addItem(new \Ease\TWB4\Badge('secondary', $topic));
             }
 
-            $dataRow['topics'] = (string) $topics;
+            $dataRow['tags'] = (string) $topics;
         }
 
         //        $dataRowRaw['created'] = (new LiveAge((new DateTime($dataRowRaw['created']))))->__toString();
