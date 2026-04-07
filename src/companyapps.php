@@ -64,55 +64,55 @@ $allApps = $apper->getFluentPDO()
 $assignedRaw = $companyApp->getAssigned()->fetchAll('app_id');
 $assigned = empty($assignedRaw) ? [] : array_keys($assignedRaw);
 
-// Collect all unique topics from applications
-$allTopics = [];
+// Collect all unique tags from applications
+$allTags = [];
 
 foreach ($allApps as $app) {
     if (!empty($app['tags'])) {
-        $topics = explode(',', $app['tags']);
+        $tags = explode(',', $app['tags']);
 
-        foreach ($topics as $topic) {
-            $topic = trim($topic);
+        foreach ($tags as $tag) {
+            $tag = trim($tag);
 
-            if (!empty($topic) && !isset($allTopics[$topic])) {
-                $allTopics[$topic] = ['id' => $topic, 'name' => $topic];
+            if (!empty($tag) && !isset($allTags[$tag])) {
+                $allTags[$tag] = ['id' => $tag, 'name' => $tag];
             }
         }
     }
 }
 
-// Sort topics alphabetically
-ksort($allTopics);
-$allTopics = array_values($allTopics);
+// Sort tags alphabetically
+ksort($allTags);
+$allTags = array_values($allTags);
 
 // Create container for filter controls (outside form to avoid CSRF issues)
 $filterContainer = new DivTag();
 $filterContainer->addItem(new H2Tag(sprintf(_('Choose Applications for %s'), $companer->getRecordName())));
 
-// Include Selectize assets for topic filtering
-if (!empty($allTopics)) {
+// Include Selectize assets for tag filtering
+if (!empty($allTags)) {
     WebPage::singleton()->includeJavaScript('js/selectize.min.js');
     WebPage::singleton()->includeCss('css/selectize.bootstrap4.css');
 }
 
-// Add topic filter using PillBox if topics are available
-if (!empty($allTopics)) {
-    $filterContainer->addItem(new \Ease\Html\H4Tag(_('Filter by Topics')));
-    $filterContainer->addItem(new PTag(_('Select topics to filter applications. All topics are selected by default to show all applications.')));
+// Add tag filter using PillBox if tags are available
+if (!empty($allTags)) {
+    $filterContainer->addItem(new \Ease\Html\H4Tag(_('Filter by Tags')));
+    $filterContainer->addItem(new PTag(_('Select tags to filter applications. All tags are selected by default to show all applications.')));
 
     $filterRow = new Row();
 
-    // Pre-select all topics by default
-    $allTopicIds = array_column($allTopics, 'id');
-    $topicFilter = new PillBox('topic_filter', $allTopics, $allTopicIds, ['class' => 'form-control mb-3', 'placeholder' => _('Select topics to filter applications...')]);
-    $filterRow->addColumn(10, $topicFilter);
+    // Pre-select all tags by default
+    $allTagIds = array_column($allTags, 'id');
+    $tagFilter = new PillBox('tag_filter', $allTags, $allTagIds, ['class' => 'form-control mb-3', 'placeholder' => _('Select tags to filter applications...')]);
+    $filterRow->addColumn(10, $tagFilter);
 
     // Add reset filter button
     $resetButton = new \Ease\Html\ButtonTag(_('Reset Filter'), [
         'class' => 'btn btn-outline-secondary mb-3',
         'type' => 'button',
-        'id' => 'reset-topic-filter',
-        'title' => _('Select all topics to show all applications'),
+        'id' => 'reset-tag-filter',
+        'title' => _('Select all tags to show all applications'),
     ]);
     $filterRow->addColumn(2, $resetButton);
 
@@ -140,11 +140,11 @@ $cardsRow = new Row();
 foreach ($allApps as $app) {
     $isAssigned = \in_array($app['id'], $assigned, true);
 
-    // Add data-topics attribute for JavaScript filtering
-    $topicsList = !empty($app['tags']) ? explode(',', $app['tags']) : [];
-    $topicsDataAttr = implode(',', array_map('trim', $topicsList));
+    // Add data-tags attribute for JavaScript filtering
+    $tagsList = !empty($app['tags']) ? explode(',', $app['tags']) : [];
+    $tagsDataAttr = implode(',', array_map('trim', $tagsList));
 
-    $cardDiv = new DivTag(null, ['class' => 'col-md-4 col-lg-3 mb-3 app-card-wrapper', 'data-app-name' => strtolower($app['name']), 'data-app-desc' => strtolower($app['description'] ?? ''), 'data-topics' => $topicsDataAttr]);
+    $cardDiv = new DivTag(null, ['class' => 'col-md-4 col-lg-3 mb-3 app-card-wrapper', 'data-app-name' => strtolower($app['name']), 'data-app-desc' => strtolower($app['description'] ?? ''), 'data-tags' => $tagsDataAttr]);
 
     $card = new Card(
         null,
@@ -181,20 +181,20 @@ foreach ($allApps as $app) {
         $cardBody->addItem(new PTag(new SmallTag($desc, ['class' => 'text-muted']), ['class' => 'card-text text-center']));
     }
 
-    // Show topics as badges
+    // Show tags as badges
     if (!empty($app['tags'])) {
-        $topicBadges = new DivTag(null, ['class' => 'mb-2 topic-badges text-center']);
+        $tagBadges = new DivTag(null, ['class' => 'mb-2 tag-badges text-center']);
 
-        foreach ($topicsList as $topic) {
-            $topic = trim($topic);
+        foreach ($tagsList as $tag) {
+            $tag = trim($tag);
 
-            if (!empty($topic)) {
-                $badge = new \Ease\TWB4\Badge('secondary', $topic, ['class' => 'mr-1 mb-1 topic-badge']);
-                $topicBadges->addItem($badge);
+            if (!empty($tag)) {
+                $badge = new \Ease\TWB4\Badge('secondary', $tag, ['class' => 'mr-1 mb-1 tag-badge']);
+                $tagBadges->addItem($badge);
             }
         }
 
-        $cardBody->addItem($topicBadges);
+        $cardBody->addItem($tagBadges);
     }
 
     $card->addItem($cardBody);
@@ -233,7 +233,7 @@ WebPage::singleton()->addCSS(<<<'CSS'
     height: 20px;
     cursor: pointer;
 }
-.topic-badge {
+.tag-badge {
     transition: all 0.3s ease-in-out;
     font-size: 0.75rem;
 }
@@ -283,76 +283,80 @@ $(document).ready(function() {
         });
     });
 
-    // Topic filtering functionality with localStorage support
-    const STORAGE_KEY = 'multiflexi_companyapps_topic_filter';
-    const DEFAULT_ALL_SELECTED = 'all_topics_selected';
+    // Tag filtering functionality with localStorage support
+    const STORAGE_KEY = 'multiflexi_companyapps_tag_filter';
+    const DEFAULT_ALL_SELECTED = 'all_tags_selected';
 
-    var topicFilterSelectize = null;
-    var allAvailableTopics = [];
+    var tagFilterSelectize = null;
+    var allAvailableTags = [];
 
-    // Function to save topic selection to localStorage
-    function saveTopicSelection(selectedTopics) {
+    // Function to save tag selection to localStorage
+    function saveTagSelection(selectedTags) {
         try {
-            if (selectedTopics.length === allAvailableTopics.length) {
+            if (selectedTags.length === allAvailableTags.length) {
                 localStorage.setItem(STORAGE_KEY, DEFAULT_ALL_SELECTED);
-            } else if (selectedTopics.length === 0) {
+            } else if (selectedTags.length === 0) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
             } else {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTopics));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTags));
             }
         } catch (e) {
-            console.warn('Failed to save topic selection to localStorage:', e);
+            console.warn('Failed to save tag selection to localStorage:', e);
         }
     }
 
-    // Function to load topic selection from localStorage
-    function loadTopicSelection() {
+    // Function to load tag selection from localStorage
+    function loadTagSelection() {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (!saved || saved === DEFAULT_ALL_SELECTED) {
-                return allAvailableTopics.slice();
+                return allAvailableTags.slice();
             }
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
-                return parsed.filter(topic => allAvailableTopics.includes(topic));
+                return parsed.filter(tag => allAvailableTags.includes(tag));
             }
-            return allAvailableTopics.slice();
+            return allAvailableTags.slice();
         } catch (e) {
-            console.warn('Failed to load topic selection from localStorage:', e);
-            return allAvailableTopics.slice();
+            console.warn('Failed to load tag selection to localStorage:', e);
+            return allAvailableTags.slice();
         }
     }
 
-    // Function to filter applications based on selected topics
-    function filterApplicationsByTopics(selectedTopics) {
-        var topicsArray = [];
-        if (typeof selectedTopics === 'string' && selectedTopics.length > 0) {
-            topicsArray = selectedTopics.split(',');
-        } else if (Array.isArray(selectedTopics)) {
-            topicsArray = selectedTopics;
+    // Function to filter applications based on selected tags
+    function filterApplicationsByTags(selectedTags) {
+        var tagsArray = [];
+        if (typeof selectedTags === 'string' && selectedTags.length > 0) {
+            tagsArray = selectedTags.split(',');
+        } else if (Array.isArray(selectedTags)) {
+            tagsArray = selectedTags;
         }
 
         var visibleCount = 0;
         $('.app-card-wrapper').each(function() {
-            var cardTopics = $(this).attr('data-topics') || '';
-            var cardTopicsArray = cardTopics.split(',').map(function(topic) {
-                return topic.trim();
-            }).filter(function(topic) {
-                return topic.length > 0;
+            var cardTags = $(this).attr('data-tags') || '';
+            var cardTagsArray = cardTags.split(',').map(function(tag) {
+                return tag.trim();
+            }).filter(function(tag) {
+                return tag.length > 0;
             });
 
             var shouldShow = true;
 
-            // If no topics are selected, hide all applications
-            if (topicsArray.length === 0) {
-                shouldShow = false;
+            // If no tags are selected, show ALL applications
+            if (tagsArray.length === 0) {
+                shouldShow = true;
             } else {
-                // Check if card has at least one matching topic
-                shouldShow = false;
-                for (var i = 0; i < topicsArray.length; i++) {
-                    if (cardTopicsArray.indexOf(topicsArray[i]) !== -1) {
-                        shouldShow = true;
-                        break;
+                // Show apps that have no tags or have at least one matching tag
+                if (cardTagsArray.length === 0) {
+                    shouldShow = true;
+                } else {
+                    shouldShow = false;
+                    for (var i = 0; i < tagsArray.length; i++) {
+                        if (cardTagsArray.indexOf(tagsArray[i]) !== -1) {
+                            shouldShow = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -362,7 +366,6 @@ $(document).ready(function() {
                 visibleCount++;
             } else {
                 $(this).hide();
-                // Uncheck checkbox if hidden card was selected
                 var checkbox = $(this).find('.app-checkbox');
                 if (checkbox.is(':checked')) {
                     checkbox.prop('checked', false).trigger('change');
@@ -370,17 +373,15 @@ $(document).ready(function() {
             }
         });
 
-        // Highlight selected topics
-        highlightSelectedTopics(topicsArray);
+        highlightSelectedTags(tagsArray);
         updateCount();
     }
 
-    // Function to highlight selected topics on application cards
-    function highlightSelectedTopics(selectedTopics) {
-        $('.topic-badge').each(function() {
-            var topicText = $(this).text().trim();
+    // Function to highlight selected tags on application cards
+    function highlightSelectedTags(selectedTags) {
+        $('.tag-badge').each(function() {
+            var tagText = $(this).text().trim();
 
-            // Reset badge styling
             $(this).removeClass('badge-primary badge-warning badge-success badge-info').addClass('badge-secondary');
             $(this).css({
                 'font-weight': 'normal',
@@ -389,8 +390,7 @@ $(document).ready(function() {
                 'border': 'none'
             });
 
-            // Highlight if this topic is selected
-            if (selectedTopics.includes(topicText)) {
+            if (selectedTags.includes(tagText)) {
                 $(this).removeClass('badge-secondary').addClass('badge-primary');
                 $(this).css({
                     'font-weight': 'bold',
@@ -404,31 +404,28 @@ $(document).ready(function() {
         });
     }
 
-    // Initialize topic filter selectize
+    // Initialize tag filter selectize
     setTimeout(function() {
-        var element = $('#topic_filterpillBox');
+        var element = $('#tag_filterpillBox');
         if (element.length > 0 && element[0].selectize) {
-            topicFilterSelectize = element[0].selectize;
-            var options = topicFilterSelectize.options;
-            allAvailableTopics = Object.keys(options);
+            tagFilterSelectize = element[0].selectize;
+            var options = tagFilterSelectize.options;
+            allAvailableTags = Object.keys(options);
 
-            // Load saved selection or use all topics for first visit
-            var savedSelection = loadTopicSelection();
-            topicFilterSelectize.setValue(savedSelection, true);
-            filterApplicationsByTopics(savedSelection);
+            var savedSelection = loadTagSelection();
+            tagFilterSelectize.setValue(savedSelection, true);
+            filterApplicationsByTags(savedSelection);
 
-            // Listen for changes in topic selection
-            topicFilterSelectize.on('change', function(value) {
-                var selectedTopics = Array.isArray(value) ? value : (value ? value.split(',') : []);
-                saveTopicSelection(selectedTopics);
-                filterApplicationsByTopics(selectedTopics);
+            tagFilterSelectize.on('change', function(value) {
+                var selectedTags = Array.isArray(value) ? value : (value ? value.split(',') : []);
+                saveTagSelection(selectedTags);
+                filterApplicationsByTags(selectedTags);
             });
 
-            // Handle reset filter button
-            $('#reset-topic-filter').on('click', function() {
-                topicFilterSelectize.setValue(allAvailableTopics, true);
-                saveTopicSelection(allAvailableTopics);
-                filterApplicationsByTopics(allAvailableTopics);
+            $('#reset-tag-filter').on('click', function() {
+                tagFilterSelectize.setValue(allAvailableTags, true);
+                saveTagSelection(allAvailableTags);
+                filterApplicationsByTags(allAvailableTags);
             });
         } else {
             setTimeout(arguments.callee, 500);

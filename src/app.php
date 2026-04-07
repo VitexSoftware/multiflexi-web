@@ -29,6 +29,16 @@ use MultiFlexi\Job;
 require_once './init.php';
 WebPage::singleton()->onlyForLogged();
 $action = \Ease\WebPage::getRequestValue('action');
+
+// Handle import by UUID from multiflexi.eu hub
+$importUuid = \Ease\WebPage::getRequestValue('import');
+
+if ($importUuid && !$action) {
+    $action = 'import';
+    $hubUrl = \Ease\Shared::cfg('MULTIFLEXI_HUB_URL', 'https://multiflexi.eu/src');
+    $_REQUEST['app_json_url'] = rtrim($hubUrl, '/').'/app.php?export='.urlencode($importUuid);
+}
+
 $apps = new Application(WebPage::getRequestValue('id', 'int') + WebPage::getRequestValue('app', 'int'));
 $instanceName = _($apps->getDataValue('name') ?: _('n/a'));
 

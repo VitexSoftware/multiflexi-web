@@ -56,21 +56,21 @@ class ActivationWizard extends \Ease\Html\DivTag
      */
     public function afterAdd(): void
     {
-        // Include selectize assets for step 2 (application selection with topic filtering)
+        // Include selectize assets for step 2 (application selection with tag filtering)
         if ($this->currentStep === 2) {
             WebPage::singleton()->includeJavaScript('js/selectize.min.js');
             WebPage::singleton()->includeCss('css/selectize.bootstrap4.css');
 
-            // Add custom CSS for topic highlighting
+            // Add custom CSS for tag highlighting
             WebPage::singleton()->addCSS(<<<'EOD'
 
-.topic-badge {
+.tag-badge {
     transition: all 0.3s ease-in-out;
     cursor: pointer;
     position: relative;
 }
 
-.topic-badge.badge-primary {
+.tag-badge.badge-primary {
     background-color: #007bff !important;
     border-color: #0056b3 !important;
     color: #ffffff !important;
@@ -80,12 +80,12 @@ class ActivationWizard extends \Ease\Html\DivTag
     z-index: 2 !important;
 }
 
-.topic-badge:hover {
+.tag-badge:hover {
     transform: scale(1.05);
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.topic-badges {
+.tag-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -97,7 +97,7 @@ class ActivationWizard extends \Ease\Html\DivTag
     100% { box-shadow: 0 2px 6px rgba(0,123,255,0.4); }
 }
 
-.topic-badge.badge-primary {
+.tag-badge.badge-primary {
     animation: highlightPulse 2s ease-in-out infinite;
 }
 
@@ -378,7 +378,7 @@ EOD,
 
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
         $container->addItem(new \Ease\Html\H3Tag(_('Select Application for').' '.$company->getRecordName()));
-        $container->addItem(new \Ease\Html\PTag(_('Choose an application to activate. Use topic filters to narrow down applications. The application will be assigned to the selected company.')));
+        $container->addItem(new \Ease\Html\PTag(_('Choose an application to activate. Use tag filters to narrow down applications. The application will be assigned to the selected company.')));
 
         $app = new \MultiFlexi\Application();
         $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
@@ -410,45 +410,45 @@ EOD,
             return $container;
         }
 
-        // Collect all unique topics from applications
-        $allTopics = [];
+        // Collect all unique tags from applications
+        $allTags = [];
 
         foreach ($applications as $appData) {
             if (!empty($appData['tags'])) {
-                $topics = explode(',', $appData['tags']);
+                $tags = explode(',', $appData['tags']);
 
-                foreach ($topics as $topic) {
-                    $topic = trim($topic);
+                foreach ($tags as $tag) {
+                    $tag = trim($tag);
 
-                    if (!empty($topic) && !isset($allTopics[$topic])) {
-                        $allTopics[$topic] = ['id' => $topic, 'name' => $topic];
+                    if (!empty($tag) && !isset($allTags[$tag])) {
+                        $allTags[$tag] = ['id' => $tag, 'name' => $tag];
                     }
                 }
             }
         }
 
-        // Sort topics alphabetically
-        ksort($allTopics);
-        $allTopics = array_values($allTopics);
+        // Sort tags alphabetically
+        ksort($allTags);
+        $allTags = array_values($allTags);
 
-        // Add topic filter using PillBox
-        if (!empty($allTopics)) {
-            $container->addItem(new \Ease\Html\H4Tag(_('Filter by Topics')));
-            $container->addItem(new \Ease\Html\PTag(_('Select topics to filter applications. All topics are selected by default to show all applications.')));
+        // Add tag filter using PillBox
+        if (!empty($allTags)) {
+            $container->addItem(new \Ease\Html\H4Tag(_('Filter by Tags')));
+            $container->addItem(new \Ease\Html\PTag(_('Select tags to filter applications. All tags are selected by default to show all applications.')));
 
             $filterRow = new \Ease\TWB4\Row();
 
-            // Pre-select all topics by default for first-time visitors
-            $allTopicIds = array_column($allTopics, 'id');
-            $topicFilter = new PillBox('topic_filter', $allTopics, $allTopicIds, ['class' => 'form-control mb-2', 'placeholder' => _('Select topics to filter applications...')]);
-            $filterRow->addColumn(10, $topicFilter);
+            // Pre-select all tags by default for first-time visitors
+            $allTagIds = array_column($allTags, 'id');
+            $tagFilter = new PillBox('tag_filter', $allTags, $allTagIds, ['class' => 'form-control mb-2', 'placeholder' => _('Select tags to filter applications...')]);
+            $filterRow->addColumn(10, $tagFilter);
 
             // Add reset filter button
             $resetButton = new \Ease\Html\ButtonTag(_('Reset Filter'), [
                 'class' => 'btn btn-outline-secondary btn-sm mb-2',
                 'type' => 'button',
-                'id' => 'reset-topic-filter',
-                'title' => _('Select all topics to show all applications'),
+                'id' => 'reset-tag-filter',
+                'title' => _('Select all tags to show all applications'),
             ]);
             $filterRow->addColumn(2, $resetButton);
 
@@ -465,14 +465,14 @@ EOD,
             $isSelected = ($this->wizardData['app_id'] ?? null) === $appData['id'];
             $cardClass = $isSelected ? 'border-primary bg-light' : '';
 
-            // Add data-topics attribute for JavaScript filtering
-            $topicsList = !empty($appData['tags']) ? explode(',', $appData['tags']) : [];
-            $topicsDataAttr = implode(',', array_map('trim', $topicsList));
+            // Add data-tags attribute for JavaScript filtering
+            $tagsList = !empty($appData['tags']) ? explode(',', $appData['tags']) : [];
+            $tagsDataAttr = implode(',', array_map('trim', $tagsList));
 
             $card = new \Ease\Html\DivTag(null, [
                 'class' => 'card mb-3 h-100 app-card '.$cardClass,
                 'style' => 'cursor: pointer;',
-                'data-topics' => $topicsDataAttr,
+                'data-tags' => $tagsDataAttr,
             ]);
             $cardBody = $card->addItem(new \Ease\Html\DivTag(null, ['class' => 'card-body text-center']));
 
@@ -497,21 +497,21 @@ EOD,
                 $cardBody->addItem(new \Ease\Html\PTag($displayDescription, ['class' => 'card-text small text-muted']));
             }
 
-            // Show topics as badges
+            // Show tags as badges
             if (!empty($appData['tags'])) {
-                $topicBadges = new \Ease\Html\DivTag(null, ['class' => 'mb-2 topic-badges']);
+                $tagBadges = new \Ease\Html\DivTag(null, ['class' => 'mb-2 tag-badges']);
 
-                foreach ($topicsList as $topic) {
-                    $topic = trim($topic);
+                foreach ($tagsList as $tag) {
+                    $tag = trim($tag);
 
-                    if (!empty($topic)) {
-                        $badge = new \Ease\TWB4\Badge('secondary', $topic, ['class' => 'mr-1 mb-1 topic-badge']);
-                        $badge->setTagProperty('data-topic', $topic);
-                        $topicBadges->addItem($badge);
+                    if (!empty($tag)) {
+                        $badge = new \Ease\TWB4\Badge('secondary', $tag, ['class' => 'mr-1 mb-1 tag-badge']);
+                        $badge->setTagProperty('data-tag', $tag);
+                        $tagBadges->addItem($badge);
                     }
                 }
 
-                $cardBody->addItem($topicBadges);
+                $cardBody->addItem($tagBadges);
             }
 
             $radio = new \Ease\Html\InputTag('app_id', $appData['id'], ['type' => 'radio', 'required' => 'required']);
@@ -528,7 +528,7 @@ EOD,
         $form->addItem($appCards);
         $container->addItem($form);
 
-        // Add JavaScript to make app cards clickable and handle topic filtering
+        // Add JavaScript to make app cards clickable and handle tag filtering
         WebPage::singleton()->addJavaScript(
             <<<'EOD'
 // Make app cards clickable
@@ -545,7 +545,7 @@ document.querySelectorAll('.wizard-content .app-card').forEach(function(card) {
     });
 });
 
-// Topic filtering functionality with localStorage support
+// Tag filtering functionality with localStorage support
 $(document).ready(function() {
     // Check if selectize is available
     if (typeof $.fn.selectize === 'undefined') {
@@ -554,168 +554,138 @@ $(document).ready(function() {
     }
 
     // Constants for localStorage
-    const STORAGE_KEY = 'multiflexi_topic_filter';
-    const DEFAULT_ALL_SELECTED = 'all_topics_selected';
+    const STORAGE_KEY = 'multiflexi_tag_filter';
+    const DEFAULT_ALL_SELECTED = 'all_tags_selected';
 
     // Get reference to the pillbox selectize instance
-    var topicFilterSelectize = null;
-    var allAvailableTopics = [];
+    var tagFilterSelectize = null;
+    var allAvailableTags = [];
 
-    // Function to save topic selection to localStorage
-    function saveTopicSelection(selectedTopics) {
+    // Function to save tag selection to localStorage
+    function saveTagSelection(selectedTags) {
         try {
-            if (selectedTopics.length === allAvailableTopics.length) {
-                // All topics selected - save special flag
+            if (selectedTags.length === allAvailableTags.length) {
                 localStorage.setItem(STORAGE_KEY, DEFAULT_ALL_SELECTED);
-            } else if (selectedTopics.length === 0) {
-                // No topics selected - save empty array
+            } else if (selectedTags.length === 0) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
             } else {
-                // Some topics selected - save the array
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTopics));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTags));
             }
-            console.log('Saved topic selection to localStorage:', selectedTopics);
         } catch (e) {
-            console.warn('Failed to save topic selection to localStorage:', e);
+            console.warn('Failed to save tag selection to localStorage:', e);
         }
     }
 
-    // Function to load topic selection from localStorage
-    function loadTopicSelection() {
+    // Function to load tag selection from localStorage
+    function loadTagSelection() {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (!saved || saved === DEFAULT_ALL_SELECTED) {
-                // First time or all selected - return all topics
-                return allAvailableTopics.slice();
+                return allAvailableTags.slice();
             }
 
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
-                // Filter out topics that no longer exist
-                return parsed.filter(topic => allAvailableTopics.includes(topic));
+                return parsed.filter(tag => allAvailableTags.includes(tag));
             }
 
-            // Fallback - return all topics
-            return allAvailableTopics.slice();
+            return allAvailableTags.slice();
         } catch (e) {
-            console.warn('Failed to load topic selection from localStorage:', e);
-            return allAvailableTopics.slice();
+            console.warn('Failed to load tag selection from localStorage:', e);
+            return allAvailableTags.slice();
         }
     }
 
     // Wait for selectize to be initialized
     setTimeout(function() {
-        console.log('Attempting to initialize topic filter selectize...');
-        var element = $('#topic_filterpillBox');
-        console.log('Found element:', element.length > 0 ? 'yes' : 'no');
+        var element = $('#tag_filterpillBox');
 
         if (element.length > 0 && element[0].selectize) {
-            topicFilterSelectize = element[0].selectize;
-            console.log('Selectize instance found:', !!topicFilterSelectize);
+            tagFilterSelectize = element[0].selectize;
         } else {
-            console.warn('Selectize not initialized yet, trying again...');
             setTimeout(arguments.callee, 500);
             return;
         }
 
-        if (topicFilterSelectize) {
-            // Get all available topic options
-            var options = topicFilterSelectize.options;
-            allAvailableTopics = Object.keys(options);
-            console.log('Available topics:', allAvailableTopics);
+        if (tagFilterSelectize) {
+            var options = tagFilterSelectize.options;
+            allAvailableTags = Object.keys(options);
 
-            // Load saved selection or use all topics for first visit
-            var savedSelection = loadTopicSelection();
+            var savedSelection = loadTagSelection();
+            tagFilterSelectize.setValue(savedSelection, true);
+            filterApplicationsByTags(savedSelection);
 
-            // Set the saved/default selection
-            topicFilterSelectize.setValue(savedSelection, true);
-
-            // Apply initial filter based on loaded selection
-            filterApplicationsByTopics(savedSelection);
-
-            console.log('Initialized topic filter with selection:', savedSelection);
-
-            // Listen for changes in topic selection
-            topicFilterSelectize.on('change', function(value) {
-                var selectedTopics = Array.isArray(value) ? value : (value ? value.split(',') : []);
-                saveTopicSelection(selectedTopics);
-                filterApplicationsByTopics(selectedTopics);
+            tagFilterSelectize.on('change', function(value) {
+                var selectedTags = Array.isArray(value) ? value : (value ? value.split(',') : []);
+                saveTagSelection(selectedTags);
+                filterApplicationsByTags(selectedTags);
             });
 
-            // Listen for item removal
-            topicFilterSelectize.on('item_remove', function(value) {
+            tagFilterSelectize.on('item_remove', function(value) {
                 setTimeout(function() {
-                    var currentSelection = topicFilterSelectize.getValue();
-                    var selectedTopics = Array.isArray(currentSelection) ? currentSelection : (currentSelection ? currentSelection.split(',') : []);
-                    saveTopicSelection(selectedTopics);
-                    filterApplicationsByTopics(selectedTopics);
+                    var currentSelection = tagFilterSelectize.getValue();
+                    var selectedTags = Array.isArray(currentSelection) ? currentSelection : (currentSelection ? currentSelection.split(',') : []);
+                    saveTagSelection(selectedTags);
+                    filterApplicationsByTags(selectedTags);
                 }, 10);
             });
 
-            // Handle reset filter button
-            $('#reset-topic-filter').on('click', function() {
-                console.log('Resetting topic filter to show all applications');
-                topicFilterSelectize.setValue(allAvailableTopics, true);
-                saveTopicSelection(allAvailableTopics);
-                filterApplicationsByTopics(allAvailableTopics);
+            $('#reset-tag-filter').on('click', function() {
+                tagFilterSelectize.setValue(allAvailableTags, true);
+                saveTagSelection(allAvailableTags);
+                filterApplicationsByTags(allAvailableTags);
             });
-        } else {
-            // Fallback: if no selectize, still highlight all topics by default
-            highlightSelectedTopics(allAvailableTopics);
         }
     }, 1000);
 
-    // Function to filter applications based on selected topics
-    function filterApplicationsByTopics(selectedTopics) {
-        console.log('Filtering by topics:', selectedTopics);
-
-        var topicsArray = [];
-        if (typeof selectedTopics === 'string' && selectedTopics.length > 0) {
-            topicsArray = selectedTopics.split(',');
-        } else if (Array.isArray(selectedTopics)) {
-            topicsArray = selectedTopics;
+    // Function to filter applications based on selected tags
+    function filterApplicationsByTags(selectedTags) {
+        var tagsArray = [];
+        if (typeof selectedTags === 'string' && selectedTags.length > 0) {
+            tagsArray = selectedTags.split(',');
+        } else if (Array.isArray(selectedTags)) {
+            tagsArray = selectedTags;
         }
 
-        // Get all application cards
         var appCards = document.querySelectorAll('.app-card');
         var visibleCount = 0;
 
         appCards.forEach(function(card) {
-            var cardTopics = card.getAttribute('data-topics') || '';
-            var cardTopicsArray = cardTopics.split(',').map(function(topic) {
-                return topic.trim();
-            }).filter(function(topic) {
-                return topic.length > 0;
+            var cardTags = card.getAttribute('data-tags') || '';
+            var cardTagsArray = cardTags.split(',').map(function(tag) {
+                return tag.trim();
+            }).filter(function(tag) {
+                return tag.length > 0;
             });
 
             var shouldShow = true;
 
-            // If no topics are selected, hide all applications
-            if (topicsArray.length === 0) {
-                shouldShow = false;
+            // If no tags are selected, show ALL applications
+            if (tagsArray.length === 0) {
+                shouldShow = true;
             } else {
-                // Check if card has at least one matching topic
-                shouldShow = false;
-                for (var i = 0; i < topicsArray.length; i++) {
-                    if (cardTopicsArray.indexOf(topicsArray[i]) !== -1) {
-                        shouldShow = true;
-                        break;
+                // Show apps that have no tags or have at least one matching tag
+                if (cardTagsArray.length === 0) {
+                    shouldShow = true;
+                } else {
+                    shouldShow = false;
+                    for (var i = 0; i < tagsArray.length; i++) {
+                        if (cardTagsArray.indexOf(tagsArray[i]) !== -1) {
+                            shouldShow = true;
+                            break;
+                        }
                     }
                 }
             }
 
-            // Show/hide the entire column containing the card
             var cardColumn = card.closest('.col-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xl-4');
             if (cardColumn) {
                 if (shouldShow) {
                     cardColumn.style.display = '';
                     visibleCount++;
-                    console.log('Showing application:', card.querySelector('.card-title').textContent);
                 } else {
                     cardColumn.style.display = 'none';
-                    console.log('Hiding application:', card.querySelector('.card-title').textContent);
 
-                    // Uncheck radio if hidden card was selected
                     var radio = card.querySelector('input[type="radio"]');
                     if (radio && radio.checked) {
                         radio.checked = false;
@@ -725,42 +695,24 @@ $(document).ready(function() {
             }
         });
 
-        console.log('Visible applications:', visibleCount, '/', appCards.length);
+        highlightSelectedTags(tagsArray);
 
-        // Highlight selected topics on visible application cards
-        highlightSelectedTopics(topicsArray);
-
-        // Show message if no applications are visible
         var existingMessage = document.querySelector('.no-applications-message');
         if (existingMessage) {
             existingMessage.remove();
         }
-
-        if (visibleCount === 0 && topicsArray.length > 0) {
-            var form = document.querySelector('#wizardForm');
-            if (form) {
-                var noAppsMessage = document.createElement('div');
-                noAppsMessage.className = 'alert alert-info no-applications-message';
-                noAppsMessage.innerHTML = '<strong>No applications found</strong> for the selected topics. Try selecting different topics or clear the filter to see all applications.';
-                form.insertBefore(noAppsMessage, form.querySelector('.row'));
-            }
-        }
     }
 
-    // Function to highlight selected topics on application cards
-    function highlightSelectedTopics(selectedTopics) {
-        console.log('Highlighting selected topics:', selectedTopics);
-
+    // Function to highlight selected tags on application cards
+    function highlightSelectedTags(selectedTags) {
         var appCards = document.querySelectorAll('.app-card');
 
         appCards.forEach(function(card) {
-            // Find all topic badges in this card using the specific class
-            var topicBadges = card.querySelectorAll('.topic-badge');
+            var tagBadges = card.querySelectorAll('.tag-badge');
 
-            topicBadges.forEach(function(badge) {
-                var topicText = badge.textContent.trim();
+            tagBadges.forEach(function(badge) {
+                var tagText = badge.textContent.trim();
 
-                // Reset badge styling first
                 badge.classList.remove('badge-primary', 'badge-warning', 'badge-success', 'badge-info');
                 badge.classList.add('badge-secondary');
                 badge.style.fontWeight = 'normal';
@@ -768,8 +720,7 @@ $(document).ready(function() {
                 badge.style.transform = 'scale(1)';
                 badge.style.border = 'none';
 
-                // Highlight if this topic is selected
-                if (selectedTopics.includes(topicText)) {
+                if (selectedTags.includes(tagText)) {
                     badge.classList.remove('badge-secondary');
                     badge.classList.add('badge-primary');
                     badge.style.fontWeight = 'bold';
@@ -780,7 +731,6 @@ $(document).ready(function() {
                     badge.style.color = '#ffffff';
                 }
 
-                // Apply smooth transition for all badges
                 badge.style.transition = 'all 0.3s ease-in-out';
             });
         });
