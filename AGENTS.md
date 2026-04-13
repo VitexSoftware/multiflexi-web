@@ -1,74 +1,179 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents (Warp, Copilot, Claude Code, etc.) when working with code in this repository.
 
-## Commands
+## Project Overview
+
+**Repository**: multiflexi-web (part of the MultiFlexi suite)
+**Debian package**: `multiflexi-web`
+**Type**: PHP Web Application — Apache/Nginx-served UI
+**Purpose**: Web interface for the MultiFlexi platform — multi-tenant job scheduling and automation for accounting integrations (AbraFlexi, Pohoda, etc.)
+**License**: MIT
+**Homepage**: https://multiflexi.eu/
+
+This is the web front-end component of the MultiFlexi suite. It sits on top of:
+- `php-vitexsoftware-multiflexi-core` — domain models (Company, Application, RunTemplate, Job, Credential, …)
+- `multiflexi-database` — Phinx DB migrations
+- `multiflexi-server` — REST API (OpenAPI/Slim 4)
+- `multiflexi-cli` — CLI management tool
+- `multiflexi-executor` — job execution daemon
+- `multiflexi-scheduler` — cron-based job scheduling daemon
+
+All suite components share the same MultiFlexi database (configured via `DB_*` env vars in `.env` or `/etc/multiflexi/multiflexi.env`).
+
+## High-Level Architecture
+
+### Entry Points
+All web pages live under `src/` as standalone PHP files (e.g. `src/dashboard.php`, `src/company.php`, `src/job.php`). Each file bootstraps via `src/init.php` which initialises `Ease\Shared`, starts a secure session, and sets security headers.
+
+### Namespaces (PSR-4, all under `src/`)
+| Namespace | Path | Purpose |
+|---|---|---|
+| `MultiFlexi\` | `src/MultiFlexi/` | Local extensions on top of core |
+| `MultiFlexi\Ui\` | `src/MultiFlexi/Ui/` | UI components (forms, panels, wizards, charts) |
+| `MultiFlexi\Ui\Action\` | `src/MultiFlexi/Ui/Action/` | Action form helpers (12 action types) |
+| `MultiFlexi\Ui\CredentialType\` | `src/MultiFlexi/Ui/CredentialType/` | Credential form helpers (from addon packages) |
+| `MultiFlexi\Api\` | `src/MultiFlexi/Api/` | REST API controllers |
+| `MultiFlexi\Api\Auth\` | `src/MultiFlexi/Api/Auth/` | API authentication |
+| `MultiFlexi\Api\Server\` | `src/MultiFlexi/Api/Server/` | API server glue |
+| `MultiFlexi\Audit\` | `src/MultiFlexi/Audit/` | Audit logging |
+| `MultiFlexi\GDPR\` | `src/MultiFlexi/GDPR/` | GDPR request handling (Articles 15–17) |
+| `MultiFlexi\Notifications\` | `src/MultiFlexi/Notifications/` | Email notifications |
+
+### Key Ui Component Groups
+- **Wizards**: `ActivationWizard`, `CredentialWizard`, `ConfigurationWizard` — multi-step on-boarding flows
+- **Dashboard**: `DashboardMetricsCards`, `DashboardStatusCards`, `DashboardIntervalChart`, `DashboardJobsByCompanyChart`, `DashboardJobsByAppChart`, `DashboardTimelineChart`, `DashboardRecentJobsTable`
+- **Forms**: `CompanyEditorForm`, `UserForm`, `EnvsForm`, `AppLaunchForm`, `RuntemplateLaunchForm`, …
+- **Actions** (`Ui/Action/`): `ChainRuntemplate`, `LaunchJob`, `TriggerJenkins`, `Github`, `RedmineIssue`, `WebHook`, `Zabbix`, `CustomCommand`, `Sleep`, `Stop`, `Reschedule`, `ToDo`
+- **Security**: `src/MultiFlexi/Security/` — `SessionManager`, `CsrfProtection`, `DataEncryption`, `RateLimiter`, `ApiRateLimiter`, `IpWhitelist`, `TwoFactorAuth`, `PasswordValidator`, `SecurityAuditLogger`
+- **GDPR**: `src/MultiFlexi/GDPR/`, `DataExport/`, `DataErasure/`, `DataRetention/` — full Article 15/16/17 implementation
+
+### Real-time
+`src/websocket-server.php` runs a Ratchet WebSocket server for live job status streaming.
+
+### Telemetry
+`src/MultiFlexi/Telemetry/OtelMetricsExporter.php` exports metrics via OpenTelemetry SDK to an OTLP endpoint.
+
+## Development Commands
+
+All standard targets are in `Makefile`:
 
 ```bash
-# Dependencies
-make vendor                        # Install Composer dependencies
-
-# Code quality
-make cs                            # PHP CS Fixer (code style)
-make static-code-analysis          # PHPStan static analysis
-make static-code-analysis-baseline # Regenerate PHPStan baseline
-
-# Tests
-make tests                         # Run PHPUnit test suite
-vendor/bin/phpunit tests/SomeTest.php  # Run a single test file
-
-# Documentation
-make docs                          # Build Sphinx HTML docs
+make vendor                      # composer install
+make cs                          # php-cs-fixer fix (PSR-12)
+make static-code-analysis        # PHPStan (phpstan-default.neon.dist)
+make static-code-analysis-baseline  # regenerate PHPStan baseline
+make tests                       # vendor/bin/phpunit tests
+make autoload                    # composer update (regenerate autoload)
+make docs                        # Sphinx HTML docs
+make clean                       # remove vendor/, composer.lock, SQLite DB
 ```
 
-## Architecture
+Run a single test:
+```bash
+vendor/bin/phpunit tests/src/MultiFlexi/SomeClassTest.php
+vendor/bin/phpunit --filter 'ClassName::testMethod'
+```
 
-**MultiFlexi Web** is a PHP 8.1+ web UI for the MultiFlexi task automation platform. It orchestrates jobs/runs on AbraFlexi and Pohoda servers via a Bootstrap 4 interface.
+Lint a file before committing:
+```bash
+php -l src/MultiFlexi/Ui/SomeClass.php
+```
 
-### Request Lifecycle
+GDPR Article 16 DB migration (run once after upgrading):
+```bash
+make gdpr-migration
+```
 
-1. Browser hits a file-based route (e.g. `src/app.php`) — routing is file-per-page, not a router.
-2. Every page begins with `require_once './init.php'`, which bootstraps: environment, session security, DB, CSRF protection, localization, OpenTelemetry.
-3. `WebPage::singleton()` (extends `Ease\TWB4\WebPage`) is the global page object. Protected pages call `WebPage::singleton()->onlyForLogged()`.
-4. Action handling is done inline via `?action=` query param switches.
-5. Output is rendered by Ease framework component tree (Card, Row, Table, Form etc.) via `WebPage::singleton()->draw()`.
+## Configuration & Environment
 
-### Key Namespaces (PSR-4)
+`src/init.php` reads these keys from `.env` (or `/etc/multiflexi/multiflexi.env` on installed systems):
 
-| Namespace | Path | Purpose |
-|-----------|------|---------|
-| `MultiFlexi\Ui\` | `src/MultiFlexi/Ui/` | All UI components, page panels, forms |
-| `MultiFlexi\Ui\Action\` | `src/MultiFlexi/Ui/Action/` | Extensible action plugins (LaunchJob, Zabbix, WebHook, …) |
-| `MultiFlexi\Security\` | `src/MultiFlexi/Security/` | Session, CSRF, brute-force, 2FA, RBAC, encryption |
-| `MultiFlexi\Audit\` | `src/MultiFlexi/Audit/` | Security audit logging |
-| `MultiFlexi\GDPR\` | `src/MultiFlexi/GDPR/` | GDPR Articles 16/17: correction, erasure, retention, consent |
-| `MultiFlexi\Telemetry\` | `src/MultiFlexi/Telemetry/` | OpenTelemetry metrics export |
-| Core models | `vendor/vitexsoftware/multiflexi-core` | Company, Job, Application, RunTemplate, etc. |
+| Key | Purpose |
+|---|---|
+| `DB_CONNECTION` | `mysql` / `pgsql` / `sqlite` |
+| `DB_HOST`, `DB_PORT` | Database host/port |
+| `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Database credentials |
+| `ENCRYPTION_MASTER_KEY` | AES-256 master key for credential encryption |
+| `EASE_LOGGER` | Logger config (e.g. `syslog\|console`) |
+| `APP_DEBUG` | Enable debug output (`true`/`false`) |
+| `SESSION_TIMEOUT` | Session idle timeout in seconds (default 14400) |
+| `SESSION_REGENERATION_INTERVAL` | Session ID rotation interval (default 900) |
+| `SESSION_STRICT_USER_AGENT` | Bind session to User-Agent (default `true`) |
+| `SESSION_STRICT_IP_ADDRESS` | Bind session to IP (default `false`) |
+| `OTEL_ENABLED`, `OTEL_EXPORTER_OTLP_ENDPOINT` | OpenTelemetry export |
+| `ZABBIX_SERVER`, `ZABBIX_HOST` | Zabbix monitoring integration |
+| `MULTIFLEXI_URL` | Base URL of the web application |
 
-### Design Patterns
+## Coding Standards
 
-- **Singleton page**: `WebPage::singleton()` / `Shared::singleton()` give global access to the page and shared state.
-- **Model classes**: Data entities extend Ease ORM base classes from `multiflexi-core`; FluentPDO handles query building.
-- **Lister classes**: Dedicated `*Lister` classes (e.g. `CompanyJobLister`) provide filtered/sorted data access on top of models.
-- **Action plugins**: Classes under `Ui/Action/` implement a common interface for extensible task-execution side-effects.
-- **UI components**: Ease framework objects (`Card`, `Row`, `Table`, `Form`) are composed together and attached to the page; `draw()` renders the whole tree.
+- PHP 8.1+, strict types everywhere (`declare(strict_types=1)`)
+- PSR-12 via `ergebnis/php-cs-fixer-config` (config: `.php-cs-fixer.dist.php`)
+- PSR-4 autoloading — never add manual `require`/`include`
+- Use `_()` for all user-visible strings (gettext i18n)
+- Docblocks with typed parameters and return types on all classes/methods
+- Create or update a PHPUnit test whenever you create or modify a class
+- Run `make cs` and `make static-code-analysis` before committing
 
-### Frontend
+## Debian Packaging
 
-- Bootstrap 4 via Ease TWB4 wrapper — use `fa-*` (Font Awesome) for icons.
-- DataTables for sortable/searchable lists; Chart.js / SVGGraph for job charts.
-- CSS/JS assets live in `src/css/` and `src/js/`.
+```bash
+make debs          # builds .deb (debuild -i -us -uc -b)
+make redeb         # purges installed package, rebuilds, installs with gdebi
+make debs2deb      # moves built .deb files to dist/ and bundles them
+```
 
-### Security & GDPR
+The `debian/control` binary package `multiflexi-web` depends on:
+`multiflexi-common`, `php-vitexsoftware-multiflexi-core`, Bootstrap 4 widget libraries, DataTables JS, jQuery Selectize, Font Awesome, and a sodium extension for encryption.
 
-Every non-API page gets CSRF protection automatically via `init.php`. Session security (regeneration, user-agent/IP pinning, secure cookies) is managed by `MultiFlexi\Security\SessionManager`. Do not bypass these in new pages.
+## Docker
 
-GDPR consent/erasure flows live in `consent-*.php` and `data-export*.php` and must stay consistent with `MultiFlexi\GDPR\*` classes.
+```bash
+make dimage        # builds vitexsoftware/multiflexi image
+make drun          # builds + runs on :8080, opens in browser
+make demoimage     # builds vitexsoftware/multiflexi-demo image
+make demorun       # runs demo on :8282 (login: demo/demo)
+```
 
-### Localization
+## Pages Reference (src/*.php)
 
-Use `_('string')` (gettext) throughout. Translation files are in `i18n/`. `Ease\Locale` is initialized in `init.php`.
+| File | Purpose |
+|---|---|
+| `dashboard.php` | Main dashboard with analytics charts |
+| `companies.php` / `company.php` | Company listing and detail |
+| `companyapps.php` / `companyapp.php` | Per-company app assignment |
+| `apps.php` / `app.php` | Application catalogue |
+| `runtemplates.php` / `runtemplate.php` | Run template management |
+| `jobs.php` / `job.php` | Job listing and detail |
+| `credentials.php` / `credential.php` | Credential management |
+| `credentialtypes.php` / `credentialtype.php` | Credential type management |
+| `credentialprototypes.php` / `credentialprototype.php` | Credential prototype management |
+| `activation-wizard.php` | Step-by-step app activation wizard |
+| `credential-wizard.php` | Step-by-step credential setup wizard |
+| `users.php` / `user.php` | User management |
+| `eventsources.php` / `eventsource.php` | Event source configuration |
+| `eventrules.php` / `eventrule.php` | Event rule configuration (event → RunTemplate mapping) |
+| `data-export.php` / `data-export-page.php` | GDPR Article 15 (data export) |
+| `admin-data-corrections.php` | GDPR Article 16 (data correction approval) |
+| `gdpr-user-deletion-request.php` / `admin-deletion-requests.php` | GDPR Article 17 (right to erasure) |
+| `data-retention-admin.php` | Data retention policy management |
+| `consent-preferences.php` / `consent-api.php` | Cookie consent management |
+| `websocket-server.php` | Ratchet WebSocket daemon for live job output |
+| `login.php` / `logout.php` / `createaccount.php` / `passwordrecovery.php` | Authentication |
+| `init.php` | Bootstrap — shared by all pages |
 
-### Environment
+## Suite Architecture Context
 
-Configuration comes from `.env` (dev) or `/etc/multiflexi/multiflexi.env` (production). Key vars: `DB_*` (database), `ENCRYPTION_MASTER_KEY`, `SESSION_TIMEOUT`, `SESSION_REGENERATION_INTERVAL`, `LOG_DIRECTORY`.
+See the top-level `~/Projects/Multi/AGENTS.md` for ecosystem-wide context including:
+- Two build pipelines (production `repo.multiflexi.eu` vs testing `repo.vitexsoftware.com`)
+- Dependency build order across all packages
+- Jenkins pipeline conventions
+- Common environment variables and coding standards
+
+## Related Resources
+
+- **Demo**: https://demo.multiflexi.eu/ (login: demo / demo)
+- **Docs**: https://multiflexi.readthedocs.io/
+- **GitHub**: https://github.com/VitexSoftware/MultiFlexi
+- **Production repo**: https://repo.multiflexi.eu/
+- **Jenkins**: https://jenkins.proxy.spojenet.cz/job/MultiFlexi/
