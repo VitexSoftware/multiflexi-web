@@ -22,7 +22,7 @@ WebPage::singleton()->onlyForLogged();
 
 $jobID = WebPage::getRequestValue('cancel', 'int');
 $jobber = new \MultiFlexi\Job($jobID);
-$runTemplate = $jobID ? $jobber->runTemplate : new \MultiFlexi\RunTemplate(WebPage::getRequestValue('id', 'int'));
+$runTemplate = $jobID ? $jobber->getRunTemplate() : new \MultiFlexi\RunTemplate(WebPage::getRequestValue('id', 'int'));
 
 WebPage::singleton()->addItem(new PageTop(_('Schedule Job')));
 
@@ -102,8 +102,10 @@ if (null === $runTemplate->getMyKey()) {
             }
         }
 
+        $timezone = \MultiFlexi\DateTimeHelper::getConfiguredTimezone();
+
         if ($allFieldsFilled) {
-            $prepared = $jobber->prepareJob($runTemplate, $uploadEnv, new \DateTime($when), \Ease\WebPage::getRequestValue('executor'), 'adhoc');
+            $prepared = $jobber->prepareJob($runTemplate, $uploadEnv, new \DateTime($when, $timezone), \Ease\WebPage::getRequestValue('executor'), 'adhoc');
 
             // Store files for job if needed (simulate)
             foreach ($uploadEnv as $field => $file) {
@@ -117,8 +119,8 @@ if (null === $runTemplate->getMyKey()) {
             $glassHourRow->addColumn(4, new \Ease\Html\DivTag(new \Ease\Html\Widgets\SandClock(['class' => 'mx-auto d-block img-fluid'])), 'sm');
             $glassHourRow->addColumn(4);
 
-            $currentTime = new \DateTime();
-            $beginTime = new \DateTime($when);
+            $currentTime = new \DateTime('now', $timezone);
+            $beginTime = new \DateTime($when, $timezone);
 
             $a = $currentTime->format('Y-m-d H:i:s');
             $b = $beginTime->format('Y-m-d H:i:s');

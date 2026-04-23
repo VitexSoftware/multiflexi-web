@@ -25,7 +25,7 @@ WebPage::singleton()->onlyForLogged();
 
 $jobber = new Job();
 $runTemplate = new RunTemplate(WebPage::singleton()->getRequestValue('id', 'int'));
-$jobber->prepareJob($runTemplate, new ConfigFields(), new \DateTime());
+$jobber->prepareJob($runTemplate, new ConfigFields(), DateTimeHelper::createDateTime());
 echo new H2Tag(str_replace(' ', '&nbsp;', htmlspecialchars((string) $jobber->getCmdline(), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')), ['style' => 'color: green']);
 
 $jobber->performJob();

@@ -216,7 +216,16 @@ if (!\in_array($currentScript, ['consent-api.php', 'ajax.php', 'api.php'], true)
     \MultiFlexi\Consent\ConsentHelper::enhancePageWithConsent($oPage);
 }
 
-date_default_timezone_set('Europe/Prague');
+// Configure timezone from environment or autodetect from server
+$configuredTimezone = \MultiFlexi\DateTimeHelper::getConfiguredTimezoneString();
+
+try {
+    date_default_timezone_set($configuredTimezone);
+} catch (\Exception $e) {
+    // Fallback to UTC if configured timezone is invalid
+    error_log('Invalid timezone configured: '.$configuredTimezone.'. Falling back to UTC.');
+    date_default_timezone_set('UTC');
+}
 
 $script_tz = date_default_timezone_get();
 

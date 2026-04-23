@@ -89,9 +89,9 @@ foreach ($jobs as $job) {
     $job['id'] = new \Ease\Html\ATag('job.php?id='.$job['id'], [new ExitCode($job['exitcode'], ['style' => 'font-size: 1.0em; font-family: monospace;']), '<br>', new \Ease\TWB4\Badge('info', '🏁 '.$job['id'])], ['title' => _('Job Info')]);
 
     if ($job['begin']) {
-        $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'])))];
+        $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone())))];
     } else {
-        $job['begin'] = '⏳&nbsp;'._('Scheduled').($job['scheduled'] ? new \Ease\Html\DivTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['scheduled']))) : '');
+        $job['begin'] = '⏳&nbsp;'._('Scheduled').($job['scheduled'] ? new \Ease\Html\DivTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['scheduled'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone()))) : '');
     }
 
     $job['launched_by'] = [

@@ -90,7 +90,7 @@ try {
         $jobber = new \MultiFlexi\Job();
 
         try {
-            $whenDateTime = new \DateTime($when);
+            $whenDateTime = new \DateTime($when, \MultiFlexi\DateTimeHelper::getConfiguredTimezone());
             $prepared = $jobber->prepareJob(
                 $runTemplate,
                 new \MultiFlexi\ConfigFields(), // No upload environment for bulk execute

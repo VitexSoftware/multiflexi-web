@@ -170,7 +170,7 @@ foreach ($jobs as $job) {
     if (empty($job['begin'])) {
         $job['begin'] = '⏳'._('Not yet');
     } else {
-        $job['begin'] = [$job['begin'], '<br>', new SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'])))];
+        $job['begin'] = [$job['begin'], '<br>', new SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone())))];
     }
 
     $job['exitcode'] = new ExitCode($job['exitcode']);

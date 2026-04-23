@@ -119,7 +119,7 @@ foreach ($jobs as $job) {
     if (empty($job['begin'])) {
         if (!empty($job['schedule'])) {
             try {
-                $scheduleTime = new \DateTime($job['schedule']);
+                $scheduleTime = new \DateTime($job['schedule'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone());
                 $relativeTime = \MultiFlexi\CompanyJobLister::getRelativeTime($scheduleTime);
                 $jobRow[] = '💣 <span title="'.htmlspecialchars($job['schedule']).'">'.$relativeTime.'</span>';
             } catch (\Exception $e) {
@@ -132,7 +132,7 @@ foreach ($jobs as $job) {
         $jobRow[] = [
             $job['begin'],
             ' ',
-            new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin']))),
+            new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone()))),
         ];
     }
 

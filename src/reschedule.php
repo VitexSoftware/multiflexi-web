@@ -48,7 +48,7 @@ if ($jobber->isScheduled()) {
 
     if (!empty($scheduleInfo)) {
         $scheduleData = $scheduleInfo[0];
-        $scheduledTime = new \DateTime($scheduleData['after'] ?? $scheduleData['scheduled']);
+        $scheduledTime = new \DateTime($scheduleData['after'] ?? $scheduleData['scheduled'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone());
         WebPage::singleton()->container->addItem(new \Ease\Html\DivTag(_('Scheduled for: ').$scheduledTime->format('Y-m-d H:i:s')));
     }
 
@@ -63,7 +63,7 @@ if ($jobber->isScheduled()) {
 $when = WebPage::getRequestValue('when');
 
 if (WebPage::isPosted() || $when === 'now') {
-    $scheduledTime = $when ? new \DateTime($when) : new \DateTime();
+    $scheduledTime = $when ? new \DateTime($when, \MultiFlexi\DateTimeHelper::getConfiguredTimezone()) : \MultiFlexi\DateTimeHelper::createDateTime();
 
     try {
         // Re-schedule the job by creating a new schedule entry
