@@ -49,12 +49,23 @@ if (WebPage::singleton()->isPosted()) {
 
             break;
         case 3:
-            // Step 2 -> Step 3: Save application selection
-            if (isset($postData['app_id'])) {
+            // Step 2 -> Step 3: Save application selection and auto-assign if needed
+            if (isset($postData['app_id'], $postData['company_id'])) {
+                $appId = (int) $postData['app_id'];
+                $companyId = (int) $postData['company_id'];
                 ActivationWizard::updateWizardData([
-                    'company_id' => (int) $postData['company_id'],
-                    'app_id' => (int) $postData['app_id'],
+                    'company_id' => $companyId,
+                    'app_id' => $appId,
                 ]);
+
+                // Assign the application to the company if not already assigned
+                $companyObj = new \MultiFlexi\Company($companyId);
+                $companyAppObj = new \MultiFlexi\CompanyApp($companyObj);
+                $alreadyAssigned = array_keys($companyAppObj->getAssigned()->fetchAll('app_id'));
+
+                if (!\in_array($appId, $alreadyAssigned, true)) {
+                    $companyAppObj->insertToSQL(['company_id' => $companyId, 'app_id' => $appId]);
+                }
             }
 
             break;
@@ -267,9 +278,7 @@ if ($step === 'complete' && isset($runtemplateId)) {
     $app = new \MultiFlexi\Application($runTemplate->getDataValue('app_id'));
     $company = new \MultiFlexi\Company($runTemplate->getDataValue('company_id'));
 
-    $completionCard = new \Ease\TWB4\Card(
-        '🎉 '._('Activation Complete'),
-    );
+    $completionCard = new \Ease\TWB4\Card('🎉 '._('Activation Complete'));
 
     $completionCard->addTagClass('text-white bg-success');
 
@@ -359,9 +368,7 @@ if ($step === 'complete' && isset($runtemplateId)) {
     $completionCard->addItem($summaryTable);
 
     $completionCard->addItem(new \Ease\Html\HrTag());
-    $completionCard->addItem(new \Ease\Html\PTag(
-        '🚀 '._('Your RunTemplate has been successfully created and configured!'),
-    ));
+    $completionCard->addItem(new \Ease\Html\PTag('🚀 '._('Your RunTemplate has been successfully created and configured!')));
 
     $buttonRow = new \Ease\TWB4\Row();
     $buttonRow->addColumn(

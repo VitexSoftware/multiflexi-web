@@ -378,34 +378,27 @@ EOD,
 
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
         $container->addItem(new \Ease\Html\H3Tag(_('Select Application for').' '.$company->getRecordName()));
-        $container->addItem(new \Ease\Html\PTag(_('Choose an application to activate. Use tag filters to narrow down applications. The application will be assigned to the selected company.')));
+        $container->addItem(new \Ease\Html\PTag(_('Choose an application to activate. Applications not yet assigned to this company will be automatically assigned when selected. Use tag filters to narrow down applications.')));
 
         $app = new \MultiFlexi\Application();
         $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
 
-        // Get app IDs assigned to this company
+        // Get app IDs already assigned to this company (for display purposes)
         $companyApp = new \MultiFlexi\CompanyApp($company);
         $assignedAppIds = array_keys($companyApp->getAssigned()->fetchAll('app_id'));
 
-        if (empty($assignedAppIds)) {
-            $container->addItem(new \Ease\TWB4\Alert('warning', _('No applications assigned to this company.').' '.
-                '<a href="companyapps.php?company_id='.$this->wizardData['company_id'].'">'._('Assign applications').'</a>'));
-
-            return $container;
-        }
-
+        // Fetch ALL installed applications
         $applications = $app->getFluentPDO()
             ->from('apps')
             ->select('apps.*')
             ->select('COALESCE(app_translations.name, apps.name) AS localized_name')
             ->select('COALESCE(app_translations.description, apps.description) AS localized_description')
             ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
-            ->where('apps.id', $assignedAppIds)
             ->orderBy('COALESCE(app_translations.name, apps.name)')
             ->fetchAll();
 
         if (empty($applications)) {
-            $container->addItem(new \Ease\TWB4\Alert('warning', _('No applications available.')));
+            $container->addItem(new \Ease\TWB4\Alert('warning', _('No applications installed. Please install at least one application first.')));
 
             return $container;
         }
@@ -495,6 +488,13 @@ EOD,
 
             if (!empty($displayDescription)) {
                 $cardBody->addItem(new \Ease\Html\PTag($displayDescription, ['class' => 'card-text small text-muted']));
+            }
+
+            // Show assignment status badge
+            if (\in_array($appData['id'], $assignedAppIds, true)) {
+                $cardBody->addItem(new \Ease\TWB4\Badge('success', '✓ '._('Already assigned'), ['class' => 'mb-2']));
+            } else {
+                $cardBody->addItem(new \Ease\TWB4\Badge('warning', '+ '._('Will be assigned'), ['class' => 'mb-2']));
             }
 
             // Show tags as badges

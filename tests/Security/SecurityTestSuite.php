@@ -86,11 +86,9 @@ class SecurityTestSuite extends TestCase
         // Mock session manager
         $sessionManager = $this->createMock(SessionManager::class);
         $sessionManager->method('getCsrfToken')->willReturn('test_token_123');
-        $sessionManager->method('validateCsrfToken')->willReturnCallback(
-            static function ($token) {
-                return $token === 'test_token_123';
-            },
-        );
+        $sessionManager->method('validateCsrfToken')->willReturnCallback(static function ($token) {
+            return $token === 'test_token_123';
+        },);
 
         $csrfProtection = new CsrfProtection($sessionManager);
 

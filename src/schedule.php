@@ -134,8 +134,7 @@ if (null === $runTemplate->getMyKey()) {
             $waitRow->addColumn(4, sprintf(_('Seconds to wait: %d'), $waitTime));
 
             if ($waitTime > 0) {
-                WebPage::singleton()->addJavaScript(
-                    <<<'EOD'
+                WebPage::singleton()->addJavaScript(<<<'EOD'
 // ...existing code...
 
 function pollJobCompletion(jobId, pollingInterval, maxPollingDuration) {
@@ -184,12 +183,9 @@ EOD.$jobber->getMyKey().<<<'EOD'
 EOD.$waitTime.<<<'EOD'
 , 5000, 3600000);
 
-EOD
-                );
+EOD);
             } else {
-                WebPage::singleton()->addJavaScript(
-                    'window.location.href = "job.php?id='.$jobber->getMyKey().'";',
-                );
+                WebPage::singleton()->addJavaScript('window.location.href = "job.php?id='.$jobber->getMyKey().'";');
             }
 
             $appPanel = new ApplicationPanel(
@@ -202,9 +198,7 @@ EOD
             // Not all required fields filled, re-show form with persisted file references
             $appPanel = new ApplicationPanel($app, new JobScheduleForm($runTemplate, $uploadedFiles));
             $appPanel->headRow->addItem(new RuntemplateButton($runTemplate));
-            WebPage::singleton()->container->addItem(
-                new CompanyPanel($company, [$appPanel]),
-            );
+            WebPage::singleton()->container->addItem(new CompanyPanel($company, [$appPanel]));
         }
     } else {
         if ($jobID) {
@@ -219,9 +213,7 @@ EOD
         } else {
             $appPanel = new ApplicationPanel($app, new JobScheduleForm($runTemplate));
             $appPanel->headRow->addItem(new RuntemplateButton($runTemplate));
-            WebPage::singleton()->container->addItem(
-                new CompanyPanel($company, [$appPanel]),
-            );
+            WebPage::singleton()->container->addItem(new CompanyPanel($company, [$appPanel]));
         }
     }
 }

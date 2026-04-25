@@ -65,9 +65,7 @@ class Zabbix extends \MultiFlexi\Action\Zabbix
 
         $input = new \Ease\Html\DivTag($prepend, ['class' => 'input-group mb-2']);
 
-        $input->addItem(
-            new \Ease\Html\InputTextTag($prefix.'[Zabbix][key]', null, ['class' => 'form-control']),
-        );
+        $input->addItem(new \Ease\Html\InputTextTag($prefix.'[Zabbix][key]', null, ['class' => 'form-control']));
 
         return [
             new \Ease\TWB4\FormGroup(_('Zabbix key'), $input, '{COMPANY_CODE}-{APP_CODE}-{RUNTEMPLATE_ID}-data', _('Zabbix Item key')),

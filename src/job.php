@@ -83,8 +83,7 @@ $liveOutputSocket = \Ease\Shared::cfg('LIVE_OUTPUT_SOCKET');
 if ($liveOutputSocket && isset($_SESSION['ws_token'])) {
     $wsToken = $_SESSION['ws_token'];
 
-    WebPage::singleton()->addJavaScript(
-        <<<EOD
+    WebPage::singleton()->addJavaScript(<<<EOD
 
 var ws = new WebSocket('{$liveOutputSocket}?token={$wsToken}');
 ws.onmessage = function(event) {
@@ -93,8 +92,7 @@ ws.onmessage = function(event) {
     output.textContent += data.message + '\\n';
 };
 
-EOD
-    );
+EOD);
 }
 
 // Check if job is orphaned and show warning
@@ -233,9 +231,7 @@ $panelContent[] = $outputTabs;
 
 $appPanel = new ArchivedJobPanel($jobber, $panelContent, $jobFoot);
 
-WebPage::singleton()->container->addItem(
-    new CompanyPanel(new \MultiFlexi\Company($appInfo['company_id']), $appPanel),
-);
+WebPage::singleton()->container->addItem(new CompanyPanel(new \MultiFlexi\Company($appInfo['company_id']), $appPanel));
 
 WebPage::singleton()->addItem(new PageBottom('job/'.$jobber->getMyKey()));
 WebPage::singleton()->addCss(<<<'EOD'

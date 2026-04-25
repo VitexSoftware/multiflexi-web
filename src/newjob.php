@@ -82,8 +82,6 @@ $jobInfoButton = new \Ease\TWB4\LinkButton('job.php?id='.$jobber->getMyKey(), _(
 
 $appPanel = new ApplicationPanel($apps, _('Job Run Scheduled'), $jobInfoButton);
 $appPanel->headRow->addColumn(2, $runTemplateButton);
-WebPage::singleton()->container->addItem(
-    new CompanyPanel(new \MultiFlexi\Company($appInfo['company_id']), $appPanel),
-);
+WebPage::singleton()->container->addItem(new CompanyPanel(new \MultiFlexi\Company($appInfo['company_id']), $appPanel));
 
 WebPage::singleton()->draw();

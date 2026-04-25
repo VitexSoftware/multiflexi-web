@@ -165,12 +165,10 @@ $runtemplatesDiv->addItem(new LinkButton(
 
 // Wrap everything in CompanyPanel with CompanyApplicationPanel
 // This will show "Aktivní RunTemplates" panel with all RunTemplates for this app across companies
-WebPage::singleton()->container->addItem(
-    new CompanyPanel(
-        $companer,
-        new CompanyApplicationPanel($companyApp, $runtemplatesDiv),
-    ),
-);
+WebPage::singleton()->container->addItem(new CompanyPanel(
+    $companer,
+    new CompanyApplicationPanel($companyApp, $runtemplatesDiv),
+),);
 
 // Get dynamic object name for JavaScript and CSS (without namespace)
 $objectName = \Ease\Functions::baseClassName($engine);

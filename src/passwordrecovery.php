@@ -80,9 +80,7 @@ WebPage::singleton()->addItem($pageRow);
 if (!$success) {
     $columnIII->addItem(new \Ease\TWB4\Label('info', _('Tip')));
 
-    $columnIII->addItem(new \Ease\TWB4\Well(
-        _('Forgot your password? Enter your e-mail address you entered during the registration and we will send you a new one.'),
-    ));
+    $columnIII->addItem(new \Ease\TWB4\Well(_('Forgot your password? Enter your e-mail address you entered during the registration and we will send you a new one.')));
 
     $titlerow = new \Ease\TWB4\Row();
     $titlerow->addColumn(4, new \Ease\Html\ImgTag('images/password.png'));

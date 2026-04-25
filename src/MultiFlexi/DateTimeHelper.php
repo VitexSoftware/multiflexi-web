@@ -19,19 +19,19 @@ use DateTimeZone;
 use Ease\Shared;
 
 /**
- * Helper class for DateTime operations with timezone support
+ * Helper class for DateTime operations with timezone support.
  */
 class DateTimeHelper
 {
     /**
-     * Autodetect the server's timezone from Linux system configuration
+     * Autodetect the server's timezone from Linux system configuration.
      *
      * Attempts to detect timezone in the following order:
      * 1. Read from /etc/timezone file (Debian/Ubuntu)
      * 2. Read symlink from /etc/localtime (most Linux distributions)
      * 3. Use timedatectl command if available
      *
-     * @return string|null The detected timezone string or null if detection fails
+     * @return null|string The detected timezone string or null if detection fails
      */
     public static function autodetectServerTimezone(): ?string
     {
@@ -41,7 +41,7 @@ class DateTimeHelper
 
             if (!empty($timezone)) {
                 try {
-                    new DateTimeZone($timezone);
+                    new \DateTimeZone($timezone);
 
                     return $timezone;
                 } catch (\Exception $e) {
@@ -59,7 +59,7 @@ class DateTimeHelper
                 $timezone = $matches[1];
 
                 try {
-                    new DateTimeZone($timezone);
+                    new \DateTimeZone($timezone);
 
                     return $timezone;
                 } catch (\Exception $e) {
@@ -69,7 +69,7 @@ class DateTimeHelper
         }
 
         // Method 3: Use timedatectl command
-        if (function_exists('exec')) {
+        if (\function_exists('exec')) {
             $output = [];
             $returnVar = 0;
             @exec('timedatectl show --property=Timezone --value 2>/dev/null', $output, $returnVar);
@@ -78,7 +78,7 @@ class DateTimeHelper
                 $timezone = trim($output[0]);
 
                 try {
-                    new DateTimeZone($timezone);
+                    new \DateTimeZone($timezone);
 
                     return $timezone;
                 } catch (\Exception $e) {
@@ -91,15 +91,15 @@ class DateTimeHelper
     }
 
     /**
-     * Get the configured timezone
+     * Get the configured timezone.
      *
      * Returns a DateTimeZone object based on the MULTIFLEXI_TIMEZONE configuration
      * from the environment. If not configured, attempts to autodetect from the server.
      * Falls back to UTC if autodetection fails.
      *
-     * @return DateTimeZone The configured timezone
+     * @return \DateTimeZone The configured timezone
      */
-    public static function getConfiguredTimezone(): DateTimeZone
+    public static function getConfiguredTimezone(): \DateTimeZone
     {
         $timezone = Shared::cfg('MULTIFLEXI_TIMEZONE');
 
@@ -114,17 +114,17 @@ class DateTimeHelper
         }
 
         try {
-            return new DateTimeZone($timezone);
+            return new \DateTimeZone($timezone);
         } catch (\Exception $e) {
             // Fallback to UTC if configured timezone is invalid
             error_log('Invalid timezone configured: '.$timezone.'. Falling back to UTC.');
 
-            return new DateTimeZone('UTC');
+            return new \DateTimeZone('UTC');
         }
     }
 
     /**
-     * Get the configured timezone string
+     * Get the configured timezone string.
      *
      * @return string The configured timezone string (e.g., 'UTC', 'Europe/Prague')
      */
@@ -134,7 +134,7 @@ class DateTimeHelper
     }
 
     /**
-     * Create a DateTime object with the configured timezone
+     * Create a DateTime object with the configured timezone.
      *
      * @param string $datetime The datetime string (e.g., '2024-01-01 12:00:00')
      *

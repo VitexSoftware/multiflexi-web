@@ -88,11 +88,7 @@ $socketAddress = $socketUriParts['host'].':'.$socketUriParts['port'];
 $webSock = new SocketServer($socketAddress, [], $loop);
 
 $server = new IoServer(
-    new HttpServer(
-        new WsServer(
-            new JobOutputStreamer(),
-        ),
-    ),
+    new HttpServer(new WsServer(new JobOutputStreamer())),
     $webSock,
     $loop,
 );

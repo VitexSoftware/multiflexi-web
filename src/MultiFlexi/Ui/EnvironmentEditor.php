@@ -146,8 +146,7 @@ class EnvironmentEditor extends \Ease\Html\TableTag
         $this->includeCss('css/bootstrap-editable.css');
 
         // Add custom CSS for modern look
-        $this->addCss(
-            <<<'CSS'
+        $this->addCss(<<<'CSS'
 .environment-editor-table {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     border-radius: 8px;
@@ -206,8 +205,7 @@ class EnvironmentEditor extends \Ease\Html\TableTag
 .environment-editor-table thead th:last-child {
     width: 3em;
 }
-CSS
-        );
+CSS);
 
         // Configure editable with CSRF token
         $csrfToken = '';
