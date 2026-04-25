@@ -1203,7 +1203,7 @@ EOD,
         $buttonRow->addColumn(
             3,
             new \Ease\TWB4\LinkButton(
-                'schedule.php?app_id='.$app->getMyKey().'&company_id='.$company->getMyKey().'&runtemplate_id='.$runtemplateId,
+                'schedule.php?id='.$runtemplateId,
                 '📅 '._('Schedule'),
                 'info btn-lg btn-block',
             ),
