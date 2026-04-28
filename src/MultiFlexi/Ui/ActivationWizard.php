@@ -458,6 +458,19 @@ EOD,
             $container->addItem(new \Ease\Html\DivTag('', ['class' => 'mb-4'])); // Add spacing
         }
 
+        // Build app_id => [slug, ...] map across all companies
+        $appCompanies = [];
+
+        foreach ($app->getFluentPDO()
+            ->from('company_app')
+            ->join('company ON company.id = company_app.company_id')
+            ->select('company_app.app_id, company.slug')
+            ->fetchAll() as $row) {
+            if (!empty($row['slug'])) {
+                $appCompanies[$row['app_id']][] = $row['slug'];
+            }
+        }
+
         $form = new SecureForm(['method' => 'POST', 'action' => 'activation-wizard.php?step=3', 'id' => 'wizardForm']);
         $form->addItem(new \Ease\Html\InputHiddenTag('company_id', (string) $this->wizardData['company_id']));
 
@@ -500,11 +513,15 @@ EOD,
                 $cardBody->addItem(new \Ease\Html\PTag($displayDescription, ['class' => 'card-text small text-muted']));
             }
 
-            // Show assignment status badge
-            if (\in_array($appData['id'], $assignedAppIds, true)) {
-                $cardBody->addItem(new \Ease\TWB4\Badge('success', '✓ '._('Already assigned'), ['class' => 'mb-2']));
-            } else {
-                $cardBody->addItem(new \Ease\TWB4\Badge('warning', '+ '._('Will be assigned'), ['class' => 'mb-2']));
+            // Show slugs of companies that already use this application
+            if (!empty($appCompanies[$appData['id']])) {
+                $slugsContainer = new \Ease\Html\DivTag(null, ['class' => 'mb-2']);
+
+                foreach ($appCompanies[$appData['id']] as $slug) {
+                    $slugsContainer->addItem(new \Ease\TWB4\Badge('info', $slug, ['class' => 'mr-1 mb-1']));
+                }
+
+                $cardBody->addItem($slugsContainer);
             }
 
             // Show tags as badges
