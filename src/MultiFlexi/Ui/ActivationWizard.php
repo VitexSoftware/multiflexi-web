@@ -475,6 +475,7 @@ EOD,
                 'class' => 'card mb-3 h-100 app-card '.$cardClass,
                 'style' => 'cursor: pointer;',
                 'data-tags' => $tagsDataAttr,
+                'data-name' => strtolower($appData['localized_name'] ?? $appData['name']),
             ]);
             $cardBody = $card->addItem(new \Ease\Html\DivTag(null, ['class' => 'card-body text-center']));
 
@@ -700,8 +701,7 @@ $(document).ready(function() {
 
             // Also filter by name search
             if (shouldShow && searchTerm.length > 0) {
-                var cardTitle = card.querySelector('.card-title');
-                var cardName = cardTitle ? cardTitle.textContent.toLowerCase().trim() : '';
+                var cardName = card.getAttribute('data-name') || '';
                 if (cardName.indexOf(searchTerm) === -1) {
                     shouldShow = false;
                 }
