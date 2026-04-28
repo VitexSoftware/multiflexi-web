@@ -47,7 +47,7 @@ class FilterDialog extends \Ease\Html\DivTag
                             null,
                             ['indeterminate' => true, 'id' => $columnName.'sw'],
                         ),
-                    ),);
+                    ), );
                     $controls->addItem('&nbsp;'.new \Ease\Html\ATag(
                         '#',
                         '<i class="fas fa-yin-yang"></i>',

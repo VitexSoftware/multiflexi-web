@@ -28,7 +28,7 @@ $infoBlock = WebPage::singleton()->container->addItem(new \Ease\TWB4\Panel(
         _('Vitex Software'),
         'info',
     ),
-),);
+), );
 $listing = $infoBlock->addItem(new \Ease\Html\UlTag());
 
 if (file_exists('../README.md')) {

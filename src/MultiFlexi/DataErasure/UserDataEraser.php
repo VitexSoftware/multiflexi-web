@@ -342,7 +342,7 @@ class UserDataEraser extends \Ease\Sand
             throw new \Exception(sprintf(
                 _('Cannot perform hard deletion due to dependencies: %s'),
                 implode(', ', $dependencies['blocking']),
-            ),);
+            ), );
         }
 
         $deletedTables = [];

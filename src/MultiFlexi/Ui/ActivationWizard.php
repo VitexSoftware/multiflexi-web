@@ -424,6 +424,15 @@ EOD,
         ksort($allTags);
         $allTags = array_values($allTags);
 
+        // Add name search bar
+        $searchInput = new \Ease\Html\InputTextTag('app_name_search', '', [
+            'class' => 'form-control',
+            'id' => 'app-name-search',
+            'placeholder' => _('Search by name...'),
+            'autocomplete' => 'off',
+        ]);
+        $container->addItem(new \Ease\TWB4\FormGroup(_('Search by Name'), $searchInput));
+
         // Add tag filter using PillBox
         if (!empty($allTags)) {
             $container->addItem(new \Ease\Html\H4Tag(_('Filter by Tags')));
@@ -560,6 +569,7 @@ $(document).ready(function() {
     // Get reference to the pillbox selectize instance
     var tagFilterSelectize = null;
     var allAvailableTags = [];
+    var currentSelectedTags = [];
 
     // Function to save tag selection to localStorage
     function saveTagSelection(selectedTags) {
@@ -613,11 +623,13 @@ $(document).ready(function() {
 
             var savedSelection = loadTagSelection();
             tagFilterSelectize.setValue(savedSelection, true);
+            currentSelectedTags = savedSelection;
             filterApplicationsByTags(savedSelection);
 
             tagFilterSelectize.on('change', function(value) {
                 var selectedTags = Array.isArray(value) ? value : (value ? value.split(',') : []);
                 saveTagSelection(selectedTags);
+                currentSelectedTags = selectedTags;
                 filterApplicationsByTags(selectedTags);
             });
 
@@ -626,6 +638,7 @@ $(document).ready(function() {
                     var currentSelection = tagFilterSelectize.getValue();
                     var selectedTags = Array.isArray(currentSelection) ? currentSelection : (currentSelection ? currentSelection.split(',') : []);
                     saveTagSelection(selectedTags);
+                    currentSelectedTags = selectedTags;
                     filterApplicationsByTags(selectedTags);
                 }, 10);
             });
@@ -633,10 +646,16 @@ $(document).ready(function() {
             $('#reset-tag-filter').on('click', function() {
                 tagFilterSelectize.setValue(allAvailableTags, true);
                 saveTagSelection(allAvailableTags);
+                currentSelectedTags = allAvailableTags;
                 filterApplicationsByTags(allAvailableTags);
             });
         }
     }, 1000);
+
+    // Name search input - filter in real time
+    $('#app-name-search').on('input', function() {
+        filterApplicationsByTags(currentSelectedTags);
+    });
 
     // Function to filter applications based on selected tags
     function filterApplicationsByTags(selectedTags) {
@@ -649,6 +668,7 @@ $(document).ready(function() {
 
         var appCards = document.querySelectorAll('.app-card');
         var visibleCount = 0;
+        var searchTerm = ($('#app-name-search').val() || '').toLowerCase().trim();
 
         appCards.forEach(function(card) {
             var cardTags = card.getAttribute('data-tags') || '';
@@ -675,6 +695,15 @@ $(document).ready(function() {
                             break;
                         }
                     }
+                }
+            }
+
+            // Also filter by name search
+            if (shouldShow && searchTerm.length > 0) {
+                var cardTitle = card.querySelector('.card-title');
+                var cardName = cardTitle ? cardTitle.textContent.toLowerCase().trim() : '';
+                if (cardName.indexOf(searchTerm) === -1) {
+                    shouldShow = false;
                 }
             }
 
@@ -1203,7 +1232,7 @@ EOD,
         $buttonRow->addColumn(
             3,
             new \Ease\TWB4\LinkButton(
-                'schedule.php?id='.$runtemplateId
+                'schedule.php?id='.$runtemplateId,
                 '📅 '._('Schedule'),
                 'info btn-lg btn-block',
             ),

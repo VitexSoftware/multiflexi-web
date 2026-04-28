@@ -168,7 +168,7 @@ $runtemplatesDiv->addItem(new LinkButton(
 WebPage::singleton()->container->addItem(new CompanyPanel(
     $companer,
     new CompanyApplicationPanel($companyApp, $runtemplatesDiv),
-),);
+), );
 
 // Get dynamic object name for JavaScript and CSS (without namespace)
 $objectName = \Ease\Functions::baseClassName($engine);

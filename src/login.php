@@ -122,7 +122,9 @@ if ($login && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     session_write_close();
 
                     exit;
-                } elseif (empty(Shared::user()->getStatusMessages())) {
+                }
+
+                if (empty(Shared::user()->getStatusMessages())) {
                     Shared::user()->addStatusMessage(_('Invalid login or password'), 'error');
                 }
             }
@@ -140,7 +142,9 @@ if ($login && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_write_close();
 
                 exit;
-            } elseif (empty(Shared::user()->getStatusMessages())) {
+            }
+
+            if (empty(Shared::user()->getStatusMessages())) {
                 Shared::user()->addStatusMessage(_('Invalid login or password'), 'error');
             }
         }
