@@ -475,7 +475,7 @@ EOD,
                 'class' => 'card mb-3 h-100 app-card '.$cardClass,
                 'style' => 'cursor: pointer;',
                 'data-tags' => $tagsDataAttr,
-                'data-name' => strtolower($appData['localized_name'] ?? $appData['name']),
+                'data-name' => strtolower(($appData['localized_name'] ?? $appData['name']).' '.$appData['name']),
             ]);
             $cardBody = $card->addItem(new \Ease\Html\DivTag(null, ['class' => 'card-body text-center']));
 
