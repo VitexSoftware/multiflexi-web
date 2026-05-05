@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>com.vitexsoftware.multi_flexibee_setup</id>
+  <icon type="stock">multiflexi</icon>
   
   <name>Multi FlexiBee setup</name>
   <summary>several accounting tools launcher</summary>
