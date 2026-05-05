@@ -71,7 +71,7 @@ class CompaniesBar extends \Ease\Html\DivTag
                     $jobCounts->addItem(new ATag('joblist.php?app_id='.$appId.'&company_id='.$companyId.'&status=waiting', (string) $waitingJobs, ['class' => 'badge badge-pill badge-warning']));
                 }
 
-                $appIcon = new ATag('companyapp.php?company_id='.$companer->getMyKey().'&app_id='.$appId, new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], _($companyApp['name']), ['title' => _($companyApp['description']), 'style' => 'padding: 5px; margin: 5px;max-height: 50px;max-width: 50px;']));
+                $appIcon = new ATag('companyapp.php?company_id='.$companer->getMyKey().'&app_id='.$appId, new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], _($companyApp['name']), ['title' => _($companyApp['description']), 'width' => '50', 'height' => '50', 'style' => 'padding: 5px; margin: 5px;max-height: 50px;max-width: 50px;object-fit: contain;']));
                 $appBlock = new \Ease\Html\DivTag($appIcon);
 
                 if ($successJobs > 0 || $failedJobs > 0 || $waitingJobs > 0) {

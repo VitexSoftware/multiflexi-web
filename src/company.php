@@ -75,7 +75,7 @@ foreach ($jobs as $job) {
             new \Ease\TWB4\Badge(
                 'light',
                 [
-                    new \Ease\Html\ImgTag('appimage.php?uuid='.$job['uuid'], $job['appname'], ['height' => 50, 'title' => $job['appname']]),
+                    new \Ease\Html\ImgTag('appimage.php?uuid='.$job['uuid'], $job['appname'], ['width' => 50, 'height' => 50, 'style' => 'object-fit: contain;', 'title' => $job['appname']]),
                     '&nbsp;',
                     // Přidejte styl pro nezalamování názvu aplikace
                     new \Ease\Html\SpanTag($job['appname'], ['style' => 'white-space: nowrap;']),

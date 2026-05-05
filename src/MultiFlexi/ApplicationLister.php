@@ -47,7 +47,7 @@ class ApplicationLister extends Application
     {
         $dataRow = current(Ui\AppsSelector::translateColumns([$dataRowRaw], ['name', 'description']));
         $dataRow['name'] = '<a title="'.$dataRowRaw['name'].'" href="app.php?id='.$dataRowRaw['id'].'">'.$dataRowRaw['name'].'</a>';
-        $dataRow['icon'] = '<a title="'.$dataRowRaw['name'].'" href="app.php?id='.$dataRowRaw['id'].'"><img src="appimage.php?uuid='.$dataRowRaw['uuid'].'" height="50">';
+        $dataRow['icon'] = '<a title="'.$dataRowRaw['name'].'" href="app.php?id='.$dataRowRaw['id'].'"><img src="appimage.php?uuid='.$dataRowRaw['uuid'].'" width="50" height="50" style="object-fit: contain;">';
 
         $topics = new \Ease\Html\DivTag();
 
