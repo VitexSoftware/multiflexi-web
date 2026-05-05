@@ -202,7 +202,7 @@ EOD);
             $uuid = $app->getDataValue('uuid');
 
             if ($uuid) {
-                $steps[2] .= ' <img src="appimage.php?uuid='.$uuid.'" style="height: 20px; margin-left: 5px;" />';
+                $steps[2] .= ' <img src="appimage.php?uuid='.$uuid.'" width="20" height="20" style="height: 20px; margin-left: 5px; object-fit: contain;" />';
             }
         }
 
@@ -497,7 +497,7 @@ EOD,
             $displayDescription = $appData['localized_description'] ?? $appData['description'] ?? '';
 
             if (!empty($appData['uuid'])) {
-                $appLogo = new \Ease\Html\ImgTag('appimage.php?uuid='.$appData['uuid'], $displayName, ['class' => 'img-fluid mb-3', 'style' => 'max-height: 80px; max-width: 100%;']);
+                $appLogo = new \Ease\Html\ImgTag('appimage.php?uuid='.$appData['uuid'], $displayName, ['class' => 'img-fluid mb-3', 'width' => '80', 'height' => '80', 'style' => 'max-height: 80px; max-width: 100%; object-fit: contain;']);
                 $cardBody->addItem($appLogo);
             } else {
                 // Fallback icon if no uuid/image
@@ -1165,7 +1165,7 @@ EOD,
         $summaryTable->addRowColumns([
             new \Ease\Html\StrongTag(_('Application')),
             new \Ease\Html\SpanTag([
-                $app->getDataValue('uuid') ? new \Ease\Html\ImgTag('appimage.php?uuid='.$app->getDataValue('uuid'), $app->getRecordName(), ['height' => '20', 'style' => 'margin-right: 5px;']) : '',
+                $app->getDataValue('uuid') ? new \Ease\Html\ImgTag('appimage.php?uuid='.$app->getDataValue('uuid'), $app->getRecordName(), ['width' => '20', 'height' => '20', 'style' => 'margin-right: 5px; object-fit: contain;']) : '',
                 $app->getRecordName(),
             ]),
         ]);

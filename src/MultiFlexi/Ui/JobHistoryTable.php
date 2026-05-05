@@ -77,7 +77,7 @@ class JobHistoryTable extends \Ease\TWB4\Table
             $company->setDataValue('name', $job['name']);
 
             if ($this->showIcon) {
-                $job['uuid'] = new \Ease\Html\ATag('app.php?id='.$job['app_id'], [new \Ease\TWB4\Badge('light', [new \Ease\Html\ImgTag(empty($job['appimage']) ? 'appimage.php?uuid='.$job['uuid'] : $job['appimage'], _($job['appname']), ['height' => 60, 'title' => $job['appname']]), '&nbsp;', _($job['appname'])])]);
+                $job['uuid'] = new \Ease\Html\ATag('app.php?id='.$job['app_id'], [new \Ease\TWB4\Badge('light', [new \Ease\Html\ImgTag(empty($job['appimage']) ? 'appimage.php?uuid='.$job['uuid'] : $job['appimage'], _($job['appname']), ['width' => 60, 'height' => 60, 'style' => 'object-fit: contain;', 'title' => $job['appname']]), '&nbsp;', _($job['appname'])])]);
             } else {
                 unset($job['uuid']);
             }

@@ -297,7 +297,7 @@ if ($step === 'complete' && isset($runtemplateId)) {
     $summaryTable->addRowColumns([
         new \Ease\Html\StrongTag(_('Application')),
         new \Ease\Html\SpanTag([
-            $app->getDataValue('uuid') ? new \Ease\Html\ImgTag('appimage.php?uuid='.$app->getDataValue('uuid'), $app->getRecordName(), ['height' => '20', 'style' => 'margin-right: 5px;']) : '',
+            $app->getDataValue('uuid') ? new \Ease\Html\ImgTag('appimage.php?uuid='.$app->getDataValue('uuid'), $app->getRecordName(), ['width' => '20', 'height' => '20', 'style' => 'margin-right: 5px; object-fit: contain;']) : '',
             $app->getRecordName(),
         ]),
     ]);

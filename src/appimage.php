@@ -15,12 +15,12 @@ declare(strict_types=1);
 
 namespace MultiFlexi\Ui;
 
+// Prevent PHP session from overriding our cache headers
+session_cache_limiter('');
+
 require_once __DIR__.'/init.php';
 
 WebPage::singleton()->onlyForLogged();
-
-header('Cache-Control: max-age=31536000'); // Cache for 1 year
-header('Expires: '.gmdate('D, d M Y H:i:s', time() + 31536000).' GMT'); // Expires in 1 year
 
 $uuid = WebPage::getRequestValue('uuid');
 $contentType = 'image/svg+xml';
@@ -44,8 +44,17 @@ if (file_exists('images/'.$uuid.'.svg')) {
     }
 }
 
-// Set proper content-type header
-header('Content-Type: '.str_replace(';base64', '', $contentType));
+$etag = '"'.md5($imageData).'"';
 
-// Send image data to the browser
+// Return 304 if client already has the current version
+if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag) {
+    http_response_code(304);
+
+    exit;
+}
+
+header('Content-Type: '.str_replace(';base64', '', $contentType));
+header('Cache-Control: private, max-age=86400');
+header('ETag: '.$etag);
+
 echo $imageData;
