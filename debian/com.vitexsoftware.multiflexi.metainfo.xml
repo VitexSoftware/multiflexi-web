@@ -5,7 +5,7 @@
   <name>Multi FlexiBee setup</name>
   <summary>several accounting tools launcher</summary>
 
-  <icon type="stock">multiflexi</icon>
+  <icon type="stock">multiflexi-web</icon>
 
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>

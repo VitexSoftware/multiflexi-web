@@ -6,7 +6,7 @@ Name=Multi Flexi
 Comment=several accounting tools launcher
 Categories=Office;Finance;
 
-Icon=multiflexi
+Icon=multiflexi-web
 Exec=sensible-browser http://localhost/multiflexi/
 Terminal=false
 
