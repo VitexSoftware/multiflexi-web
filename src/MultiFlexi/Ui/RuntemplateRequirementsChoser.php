@@ -53,6 +53,10 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
         $adders = new \Ease\TWB4\Row();
         $widget = new \Ease\Html\DivTag();
 
+        $credProtoHelper = new \MultiFlexi\CredentialProtoType();
+        $protoData = $credProtoHelper->listingQuery()->where('code', $requirement)->fetch();
+        $protoLogo = $protoData && !empty($protoData['logo']) ? 'images/'.$protoData['logo'] : '';
+
         if (\array_key_exists($requirement, $this->providers)) {
             if (\array_key_exists($requirement, $this->credTypes)) {
                 $state = 'success';
@@ -83,6 +87,14 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
             $adders->addColumn(4, _('Provider not found'));
         }
 
-        return new \Ease\TWB4\Panel(new \Ease\Html\StrongTag($requirement), $state, $widget, $adders);
+        $panelTitle = new \Ease\Html\SpanTag();
+
+        if ($protoLogo) {
+            $panelTitle->addItem(new \Ease\Html\ImgTag($protoLogo, $requirement, ['height' => '24px', 'class' => 'mr-1 align-middle']));
+        }
+
+        $panelTitle->addItem(new \Ease\Html\StrongTag($requirement));
+
+        return new \Ease\TWB4\Panel($panelTitle, $state, $widget, $adders);
     }
 }

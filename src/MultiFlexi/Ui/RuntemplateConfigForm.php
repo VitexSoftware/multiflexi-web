@@ -105,7 +105,11 @@ CSS);
 
                     $credentialLink = new \Ease\Html\ATag('credential.php?id='.$credential->getMyKey(), new \Ease\Html\SmallTag($credential->getRecordName()));
 
-                    $formIcon = new \Ease\Html\ImgTag('images/'.$runTemplateField->getLogo(), (string) $credentialType->getRecordName(), ['height' => 20, 'title' => $credentialType->getRecordName()]);
+                    $credProtoHelper = new \MultiFlexi\CredentialProtoType();
+                    $protoData = $credProtoHelper->listingQuery()->where('code', $credentialType->getDataValue('prototype'))->fetch();
+                    $protoLogo = $protoData && !empty($protoData['logo']) ? 'images/'.$protoData['logo'] : 'images/'.$runTemplateField->getLogo();
+
+                    $formIcon = new \Ease\Html\ImgTag($protoLogo, (string) $credentialType->getRecordName(), ['height' => 20, 'title' => $credentialType->getRecordName()]);
 
                     $credentialTypeLink = new \Ease\Html\ATag('credentialtype.php?id='.$credentialType->getMyKey(), $formIcon);
 
