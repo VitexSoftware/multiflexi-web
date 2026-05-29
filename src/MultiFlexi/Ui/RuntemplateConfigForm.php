@@ -67,43 +67,55 @@ CSS);
 
         foreach ($appFields as $fieldName => $field) {
             $inputCaption = new \Ease\Html\StrongTag($fieldName);
-
-            if ($field->getType() === 'bool') {
-                $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $field->getValue() === 'true' ? true : false, 'true', ['data-size' => 'small']));
-            } elseif ($field->isMultiLine()) {
-                $input = new \Ease\Html\TextareaTag($fieldName, $field->getValue(), ['class' => 'form-control form-control-sm', 'rows' => 4]);
-            } else {
-                $input = new \Ease\Html\InputTag($fieldName, $field->getValue(), ['type' => $field->getType(), 'class' => 'form-control form-control-sm']);
-            }
+            $credential = null;
+            $credValue = null;
+            $isDisabled = false;
 
             $runTemplateField = $runTemplateFields->getFieldByCode($fieldName);
 
+            if ($runTemplateField && \Ease\Euri::isValid($runTemplateField->getSource())) {
+                $resolved = \Ease\Euri::toObject($runTemplateField->getSource());
+
+                if ($resolved && ($resolved::class === 'MultiFlexi\\Credential')) {
+                    $credential = $resolved;
+                    $credValue = $credential->getDataValue($fieldName);
+                    $isDisabled = true;
+                }
+            }
+
+            $value = $credValue ?? $field->getValue();
+
+            if ($field->getType() === 'bool') {
+                $toggleAttrs = ['data-size' => 'small'];
+
+                if ($isDisabled) {
+                    $toggleAttrs['disabled'] = 'disabled';
+                }
+
+                $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $value === 'true' ? true : false, 'true', $toggleAttrs));
+            } elseif ($field->isMultiLine()) {
+                $input = new \Ease\Html\TextareaTag($fieldName, $value, ['class' => 'form-control form-control-sm', 'rows' => 4]);
+            } else {
+                $input = new \Ease\Html\InputTag($fieldName, $value, ['type' => $field->getType(), 'class' => 'form-control form-control-sm']);
+            }
+
             if ($runTemplateField) { // Filed by Credential
-                $runTemplateFieldSource = $runTemplateField->getSource();
+                if ($credential) {
+                    $credentialType = $credential->getCredentialType();
 
-                if (\Ease\Euri::isValid($runTemplateFieldSource)) {
-                    $credential = \Ease\Euri::toObject($runTemplateFieldSource);
+                    $credentialLink = new \Ease\Html\ATag('credential.php?id='.$credential->getMyKey(), new \Ease\Html\SmallTag($credential->getRecordName()));
 
-                    if ($credential && ($credential::class === 'MultiFlexi\\Credential')) {
-                        $credentialType = $credential->getCredentialType();
+                    $formIcon = new \Ease\Html\ImgTag('images/'.$runTemplateField->getLogo(), (string) $credentialType->getRecordName(), ['height' => 20, 'title' => $credentialType->getRecordName()]);
 
-                        $credentialLink = new \Ease\Html\ATag('credential.php?id='.$credential->getMyKey(), new \Ease\Html\SmallTag($credential->getRecordName()));
+                    $credentialTypeLink = new \Ease\Html\ATag('credentialtype.php?id='.$credentialType->getMyKey(), $formIcon);
 
-                        $formIcon = new \Ease\Html\ImgTag('images/'.$runTemplateField->getLogo(), (string) $credentialType->getRecordName(), ['height' => 20, 'title' => $credentialType->getRecordName()]);
+                    $inputCaption = new \Ease\Html\SpanTag([$credentialTypeLink, new \Ease\Html\StrongTag($fieldName), '&nbsp;', $credentialLink]);
 
-                        $credentialTypeLink = new \Ease\Html\ATag('credentialtype.php?id='.$credentialType->getMyKey(), $formIcon);
-
-                        $inputCaption = new \Ease\Html\SpanTag([$credentialTypeLink, new \Ease\Html\StrongTag($fieldName), '&nbsp;', $credentialLink]);
-                        $credValue = $credential->getDataValue($fieldName);
-
-                        if ($input instanceof \Ease\Html\DivTag) {
-                            $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $credValue === 'true' ? true : false, 'true', ['data-size' => 'small', 'disabled' => 'disabled']));
-                        } else {
-                            $input->setTagProperty('disabled', '1');
-                            $input->setValue($credValue);
-                        }
-                        $field->setDescription($credentialType->getFields()->getField($fieldName)->getDescription());
+                    if (!($input instanceof \Ease\Html\DivTag)) {
+                        $input->setTagProperty('disabled', '1');
                     }
+
+                    $field->setDescription($credentialType->getFields()->getField($fieldName)->getDescription());
                 }
 
                 $formGroup = $this->addInput($input, $inputCaption, $runTemplateField->getValue(), $field->getDescription());
