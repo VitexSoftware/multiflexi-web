@@ -94,9 +94,14 @@ CSS);
                         $credentialTypeLink = new \Ease\Html\ATag('credentialtype.php?id='.$credentialType->getMyKey(), $formIcon);
 
                         $inputCaption = new \Ease\Html\SpanTag([$credentialTypeLink, new \Ease\Html\StrongTag($fieldName), '&nbsp;', $credentialLink]);
-                        $input->setTagProperty('disabled', '1');
+                        $credValue = $credential->getDataValue($fieldName);
 
-                        $input->setValue($credential->getDataValue($fieldName));
+                        if ($input instanceof \Ease\Html\DivTag) {
+                            $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $credValue === 'true' ? true : false, 'true', ['data-size' => 'small', 'disabled' => 'disabled']));
+                        } else {
+                            $input->setTagProperty('disabled', '1');
+                            $input->setValue($credValue);
+                        }
                         $field->setDescription($credentialType->getFields()->getField($fieldName)->getDescription());
                     }
                 }
