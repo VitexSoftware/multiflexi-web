@@ -84,6 +84,7 @@ try {
 }
 
 $login = WebPage::singleton()->getRequestValue('login');
+$password = WebPage::singleton()->getRequestValue('password');
 
 if ($login && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate CSRF token if CSRF protection is enabled
@@ -184,7 +185,7 @@ $loginPanel->addItem(new FormGroup(
     _('the username you chose'),
 ));
 
-$loginPanel->addItem(new FormGroup(_('Password'), new InputPasswordTag('password')));
+$loginPanel->addItem(new FormGroup(_('Password'), new InputPasswordTag('password', $password)));
 
 $loginPanel->body->setTagCss(['margin' => '20px']);
 

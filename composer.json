@@ -39,7 +39,8 @@
         "vitexsoftware/multiflexi-database-connection": "dev-main",
         "vitexsoftware/multiflexi-mail": "dev-main",
         "vitexsoftware/multiflexi-raiffeisenbank": "dev-main",
-        "vitexsoftware/multiflexi-zabbix": "dev-main"
+        "vitexsoftware/multiflexi-zabbix": "dev-main",
+        "spojenet/multiflexi-mserver": "dev-main"
     },
     "license": "MIT",
     "authors": [

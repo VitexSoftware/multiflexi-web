@@ -55,7 +55,7 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
 
         $credProtoHelper = new \MultiFlexi\CredentialProtoType();
         $protoData = $credProtoHelper->listingQuery()->where('code', $requirement)->fetch();
-        $protoLogo = $protoData && !empty($protoData['logo']) ? 'images/'.$protoData['logo'] : '';
+        $protoLogo = $protoData && !empty($protoData['logo']) ? 'images/ffffff'.$protoData['logo'] : '';
 
         if (\array_key_exists($requirement, $this->providers)) {
             if (\array_key_exists($requirement, $this->credTypes)) {

@@ -25,23 +25,24 @@ WebPage::singleton()->onlyForLogged();
 $uuid = WebPage::getRequestValue('uuid');
 $contentType = 'image/svg+xml';
 
-if (file_exists('images/'.$uuid.'.svg')) {
-    $imageData = file_get_contents('images/'.$uuid.'.svg');
-} elseif (file_exists('/usr/share/multiflexi/images/'.$uuid.'.svg')) {
-    $imageData = file_get_contents('/usr/share/multiflexi/images/'.$uuid.'.svg');
-} else {
-    $app = new \MultiFlexi\Application();
-    $image = $app->listingQuery()->select('image', true)->where('uuid', $uuid)->limit(1)->fetch('image');
+// Shared image search paths (development source tree first, then deb-installed locations)
+$imageDirectories = [
+    __DIR__.'/images',                    // Development: src/images/
+    '/usr/share/multiflexi/images',       // Deb packages: app-specific SVGs
+];
 
-    // Extract content/type from data URI
-    if (strstr($image, ',')) {
-        [$contentType, $base64Data] = explode(',', $image);
-        [, $contentType] = explode(':', $contentType);
-        // Convert base64 data to original format
-        $imageData = base64_decode($base64Data, true);
-    } else {
-        $imageData = file_get_contents('images/apps.svg');
+foreach ($imageDirectories as $dir) {
+    $candidate = $dir.'/'.$uuid.'.svg';
+
+    if (is_file($candidate)) {
+        $imageData = file_get_contents($candidate);
+
+        break;
     }
+}
+
+if (!isset($imageData) || $imageData === false) {
+    $imageData = file_get_contents(__DIR__.'/images/apps.svg');
 }
 
 $etag = '"'.md5($imageData).'"';
