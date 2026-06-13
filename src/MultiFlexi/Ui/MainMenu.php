@@ -92,6 +92,8 @@ class MainMenu extends \Ease\Html\DivTag
                 'dashboard.php' => '📋&nbsp;'._('Dashboard'),
             ]);
 
+            $this->integrationsMenuEnabled($nav);
+
             // Privacy menu with dropdown
             $privacyMenu = [
                 'consent-preferences.php' => new \Ease\TWB4\Widgets\FaIcon('user-shield').' '._('Privacy Preferences'),
@@ -158,6 +160,40 @@ class MainMenu extends \Ease\Html\DivTag
             'eventrules.php' => '📏 '._('Event Rules'),
         ];
         $nav->addDropDownMenu('⚡ '._('Events'), $eventsMenu);
+    }
+
+    /**
+     * Integrations menu.
+     *
+     * Shows links to external services that are installed and configured.
+     * The dropdown is rendered only when at least one integration is available.
+     *
+     * @param \Ease\Html\NavTag $nav
+     */
+    public function integrationsMenuEnabled($nav): void
+    {
+        $integrationsMenu = [];
+
+        // Node-RED — shown only when enabled and a URL is configured
+        if (\Ease\Shared::cfg('NODERED_ENABLED', false) && \Ease\Shared::cfg('NODERED_URL')) {
+            $integrationsMenu[\Ease\Shared::cfg('NODERED_URL')] = new \Ease\TWB4\Widgets\FaIcon('project-diagram').'&nbsp;'._('Node-RED');
+        }
+
+        // Zabbix — shown when the Zabbix frontend URL is configured
+        // (ZABBIX_SERVER is the trapper/proxy host, not the web frontend, so a dedicated URL is required)
+        if (\Ease\Shared::cfg('ZABBIX_URL')) {
+            $integrationsMenu[\Ease\Shared::cfg('ZABBIX_URL')] = new \Ease\TWB4\Widgets\FaIcon('chart-line').'&nbsp;'._('Zabbix');
+        }
+
+        // OpenTelemetry — shown when enabled and an observability dashboard URL is configured
+        // (OTEL_EXPORTER_OTLP_ENDPOINT is an ingest endpoint, not a browsable UI)
+        if (\Ease\Shared::cfg('OTEL_ENABLED', false) && \Ease\Shared::cfg('OTEL_DASHBOARD_URL')) {
+            $integrationsMenu[\Ease\Shared::cfg('OTEL_DASHBOARD_URL')] = new \Ease\TWB4\Widgets\FaIcon('heartbeat').'&nbsp;'._('OpenTelemetry');
+        }
+
+        if (!empty($integrationsMenu)) {
+            $nav->addDropDownMenu(new \Ease\TWB4\Widgets\FaIcon('puzzle-piece').'&nbsp;'._('Integrations'), $integrationsMenu);
+        }
     }
 
     /**
