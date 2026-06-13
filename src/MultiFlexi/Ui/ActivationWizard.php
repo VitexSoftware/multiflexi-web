@@ -1188,12 +1188,18 @@ EOD,
             $credList = new \Ease\Html\UlTag();
 
             foreach ($credentials as $cred) {
-                $credObj = new \MultiFlexi\Credential($cred['credential_id']);
+                $credId = $cred['credentials_id'] ?? $cred['credential_id'] ?? null;
+                $credObj = new \MultiFlexi\Credential($credId);
                 $credType = $credObj->getCredentialType();
-                $credList->addItem(new \Ease\Html\LiTag([
-                    new \Ease\Html\ImgTag('images/'.$credType->getLogo(), $credType->getRecordName(), ['height' => '16', 'style' => 'margin-right: 5px;']),
-                    $credObj->getRecordName().' ('.$credType->getRecordName().')',
-                ]));
+
+                if ($credType === null) {
+                    $credList->addItem(new \Ease\Html\LiTag($credObj->getRecordName()));
+                } else {
+                    $credList->addItem(new \Ease\Html\LiTag([
+                        new \Ease\Html\ImgTag('images/'.$credType->getLogo(), $credType->getRecordName(), ['height' => '16', 'style' => 'margin-right: 5px;']),
+                        $credObj->getRecordName().' ('.$credType->getRecordName().')',
+                    ]));
+                }
             }
 
             $summaryTable->addRowColumns([
