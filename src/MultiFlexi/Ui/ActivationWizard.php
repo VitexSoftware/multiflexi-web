@@ -462,9 +462,9 @@ EOD,
         $appCompanies = [];
 
         foreach ($app->getFluentPDO()
-            ->from('company_app')
-            ->join('company ON company.id = company_app.company_id')
-            ->select('company_app.app_id, company.slug')
+            ->from('companyapp')
+            ->join('company ON company.id = companyapp.company_id')
+            ->select('companyapp.app_id, company.slug')
             ->fetchAll() as $row) {
             if (!empty($row['slug'])) {
                 $appCompanies[$row['app_id']][] = $row['slug'];
