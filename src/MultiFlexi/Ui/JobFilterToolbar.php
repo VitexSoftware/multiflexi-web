@@ -119,7 +119,7 @@ CSS);
      */
     private function buildButtons(): void
     {
-        $buttonGroup = $this->addItem(new \Ease\Html\DivTag(null, ['class' => 'btn-group btn-group-sm', 'role' => 'group']));
+        $buttonGroup = new \Ease\Html\DivTag(null, ['class' => 'btn-group btn-group-sm', 'role' => 'group']);
 
         // All Jobs button
         $allJobsClass = empty($this->activeFilter) ? 'btn btn-primary' : 'btn btn-outline-primary';
@@ -142,6 +142,8 @@ CSS);
         // Today button
         $todayClass = ($this->activeFilter === 'today') ? 'btn btn-warning' : 'btn btn-outline-warning';
         $buttonGroup->addItem(new \Ease\Html\ATag($this->baseUrl.'?filter=today', '📅 '._('Today'), ['class' => $todayClass, 'title' => _('Show today\'s jobs'), 'id' => 'todayjobsbuttonmain']));
+
+        $this->addItem($buttonGroup);
     }
 
     /**
