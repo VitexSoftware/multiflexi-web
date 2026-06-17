@@ -22,7 +22,7 @@ $jobID = WebPage::singleton()->getRequestValue('id', 'int');
 $mode = WebPage::singleton()->getRequestValue('mode');
 $jobber = new \MultiFlexi\Job($jobID);
 
-$output = $jobber->getDataValue($mode === 'err' ? 'stderr' : 'stdout');
+$output = ($mode === 'err') ? $jobber->getErrorOutput() : $jobber->getOutput();
 $quoted = sprintf('"job-%s"', $jobber->getMyKey().'-'.str_replace(' ', '_', $jobber->application->getRecordName()).'.'.($mode === 'err' ? 'stderr' : 'stdout').'.txt');
 header('Content-Description: File Transfer');
 header('Content-Type: application/octet-stream');
@@ -33,4 +33,4 @@ header('Expires: 0');
 header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 header('Pragma: public');
 header('Content-Length: '.mb_strlen($output));
-echo stripslashes($output);
+echo $output;

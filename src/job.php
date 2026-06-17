@@ -55,8 +55,8 @@ if (!$runTemplate->getMyKey()) {
     $jobPanel->addItem($infoDiv);
 
     $outputTabs = new \Ease\TWB4\Tabs();
-    $stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert(stripslashes((string) $jobber->getDataValue('stdout'))))), ['style' => 'background: black; font-family: monospace;']);
-    $errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert(stripslashes((string) $jobber->getDataValue('stderr'))))), ['style' => 'background: #330000; font-family: monospace;']);
+    $stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getOutput()))), ['style' => 'background: black; font-family: monospace;']);
+    $errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getErrorOutput()))), ['style' => 'background: #330000; font-family: monospace;']);
 
     $outputTabs->addTab(_('Output'), [$stdTerminal]);
     $outputTabs->addTab(_('Errors'), [$errorTerminal]);
@@ -75,22 +75,26 @@ $appInfo = $runTemplate->getAppInfo();
 $apps = new Application($appInfo['app_id']);
 $instanceName = $appInfo['app_name'];
 
-$errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert(stripslashes((string) $jobber->getDataValue('stderr'))))), ['style' => 'background: #330000; font-family: monospace;']);
-$stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert(stripslashes((string) $jobber->getDataValue('stdout'))))), ['style' => 'background:  black; font-family: monospace;']);
+$errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getErrorOutput()))), ['style' => 'background: #330000; font-family: monospace;']);
+$stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getOutput()))), ['style' => 'background:  black; font-family: monospace;']);
 
-$liveOutputSocket = \Ease\Shared::cfg('LIVE_OUTPUT_SOCKET');
-
-if ($liveOutputSocket && isset($_SESSION['ws_token'])) {
-    $wsToken = $_SESSION['ws_token'];
-
+// Connect SSE stream only while the job is still running (no exitcode yet)
+if ($jobber->getDataValue('exitcode') === null && $jobber->getDataValue('begin') !== null) {
     WebPage::singleton()->addJavaScript(<<<EOD
 
-var ws = new WebSocket('{$liveOutputSocket}?token={$wsToken}');
-ws.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    var output = document.getElementById('live-output');
-    output.textContent += data.message + '\\n';
-};
+(function () {
+    var liveOut = document.getElementById('live-output');
+    if (!liveOut) { return; }
+    var es = new EventSource('jobstream.php?id={$jobID}');
+    es.addEventListener('output', function (e) {
+        var d = JSON.parse(e.data);
+        liveOut.textContent += d.line;
+        liveOut.scrollTop = liveOut.scrollHeight;
+    });
+    es.addEventListener('done', function () { es.close(); });
+    es.addEventListener('timeout', function () { es.close(); });
+    es.onerror = function () { es.close(); };
+})();
 
 EOD);
 }
