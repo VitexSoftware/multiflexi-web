@@ -251,6 +251,10 @@ class SessionManager
         ini_set('session.entropy_length', '32');
         ini_set('session.hash_function', 'sha256');
         ini_set('session.hash_bits_per_character', '6');
+        // Keep PHP's own GC lifetime in sync with the app's logical timeout,
+        // otherwise the session file can be reaped mid-activity regardless
+        // of $sessionTimeout / last_activity bookkeeping below.
+        ini_set('session.gc_maxlifetime', (string) $this->sessionTimeout);
     }
 
     /**
@@ -358,7 +362,11 @@ class SessionManager
      */
     private static function regenerateSession(): bool
     {
-        if (!session_regenerate_id(true)) {
+        // Do not delete the old session immediately: a near-concurrent
+        // AJAX request (e.g. a DataTables poll) still carrying the old
+        // cookie would otherwise hit a destroyed session and appear
+        // "logged out" for one request even though the user is active.
+        if (!session_regenerate_id(false)) {
             return false;
         }
 
