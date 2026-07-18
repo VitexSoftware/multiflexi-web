@@ -54,7 +54,7 @@ Vytvořil jsem kompletní sadu Selenium testů pokrývající **VŠECHNY** strá
 - ✅ `/customer.php` - Detail zákazníka
 
 ### Joby a šablony
-- ✅ `/joblist.php` - Historie jobů  
+- ✅ `/jobs.php` - Historie jobů  
 - ✅ `/job.php` - Detail jobu
 - ✅ `/newjob.php` - Naplánování jobu
 - ✅ `/queue.php` - Fronta jobů

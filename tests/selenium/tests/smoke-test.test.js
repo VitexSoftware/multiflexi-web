@@ -87,7 +87,7 @@ describe('Smoke Test - Základní funkčnost MultiFlexi', function() {
                 { url: '/apps.php', name: 'Applications' },
                 { url: '/credentials.php', name: 'Credentials' },
                 { url: '/runtemplates.php', name: 'RunTemplates' },
-                { url: '/joblist.php', name: 'Jobs' }
+                { url: '/jobs.php', name: 'Jobs' }
             ];
             
             for (const section of sections) {

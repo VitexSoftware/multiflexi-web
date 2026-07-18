@@ -376,7 +376,7 @@ License:   __UNKNOWN__
 #         src/runtemplateclone.php
 #         src/companyapp.php
 #         src/companysetup.php
-#         src/joblist.php
+#         src/jobs.php
 #         src/credtypes.php
 #         src/gdpr-user-deletion-request.php
 #         src/images/FioBank.svg

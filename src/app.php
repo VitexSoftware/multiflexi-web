@@ -194,7 +194,7 @@ $appTabs->addTab(_('Configuration'), $instanceRow);
 $appTabs->addTab(_('Jobs'), [
     $jobList,
     new LinkButton('logs.php?apps_id='.$apps->getMyKey(), _('Application Log'), 'info', ['title' => _('View application log'), 'id' => 'applicationlogbutton']),
-    new LinkButton('joblist.php?app_id='.$apps->getMyKey(), _('All Application Jobs history'), 'info', ['title' => _('View all application jobs history'), 'id' => 'allapplicationjobshistorybutton']),
+    new LinkButton('jobs.php?app_id='.$apps->getMyKey(), _('All Application Jobs history'), 'info', ['title' => _('View all application jobs history'), 'id' => 'allapplicationjobshistorybutton']),
 ]);
 
 $jsonImportForm = new AppJsonImportForm();

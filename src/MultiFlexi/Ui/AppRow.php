@@ -98,7 +98,7 @@ class AppRow extends \Ease\TWB4\Row
             $jobList->addRowColumns($job);
         }
 
-        $historyButton = (new \Ease\TWB4\LinkButton('joblist.php?app_id='.$appId.'&amp;company_id='.$appData['company_id'], _('Job History').' '.new \Ease\Html\ImgTag('images/log.svg', _('Set'), ['height' => '30px']), 'info btn-sm  btn-block'));
+        $historyButton = (new \Ease\TWB4\LinkButton('jobs.php?app_id='.$appId.'&amp;company_id='.$appData['company_id'], _('Job History').' '.new \Ease\Html\ImgTag('images/log.svg', _('Set'), ['height' => '30px']), 'info btn-sm  btn-block'));
         $appRow->addColumn(4, [new \Ease\Html\H3Tag(_('Last 10 jobs')), $jobList, $historyButton]);
     }
 }

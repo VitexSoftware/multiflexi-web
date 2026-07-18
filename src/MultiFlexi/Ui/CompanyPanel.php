@@ -53,7 +53,7 @@ class CompanyPanel extends \Ease\TWB4\Panel
         $actionsRow->addColumn(4, new \Ease\TWB4\LinkButton('companyapps.php?company_id='.$cid, '📌&nbsp;'._('Applications'), 'outline-secondary btn-sm btn-block shadow-sm mb-1', ['title' => _('Manage Applications')]));
         $actionsRow->addColumn(4, new \Ease\TWB4\LinkButton('activation-wizard.php?company='.$cid, '🧙&nbsp;'._('Wizard'), 'outline-primary btn-sm btn-block shadow-sm mb-1', ['title' => _('Activation Wizard')]));
         $actionsRow->addColumn(4, new \Ease\TWB4\LinkButton('companycreds.php?company_id='.$cid, '🔐&nbsp;'._('Credentials'), 'outline-secondary btn-sm btn-block shadow-sm', ['title' => _('Manage Credentials')]));
-        $actionsRow->addColumn(4, new \Ease\TWB4\LinkButton('joblist.php?company_id='.$cid, '🏁&nbsp;'._('Jobs'), 'outline-info btn-sm btn-block shadow-sm', ['title' => _('Job List')]));
+        $actionsRow->addColumn(4, new \Ease\TWB4\LinkButton('jobs.php?company_id='.$cid, '🏁&nbsp;'._('Jobs'), 'outline-info btn-sm btn-block shadow-sm', ['title' => _('Job List')]));
 
         $headRow->addColumn(6, $actionsRow)->addTagClass('my-auto');
 

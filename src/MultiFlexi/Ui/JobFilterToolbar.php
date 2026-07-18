@@ -36,10 +36,10 @@ class JobFilterToolbar extends \Ease\Html\DivTag
      * Constructor.
      *
      * @param null|string $activeFilter Currently active filter (success, failed, running, scheduled, today)
-     * @param string      $baseUrl      Base URL for filter links (default: joblist.php)
+     * @param string      $baseUrl      Base URL for filter links (default: jobs.php)
      * @param array       $properties   Additional div properties
      */
-    public function __construct(?string $activeFilter = null, string $baseUrl = 'joblist.php', array $properties = [])
+    public function __construct(?string $activeFilter = null, string $baseUrl = 'jobs.php', array $properties = [])
     {
         $this->activeFilter = $activeFilter;
         $this->baseUrl = $baseUrl;

@@ -45,7 +45,7 @@ class JobsPage extends WebDriverHelper {
      * Navigate to jobs list
      */
     async goToJobs() {
-        await this.navigateTo('/joblist.php');
+        await this.navigateTo('/jobs.php');
         await this.waitForElement(this.selectors.pageTitle);
     }
 

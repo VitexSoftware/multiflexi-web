@@ -43,7 +43,7 @@ $actionRow->addColumn(3, [
     new \Ease\TWB4\LinkButton('consent-preferences.php', new \Ease\TWB4\Widgets\FaIcon('user-shield').' '._('Privacy Settings'), 'secondary btn-block', ['title' => _('Manage your privacy settings'), 'id' => 'privacySettingsButton']),
 ]);
 $actionRow->addColumn(3, [
-    new \Ease\TWB4\LinkButton('joblist.php', new \Ease\TWB4\Widgets\FaIcon('list').' '._('All Jobs'), 'success btn-block', ['title' => _('View all jobs in the system'), 'id' => 'allJobsButton']),
+    new \Ease\TWB4\LinkButton('jobs.php', new \Ease\TWB4\Widgets\FaIcon('list').' '._('All Jobs'), 'success btn-block', ['title' => _('View all jobs in the system'), 'id' => 'allJobsButton']),
 ]);
 
 $welcomeCard->addItem($actionRow);

@@ -32,7 +32,7 @@ $pageTitle = JobFilterToolbar::getPageTitle($filter);
 WebPage::singleton()->addItem(new PageTop($pageTitle));
 
 // Add filter toolbar
-WebPage::singleton()->container->addItem(new JobFilterToolbar($filter, 'joblist.php'));
+WebPage::singleton()->container->addItem(new JobFilterToolbar($filter, 'jobs.php'));
 
 // Add custom success row styling
 WebPage::singleton()->addCSS(<<<CSS
@@ -94,7 +94,7 @@ EOD._('Dismis All').<<<'EOD'
 EOD);
 WebPage::singleton()->includeJavascript('js/dismisLog.js');
 WebPage::singleton()->container->addItem(new DBDataTable($engine, ['buttons' => ['dismisAll']]));
-WebPage::singleton()->addItem(new PageBottom());
+WebPage::singleton()->addItem(new PageBottom('jobs'));
 WebPage::singleton()->addJavaScript(<<<'EOD'
 
     // Initialize Bootstrap popovers with delay to allow interaction

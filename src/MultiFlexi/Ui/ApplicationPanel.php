@@ -92,7 +92,7 @@ class ApplicationPanel extends Panel
     #[\Override]
     public function finalize(): void
     {
-        $this->footer->addItem(new LinkButton('joblist.php?app_id='.$this->application->getMyKey(), '🧑‍💻&nbsp;'._('App Jobs'), 'secondary btn-lg', ['title' => _('View application jobs'), 'id' => 'appjobsbutton']));
+        $this->footer->addItem(new LinkButton('jobs.php?app_id='.$this->application->getMyKey(), '🧑‍💻&nbsp;'._('App Jobs'), 'secondary btn-lg', ['title' => _('View application jobs'), 'id' => 'appjobsbutton']));
         parent::finalize();
     }
 }

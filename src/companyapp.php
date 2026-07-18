@@ -158,7 +158,7 @@ $runtemplatesDiv->addItem($jobList);
 
 // Job history link
 $runtemplatesDiv->addItem(new LinkButton(
-    'joblist.php?app_id='.$application->getMyKey().'&company_id='.$companer->getMyKey(),
+    'jobs.php?app_id='.$application->getMyKey().'&company_id='.$companer->getMyKey(),
     '🏁 '._('View Complete Job History'),
     'info btn-lg btn-block',
 ));
