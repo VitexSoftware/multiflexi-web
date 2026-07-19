@@ -41,8 +41,8 @@ class ConfigFieldsOverview extends \Ease\Html\DivTag
         $confInfoRow->addColumn(2, _('Note').': '.$field->getNote());
         $confInfoRow->addColumn(2, _('Source').': '.$field->getSource());
 
-        if ($field->isSecret()) {
-            $confInfoRow->addColumn(1, _('Value').': '.empty($field->getValue()) ? '⁉️' : '✅');
+        if ($field->isRedactable()) {
+            $confInfoRow->addColumn(1, _('Value').': '.(empty($field->getValue()) ? \MultiFlexi\ConfigField::MASKED_EMPTY : \MultiFlexi\ConfigField::MASKED_SET));
         } else {
             $confInfoRow->addColumn(1, _('Value').': '.new \Ease\Html\StrongTag($field->getValue()));
         }

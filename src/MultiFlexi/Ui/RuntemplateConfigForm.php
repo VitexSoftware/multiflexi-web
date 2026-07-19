@@ -84,6 +84,9 @@ CSS);
             }
 
             $value = $credValue ?? $field->getValue();
+            $isRedactable = $field->isRedactable();
+            $displayValue = $isRedactable ? '' : $value;
+            $maskedPlaceholder = $isRedactable ? \MultiFlexi\ConfigField::maskValue($value) : null;
 
             if ($field->getType() === 'bool') {
                 $toggleAttrs = ['data-size' => 'small'];
@@ -94,9 +97,26 @@ CSS);
 
                 $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $value === 'true' ? true : false, 'true', $toggleAttrs));
             } elseif ($field->isMultiLine()) {
-                $input = new \Ease\Html\TextareaTag($fieldName, $value, ['class' => 'form-control form-control-sm', 'rows' => 4]);
+                $textareaAttrs = ['class' => 'form-control form-control-sm', 'rows' => 4];
+
+                if ($maskedPlaceholder !== null) {
+                    $textareaAttrs['placeholder'] = $maskedPlaceholder;
+                }
+
+                $input = new \Ease\Html\TextareaTag($fieldName, $displayValue, $textareaAttrs);
             } else {
-                $input = new \Ease\Html\InputTag($fieldName, $value, ['type' => $field->getType(), 'class' => 'form-control form-control-sm']);
+                $inputAttrs = ['type' => $field->getType(), 'class' => 'form-control form-control-sm'];
+
+                if ($maskedPlaceholder !== null) {
+                    $inputAttrs['placeholder'] = $maskedPlaceholder;
+                }
+
+                $input = new \Ease\Html\InputTag($fieldName, $displayValue, $inputAttrs);
+            }
+
+            if ($isRedactable && !$isDisabled) {
+                $hint = $field->getHint();
+                $field->setHint(trim($hint.' '._('Leave blank to keep the existing value.')));
             }
 
             if ($runTemplateField) { // Filed by Credential
@@ -122,7 +142,7 @@ CSS);
                     $field->setDescription($credentialType->getFields()->getField($fieldName)->getDescription());
                 }
 
-                $formGroup = $this->addInput($input, $inputCaption, $runTemplateField->getValue(), $field->getDescription());
+                $formGroup = $this->addInput($input, $inputCaption, $isRedactable ? $maskedPlaceholder : $runTemplateField->getValue(), $field->getDescription());
             } else { // Simple Fields
                 $formGroup = $this->addInput($input, $fieldName, $field->getDefaultValue(), $field->getDescription());
             }
