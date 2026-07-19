@@ -88,6 +88,7 @@ class MainMenu extends \Ease\Html\DivTag
             $nav->addDropDownMenu('<img height=30 src=images/log.svg> '._('Logs'), [
                 'logs.php' => '📖&nbsp;'._('System'),
                 'jobs.php' => '🏁&nbsp;'._('Jobs'),
+                'task-dashboard.php' => '📋&nbsp;'._('Tasks'),
                 'queue.php' => '⏳&nbsp;'._('Job queue'),
                 'dashboard.php' => '📋&nbsp;'._('Dashboard'),
             ]);

@@ -63,7 +63,33 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
                 $widget->addItem(new CredentialSelect('credential['.$requirement.']', $companyId, $requirement, \array_key_exists($requirement, $this->assignedCredentials) ? (string) $this->assignedCredentials[$requirement]['credentials_id'] : ''));
 
                 if (\array_key_exists($requirement, $this->assignedCredentials)) {
-                    $adders->addColumn(4, new \Ease\TWB4\LinkButton('credential.php?id='.$this->assignedCredentials[$requirement]['credentials_id'], sprintf(_('Edit credential %s'), $requirement), 'secondary'));
+                    $credId = (int) $this->assignedCredentials[$requirement]['credentials_id'];
+                    $adders->addColumn(4, new \Ease\TWB4\LinkButton('credential.php?id='.$credId, sprintf(_('Edit credential %s'), $requirement), 'secondary'));
+
+                    $cred = new \MultiFlexi\Credential($credId);
+                    $prototype = $cred->getCredentialType()?->getPrototype();
+
+                    if ($prototype) {
+                        $result = $prototype->checkAvailability();
+                        $badgeStyle = match ($result->state) {
+                            \MultiFlexi\CredentialState::Available     => 'success',
+                            \MultiFlexi\CredentialState::Degraded      => 'warning',
+                            \MultiFlexi\CredentialState::Unavailable   => 'danger',
+                            \MultiFlexi\CredentialState::Misconfigured => 'danger',
+                            \MultiFlexi\CredentialState::Unknown       => 'info',
+                        };
+                        $badgeIcon = match ($result->state) {
+                            \MultiFlexi\CredentialState::Available     => '✅',
+                            \MultiFlexi\CredentialState::Degraded      => '⚠️',
+                            \MultiFlexi\CredentialState::Unavailable   => '🔴',
+                            \MultiFlexi\CredentialState::Misconfigured => '🚫',
+                            \MultiFlexi\CredentialState::Unknown       => 'ℹ️',
+                        };
+                        $widget->addItem(new \Ease\Html\SpanTag(
+                            $badgeIcon.' '.$result->state->value,
+                            ['class' => 'badge badge-'.$badgeStyle.' mt-1', 'title' => $result->message ?: $result->state->value],
+                        ));
+                    }
                 }
 
                 $helper = new \MultiFlexi\CredentialType();

@@ -26,17 +26,17 @@ WebPage::singleton()->container->addItem(new CompaniesBar());
 // Get filter parameter
 $filter = WebPage::singleton()->getRequestValue('filter');
 
-$engine = new \MultiFlexi\CompanyJobLister();
+$chartEngine = new \MultiFlexi\CompanyJobLister();
 
 // Apply filter if specified
 if (!empty($filter)) {
-    $engine->applyFilter($filter);
+    $chartEngine->applyFilter($filter);
 }
 
-WebPage::singleton()->container->addItem(new AllJobsLastMonthChart($engine, ['id' => 'container']));
+WebPage::singleton()->container->addItem(new AllJobsLastMonthChart($chartEngine, ['id' => 'container']));
 
-// Add filter toolbar
-WebPage::singleton()->container->addItem(new JobFilterToolbar($filter, 'main.php'));
+// Queue: same information as `multiflexi-cli queue:list`, with IDs used only as link targets
+$engine = new \MultiFlexi\ScheduleLister();
 
 WebPage::singleton()->container->addItem(new DBDataTable($engine));
 
@@ -58,39 +58,6 @@ WebPage::singleton()->addCSS(<<<CSS
     #{$objectName}_wrapper table.dataTable thead th {
         padding: 6px 8px !important;
         font-size: 0.9em !important;
-    }
-    /* Custom success row styling - lighter green with better contrast */
-    #{$objectName}_wrapper table.dataTable tbody tr.job-success {
-        background-color: #d4edda !important;
-        color: #155724 !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-success:hover {
-        background-color: #c3e6cb !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-success a {
-        color: #0c5460 !important;
-    }
-    /* Custom scheduled row styling - light blue for waiting jobs */
-    #{$objectName}_wrapper table.dataTable tbody tr.job-scheduled {
-        background-color: #d1ecf1 !important;
-        color: #0c5460 !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-scheduled:hover {
-        background-color: #bee5eb !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-scheduled a {
-        color: #004085 !important;
-    }
-    /* Custom orphaned row styling - yellow warning for jobs without schedule entry */
-    #{$objectName}_wrapper table.dataTable tbody tr.job-orphaned {
-        background-color: #fff3cd !important;
-        color: #856404 !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-orphaned:hover {
-        background-color: #ffe8a1 !important;
-    }
-    #{$objectName}_wrapper table.dataTable tbody tr.job-orphaned a {
-        color: #533f03 !important;
     }
 CSS);
 
