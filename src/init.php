@@ -163,18 +163,6 @@ if ($pdo && Shared::cfg('TWO_FACTOR_AUTH_ENABLED', true) && class_exists('\Multi
     }
 }
 
-// Initialize Role-Based Access Control (RBAC) (disabled temporarily)
-if ($pdo && Shared::cfg('RBAC_ENABLED', true) && class_exists('\MultiFlexi\Security\RoleBasedAccessControl')) {
-    try {
-        $rbac = new \MultiFlexi\Security\RoleBasedAccessControl($pdo);
-
-        $GLOBALS['rbac'] = $rbac;
-    } catch (\Exception $e) {
-        // Log error but don't break the application
-        error_log('Failed to initialize RBAC: '.$e->getMessage());
-    }
-}
-
 \Ease\Locale::singleton(null, '../i18n', 'multiflexi');
 
 // Configure file logging

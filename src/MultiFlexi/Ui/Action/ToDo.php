@@ -40,8 +40,8 @@ class ToDo extends \MultiFlexi\Action\ToDo
     {
         $companyId = 0;
 
-        if (isset($_SESSION) && \array_key_exists('company', $_SESSION)) {
-            $companyId = $_SESSION['company'];
+        if (isset($_SESSION) && \array_key_exists('company', $_SESSION) && $_SESSION['company'] !== null) {
+            $companyId = (int) $_SESSION['company'];
         }
 
         $container = new \Ease\Html\DivTag();
