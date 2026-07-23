@@ -323,7 +323,6 @@ License:   __UNKNOWN__
 #         src/home.php
 #         src/companydelete.php
 #         src/adhoc.php
-#         src/gdpr-article16-migration.php
 #         src/eventsource.php
 #         src/eventrule.php
 #         src/customers.php
@@ -339,7 +338,6 @@ License:   __UNKNOWN__
 #         src/runtemplatesave.php
 #         src/search.php
 #         src/run.php
-#         src/admin-data-corrections.php
 #         src/privacy-policy.php
 #         src/webhook.php
 #         src/data-retention-admin.php
@@ -360,7 +358,6 @@ License:   __UNKNOWN__
 #         src/consent-preferences.php
 #         src/runtemplate.php
 #         src/credup.php
-#         src/profile.php
 #         src/getartifact.php
 #         src/newjob.php
 #         src/launch.php
@@ -378,7 +375,6 @@ License:   __UNKNOWN__
 #         src/companysetup.php
 #         src/jobs.php
 #         src/credtypes.php
-#         src/gdpr-user-deletion-request.php
 #         src/images/FioBank.svg
 #         src/images/pohoda-server.svg
 #         src/images/process-stop.svg
@@ -498,10 +494,7 @@ License:   __UNKNOWN__
 #         src/MultiFlexi/Command/TelemetryTestCommand.php
 #         src/MultiFlexi/Consent/ConsentHelper.php
 #         src/MultiFlexi/Consent/ConsentManager.php
-#         src/MultiFlexi/Audit/UserDataAuditLogger.php
-#         src/MultiFlexi/GDPR/UserDataCorrectionRequest.php
 #         src/MultiFlexi/DataExport/UserDataExporter.php
-#         src/MultiFlexi/Notifications/DataCorrectionNotifier.php
 #         src/MultiFlexi/DataRetention/RetentionService.php
 #         src/MultiFlexi/DataRetention/DataArchiver.php
 #         src/MultiFlexi/DataRetention/RetentionPolicyManager.php
@@ -546,13 +539,11 @@ License:   __UNKNOWN__
 #         src/MultiFlexi/Ui/LogViewer.php
 #         src/MultiFlexi/Ui/CredentialCloneForm.php
 #         src/MultiFlexi/Ui/AppsMenu.php
-#         src/MultiFlexi/Ui/UserDeletionRequestForm.php
 #         src/MultiFlexi/Ui/DashboardIntervalChart.php
 #         src/MultiFlexi/Ui/JobFilterToolbar.php
 #         src/MultiFlexi/Ui/ActionImage.php
 #         src/MultiFlexi/Ui/RuntemplateLaunchForm.php
 #         src/MultiFlexi/Ui/CompanySelect.php
-#         src/MultiFlexi/Ui/UserDataCorrectionForm.php
 #         src/MultiFlexi/Ui/EnvsForm.php
 #         src/MultiFlexi/Ui/JobSuccessGraph.php
 #         src/MultiFlexi/Ui/ConfigFieldsOverview.php

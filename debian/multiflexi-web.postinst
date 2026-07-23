@@ -59,16 +59,6 @@ case "$1" in
         # in /etc/multiflexi/multiflexi.env as ENCRYPTION_MASTER_KEY
         # Legacy file-based key at /var/lib/multiflexi/.encryption_master_key is deprecated
 
-        # Run GDPR Article 16 database migration
-        if [ -f /usr/share/multiflexi-web/gdpr-article16-migration.php ]; then
-            cd /usr/share/multiflexi-web
-            if php -f gdpr-article16-migration.php 2>/dev/null; then
-                echo "GDPR Article 16 database migration completed successfully"
-            else
-                echo "Warning: GDPR Article 16 database migration failed - tables may already exist"
-            fi
-        fi
-
         # Handle webserver configuration: detect installed webservers and configure them
         # (do not rely on debconf multiflexi/reconfigure-webserver - it may not be set,
         # e.g. non-interactive install or dependency installed after multiflexi-web)

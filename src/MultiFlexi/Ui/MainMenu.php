@@ -99,7 +99,6 @@ class MainMenu extends \Ease\Html\DivTag
             $privacyMenu = [
                 'consent-preferences.php' => new \Ease\TWB4\Widgets\FaIcon('user-shield').' '._('Privacy Preferences'),
                 'data-export-page.php' => new \Ease\TWB4\Widgets\FaIcon('download').' '._('Export My Data'),
-                'gdpr-user-deletion-request.php' => new \Ease\TWB4\Widgets\FaIcon('user-times').' '._('Request Account Deletion'),
                 '' => '',
                 'privacy-policy.php' => new \Ease\TWB4\Widgets\FaIcon('shield-alt').' '._('Privacy Policy'),
                 'cookie-policy.php' => new \Ease\TWB4\Widgets\FaIcon('cookie-bite').' '._('Cookie Policy'),
@@ -265,7 +264,6 @@ class MainMenu extends \Ease\Html\DivTag
         $nav->addDropDownMenu(
             '<img width=30 src=images/system-users.svg> '._('Admin'),
             array_merge([
-                'profile.php' => new \Ease\TWB4\Widgets\FaIcon('user-circle').'&nbsp;'._('My Profile'),
                 'createaccount.php' => '🤬&nbsp;'._('New Admin'),
                 'createuser.php' => '👤&nbsp;'._('New User Account'),
                 'envmods.php' => '🌦️&nbsp;'._('Environment Modules'),
@@ -274,7 +272,6 @@ class MainMenu extends \Ease\Html\DivTag
                 'credtypes.php' => '🔐&nbsp;'._('Credential Type helpers'),
                 'data-retention-admin.php' => '🗂️&nbsp;'._('Data Retention Management'),
                 'admin-deletion-requests.php' => '🗑️&nbsp;'._('Deletion Requests'),
-                'admin-data-corrections.php' => '✏️&nbsp;'._('Data Corrections'),
                 '' => '',
                 'users.php' => new \Ease\TWB4\Widgets\FaIcon('list').'&nbsp;'._('Users'),
             ], $this->getMenuList(\Ease\Shared::user())),

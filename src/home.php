@@ -34,9 +34,6 @@ $welcomeCard->addItem(new \Ease\Html\PTag(_('This is your personal dashboard wit
 // Quick actions
 $actionRow = new \Ease\TWB4\Row();
 $actionRow->addColumn(3, [
-    new \Ease\TWB4\LinkButton('profile.php', new \Ease\TWB4\Widgets\FaIcon('user').' '._('Edit Profile'), 'primary btn-block', ['title' => _('Edit your profile information'), 'id' => 'editProfileButton']),
-]);
-$actionRow->addColumn(3, [
     new \Ease\TWB4\LinkButton('data-export-page.php', new \Ease\TWB4\Widgets\FaIcon('download').' '._('Export My Data'), 'info btn-block', ['title' => _('Export your personal data'), 'id' => 'exportDataButton']),
 ]);
 $actionRow->addColumn(3, [
@@ -186,10 +183,6 @@ $accountInfo->addItem(new \Ease\Html\DdTag(
 ));
 
 $accountCard->addItem($accountInfo);
-$accountCard->addItem(new \Ease\Html\DivTag(
-    new \Ease\TWB4\LinkButton('profile.php', new \Ease\TWB4\Widgets\FaIcon('edit').' '._('Edit Profile'), 'primary'),
-    ['class' => 'text-right mt-3'],
-));
 
 $container->addItem($accountCard);
 
