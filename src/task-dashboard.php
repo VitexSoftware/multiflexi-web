@@ -73,7 +73,8 @@ if ($runtemplateId) {
     $rt = new \MultiFlexi\RunTemplate($runtemplateId);
     $rtName = htmlspecialchars($rt->getRecordName() ?: '#'.$runtemplateId);
     $clearHref = 'task-dashboard.php?state='.$stateFilter;
-    $oPage->container->addItem(new \Ease\TWB4\Alert('info',
+    $oPage->container->addItem(new \Ease\TWB4\Alert(
+        'info',
         sprintf(_('Filtered to RunTemplate: <strong>%s</strong>'), $rtName)
         .' &nbsp;<a href="'.$clearHref.'" class="alert-link">'._('Remove filter').'</a>',
     ));

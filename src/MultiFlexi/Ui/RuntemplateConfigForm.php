@@ -115,7 +115,7 @@ CSS);
 
                     $inputCaption = new \Ease\Html\SpanTag([$credentialTypeLink, new \Ease\Html\StrongTag($fieldName), '&nbsp;', $credentialLink]);
 
-                    if (!($input instanceof \Ease\Html\DivTag)) {
+                    if (!$input instanceof \Ease\Html\DivTag) {
                         $input->setTagProperty('disabled', '1');
                     }
 

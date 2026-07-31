@@ -197,18 +197,18 @@ class CredentialForm extends SecureForm
     private static function availabilityPanel(\MultiFlexi\CredentialCheckResult $result): DivTag
     {
         $styleMap = [
-            \MultiFlexi\CredentialState::Available->value     => 'success',
-            \MultiFlexi\CredentialState::Degraded->value      => 'warning',
-            \MultiFlexi\CredentialState::Unavailable->value   => 'danger',
+            \MultiFlexi\CredentialState::Available->value => 'success',
+            \MultiFlexi\CredentialState::Degraded->value => 'warning',
+            \MultiFlexi\CredentialState::Unavailable->value => 'danger',
             \MultiFlexi\CredentialState::Misconfigured->value => 'danger',
-            \MultiFlexi\CredentialState::Unknown->value       => 'info',
+            \MultiFlexi\CredentialState::Unknown->value => 'info',
         ];
         $iconMap = [
-            \MultiFlexi\CredentialState::Available->value     => '✅',
-            \MultiFlexi\CredentialState::Degraded->value      => '⚠️',
-            \MultiFlexi\CredentialState::Unavailable->value   => '🔴',
+            \MultiFlexi\CredentialState::Available->value => '✅',
+            \MultiFlexi\CredentialState::Degraded->value => '⚠️',
+            \MultiFlexi\CredentialState::Unavailable->value => '🔴',
             \MultiFlexi\CredentialState::Misconfigured->value => '🚫',
-            \MultiFlexi\CredentialState::Unknown->value       => 'ℹ️',
+            \MultiFlexi\CredentialState::Unknown->value => 'ℹ️',
         ];
         $style = $styleMap[$result->state->value] ?? 'info';
         $icon = $iconMap[$result->state->value] ?? 'ℹ️';

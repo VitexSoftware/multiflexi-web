@@ -32,14 +32,14 @@ class TaskSuccessChart extends \Ease\Html\DivTag
 
             $rows = $tasker->getFluentPDO()
                 ->from('task')
-                ->select(
-                    "DATE(window_end) as day,
+                ->select(<<<'EOD'
+DATE(window_end) as day,
                      COUNT(*) as total,
                      SUM(CASE WHEN state IN ('fulfilled','fulfilled_late') THEN 1 ELSE 0 END) as ok,
                      SUM(CASE WHEN state = 'fulfilled' THEN 1 ELSE 0 END) as on_time,
                      SUM(CASE WHEN state = 'fulfilled_late' THEN 1 ELSE 0 END) as late,
-                     SUM(CASE WHEN state IN ('failed','missed') THEN 1 ELSE 0 END) as bad",
-                )
+                     SUM(CASE WHEN state IN ('failed','missed') THEN 1 ELSE 0 END) as bad
+EOD,)
                 ->where('window_end >= ?', $since)
                 ->where("state NOT IN ('open','running')")
                 ->groupBy('DATE(window_end)')

@@ -72,18 +72,18 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
                     if ($prototype) {
                         $result = $prototype->checkAvailability();
                         $badgeStyle = match ($result->state) {
-                            \MultiFlexi\CredentialState::Available     => 'success',
-                            \MultiFlexi\CredentialState::Degraded      => 'warning',
-                            \MultiFlexi\CredentialState::Unavailable   => 'danger',
+                            \MultiFlexi\CredentialState::Available => 'success',
+                            \MultiFlexi\CredentialState::Degraded => 'warning',
+                            \MultiFlexi\CredentialState::Unavailable => 'danger',
                             \MultiFlexi\CredentialState::Misconfigured => 'danger',
-                            \MultiFlexi\CredentialState::Unknown       => 'info',
+                            \MultiFlexi\CredentialState::Unknown => 'info',
                         };
                         $badgeIcon = match ($result->state) {
-                            \MultiFlexi\CredentialState::Available     => '✅',
-                            \MultiFlexi\CredentialState::Degraded      => '⚠️',
-                            \MultiFlexi\CredentialState::Unavailable   => '🔴',
+                            \MultiFlexi\CredentialState::Available => '✅',
+                            \MultiFlexi\CredentialState::Degraded => '⚠️',
+                            \MultiFlexi\CredentialState::Unavailable => '🔴',
                             \MultiFlexi\CredentialState::Misconfigured => '🚫',
-                            \MultiFlexi\CredentialState::Unknown       => 'ℹ️',
+                            \MultiFlexi\CredentialState::Unknown => 'ℹ️',
                         };
                         $widget->addItem(new \Ease\Html\SpanTag(
                             $badgeIcon.' '.$result->state->value,

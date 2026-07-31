@@ -28,7 +28,6 @@ class TasksTable extends \Ease\Html\DivTag
         'open' => ['info', '🔵'],
         'running' => ['primary', '▶️'],
     ];
-
     private static array $rowClass = [
         'fulfilled' => 'table-success',
         'fulfilled_late' => 'table-warning',
@@ -47,14 +46,14 @@ class TasksTable extends \Ease\Html\DivTag
 
             $query = $tasker->getFluentPDO()
                 ->from('task')
-                ->select(
-                    'task.id, task.state, task.window_start, task.window_end, task.deadline,
+                ->select(<<<'EOD'
+task.id, task.state, task.window_start, task.window_end, task.deadline,
                      task.attempts, task.fulfilled_at, task.fulfilled_by_job_id,
                      task.runtemplate_id,
                      runtemplate.name as rt_name,
                      company.id as company_id, company.name as company_name,
-                     apps.name as app_name',
-                )
+                     apps.name as app_name
+EOD,)
                 ->leftJoin('runtemplate ON runtemplate.id = task.runtemplate_id')
                 ->leftJoin('company ON company.id = runtemplate.company_id')
                 ->leftJoin('apps ON apps.id = runtemplate.app_id')

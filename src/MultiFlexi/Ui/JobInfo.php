@@ -35,7 +35,7 @@ class JobInfo extends \Ease\Html\DivTag
         $executorImage = new ExecutorImage($job->getDataValue('executor'), ['height' => 20]);
 
         $jobInfoRow = new \Ease\TWB4\Row();
-        $jobInfoRow->addColumn(1, [_('Exitcode').'<br>', new ExitCode($job->getDataValue('exitcode'), ['style' => 'font-size: 2.0em; font-family: monospace;'])]);
+        $jobInfoRow->addColumn(1, [_('Exitcode').'<br>', new ExitCode($job->getDataValue('exitcode'), ['style' => 'font-size: 2.0em; font-family: monospace;', 'id' => 'live-exitcode'])]);
         $jobInfoRow->addColumn(4, [_('Commandline').'<br>', htmlspecialchars((string) $job->getDataValue('command'), \ENT_QUOTES | \ENT_HTML5, 'UTF-8'), '<br>', htmlspecialchars((string) $job->getApplication()->getRecordName(), \ENT_QUOTES | \ENT_HTML5, 'UTF-8').' v.:'.htmlspecialchars((string) $job->getDataValue('app_version'), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')]);
         $jobInfoRow->addColumn(2, [_('Scheduled').'<br>',
             $job->getDataValue('schedule') ? $job->getDataValue('schedule').'<br>'.new \Ease\Html\Widgets\LiveAge(new \DateTime($job->getDataValue('schedule'))) : '', '<br>', $executorImage, _('Executor').' '.$executorClass::name()]);
@@ -44,11 +44,11 @@ class JobInfo extends \Ease\Html\DivTag
             '&nbsp;',
             $job->getDataValue('begin') ? new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job->getDataValue('begin')))) : _('Not Yet Started')],
         ]);
-        $jobInfoRow->addColumn(2, [_('End').'<br>', [
+        $jobInfoRow->addColumn(2, [_('End').'<br>', new \Ease\Html\DivTag([
             $job->getDataValue('end'),
             '&nbsp;',
             $job->getDataValue('end') ? new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job->getDataValue('end')))) : _('Not Yet Ended')],
-        ]);
+            ['id' => 'live-end'])]);
 
         //        $jobInfoRow->addColumn(1, [_('Commandline').'<br>', $job->getDataValue('command')]);
 

@@ -85,13 +85,88 @@ if ($jobber->getDataValue('exitcode') === null && $jobber->getDataValue('begin')
 (function () {
     var liveOut = document.getElementById('live-output');
     if (!liveOut) { return; }
+
+    var ansiColors = {
+        30: '#000000', 31: '#e74c3c', 32: '#2ecc71', 33: '#f1c40f',
+        34: '#3498db', 35: '#9b59b6', 36: '#1abc9c', 37: '#ecf0f1',
+        90: '#7f8c8d', 91: '#ff6b6b', 92: '#7bed9f', 93: '#ffd32a',
+        94: '#70a1ff', 95: '#c56cf0', 96: '#48dbfb', 97: '#ffffff'
+    };
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function ansiToHtml(text) {
+        var re = /\\x1b\\[([0-9;]*)m/g;
+        var result = '';
+        var lastIndex = 0;
+        var open = 0;
+        var match;
+
+        while ((match = re.exec(text)) !== null) {
+            result += escapeHtml(text.slice(lastIndex, match.index));
+            lastIndex = re.lastIndex;
+
+            var codes = match[1].split(';').filter(function (c) { return c !== ''; });
+
+            if (codes.length === 0) { codes = ['0']; }
+
+            codes.forEach(function (codeStr) {
+                var code = parseInt(codeStr, 10);
+
+                if (code === 0) {
+                    while (open > 0) { result += '</span>'; open--; }
+                } else if (ansiColors[code]) {
+                    result += '<span style="color:' + ansiColors[code] + '">';
+                    open++;
+                }
+            });
+        }
+
+        result += escapeHtml(text.slice(lastIndex));
+
+        while (open > 0) { result += '</span>'; open--; }
+
+        return result;
+    }
+
+    function exitCodeBadgeType(code) {
+        if (code === -1) { return 'secondary'; }
+        if (code === 0) { return 'success'; }
+        if (code === 127) { return 'warning'; }
+
+        return 'danger';
+    }
+
     var es = new EventSource('jobstream.php?id={$jobID}');
     es.addEventListener('output', function (e) {
         var d = JSON.parse(e.data);
-        liveOut.textContent += d.line;
+        liveOut.innerHTML += ansiToHtml(d.line);
         liveOut.scrollTop = liveOut.scrollHeight;
     });
-    es.addEventListener('done', function () { es.close(); });
+    es.addEventListener('done', function (e) {
+        es.close();
+
+        var d = JSON.parse(e.data);
+        var badge = document.getElementById('live-exitcode');
+
+        if (badge) {
+            badge.className = 'badge badge-' + exitCodeBadgeType(d.exitcode);
+            badge.innerHTML = '&nbsp;' + d.exitcode + '&nbsp;';
+        }
+
+        var endEl = document.getElementById('live-end');
+
+        if (endEl && d.end) {
+            endEl.innerHTML = d.end + '&nbsp;<small id="live-end-age"></small>';
+
+            if (typeof updateCountdown === 'function') {
+                updateCountdown('live-end-age', d.end_ts);
+                setInterval(function () { updateCountdown('live-end-age', d.end_ts); }, 1000);
+            }
+        }
+    });
     es.addEventListener('timeout', function () { es.close(); });
     es.onerror = function () { es.close(); };
 })();

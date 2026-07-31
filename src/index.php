@@ -17,7 +17,6 @@ namespace MultiFlexi\Ui;
 
 require_once './init.php';
 
-
 WebPage::singleton()->addItem(new PageTop(_('MultiFlexi')));
 
 $imageRow = new \Ease\TWB4\Row();

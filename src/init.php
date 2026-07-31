@@ -170,13 +170,15 @@ if (!Shared::cfg('LOG_DIRECTORY')) {
     Shared::singleton()->setConfigValue('LOG_DIRECTORY', '/var/log/multiflexi');
 }
 
-$loggers = ['syslog', 'file', '\MultiFlexi\LogToSQL'];
+if (Shared::cfg('EASE_LOGGER', false) === false) {
+    $loggers = ['syslog', 'file', '\MultiFlexi\LogToSQL'];
 
-if (Shared::cfg('ZABBIX_SERVER')) {
-    $loggers[] = '\MultiFlexi\LogToZabbix';
+    if (Shared::cfg('ZABBIX_SERVER')) {
+        $loggers[] = '\MultiFlexi\LogToZabbix';
+    }
+
+    \define('EASE_LOGGER', implode('|', $loggers));
 }
-
-\define('EASE_LOGGER', implode('|', $loggers));
 
 // Add missing log style for security messages to prevent undefined key warning
 \Ease\Logger\Regent::singleton()->logStyles['security'] = 'color: #800080; font-weight: bold;';

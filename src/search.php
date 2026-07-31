@@ -105,7 +105,7 @@ if ($what === 'all' || $what === 'Job') {
 
             if (is_numeric($searchTerm) && (int) $job['id'] === (int) $searchTerm) {
                 $matchType = 'id';
-                $snippet   = (string) $job['id'];
+                $snippet = (string) $job['id'];
             } else {
                 $lineRow = $outputLines->getFluentPDO()
                     ->from('job_output_lines')
@@ -115,7 +115,7 @@ if ($what === 'all' || $what === 'Job') {
 
                 if ($lineRow) {
                     $matchType = $lineRow['type'];
-                    $snippet   = (string) $lineRow['line'];
+                    $snippet = (string) $lineRow['line'];
                 }
             }
 
