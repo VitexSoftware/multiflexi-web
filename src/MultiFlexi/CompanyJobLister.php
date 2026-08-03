@@ -77,7 +77,7 @@ class CompanyJobLister extends CompanyJob
      */
     public function getColumns()
     {
-        return ['id', 'company_id', 'app_id', 'env', 'exitcode', 'launched_by', 'begin', 'end', 'executor', 'schedule', 'schedule_type', 'runtemplate_id'];
+        return ['id', 'company_id', 'app_id', 'env', 'exitcode', 'block_reason', 'blocked_at', 'launched_by', 'begin', 'end', 'executor', 'schedule', 'schedule_type', 'runtemplate_id'];
     }
 
     /**
@@ -159,7 +159,7 @@ class CompanyJobLister extends CompanyJob
             $this->scheduledCounts[$scheduledJob['job']] = $position++;
         }
 
-        $query->select(['apps.name AS appname', 'apps.uuid', 'apps.image AS appimage', 'apps.description AS appdescription', 'apps.homepage AS apphomepage', 'app_translations.description AS appdescription_localized', 'job.id', 'begin', 'end', 'exitcode', 'launched_by', 'login', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'company.ic', 'company.enabled', 'schedule', 'schedule_type', 'job.runtemplate_id', 'runtemplate.name AS runtemplate_name', 'runtemplate.note AS runtemplate_note', 'runtemplate.interv AS runtemplate_interv', 'runtemplate.cron AS runtemplate_cron', 'runtemplate.last_schedule AS runtemplate_last_schedule', 'runtemplate.next_schedule AS runtemplate_next_schedule', 'runtemplate.delay AS runtemplate_delay', 'schedule.id AS schedule_id'], true)
+        $query->select(['apps.name AS appname', 'apps.uuid', 'apps.image AS appimage', 'apps.description AS appdescription', 'apps.homepage AS apphomepage', 'app_translations.description AS appdescription_localized', 'job.id', 'begin', 'end', 'exitcode', 'job.block_reason', 'job.blocked_at', 'launched_by', 'login', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'company.ic', 'company.enabled', 'schedule', 'schedule_type', 'job.runtemplate_id', 'runtemplate.name AS runtemplate_name', 'runtemplate.note AS runtemplate_note', 'runtemplate.interv AS runtemplate_interv', 'runtemplate.cron AS runtemplate_cron', 'runtemplate.last_schedule AS runtemplate_last_schedule', 'runtemplate.next_schedule AS runtemplate_next_schedule', 'runtemplate.delay AS runtemplate_delay', 'schedule.id AS schedule_id'], true)
             ->leftJoin('apps ON apps.id = job.app_id')
             ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
             ->leftJoin('company ON company.id = job.company_id')
@@ -343,6 +343,17 @@ class CompanyJobLister extends CompanyJob
             } else {
                 $dataRowRaw['begin'] = '<span style="font-size: 0.85em; color: #999;">—</span>';
             }
+        }
+
+        // A job that never got past the credential-availability check has no
+        // begin/end/exitcode of its own — it looks like an ordinary pending or
+        // stalled job unless we surface block_reason explicitly.
+        if (!empty($dataRowRaw['block_reason']) && empty($dataRowRaw['exitcode'])) {
+            $dataRowRaw['begin'] .= sprintf(
+                ' <span class="badge badge-danger" style="font-size: 0.7em;" title="%s">🚫 %s</span>',
+                htmlspecialchars($dataRowRaw['block_reason']),
+                htmlspecialchars(_('blocked')),
+            );
         }
 
         // Format Launcher column with interval/cron information

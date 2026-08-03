@@ -175,6 +175,18 @@ EOD);
 }
 
 // Check if job is orphaned and show warning
+$blockedWarning = null;
+
+if (!empty($jobber->getDataValue('block_reason')) && !$jobber->getDataValue('exitcode')) {
+    // Set by Job::reportCredentialBlocked() when a required credential fails
+    // its availability check — the job never actually ran.
+    $blockedWarning = new \Ease\TWB4\Alert('danger', [
+        new \Ease\Html\H4Tag(['🚫 ', _('Job Blocked')]),
+        new \Ease\Html\PTag($jobber->getDataValue('block_reason')),
+        new \Ease\Html\PTag(sprintf(_('Last blocked at: %s'), $jobber->getDataValue('blocked_at'))),
+    ], ['style' => 'border-left: 5px solid #dc3545;']);
+}
+
 $orphanedWarning = null;
 
 if (!$jobber->getDataValue('begin') && !$jobber->isScheduled()) {
@@ -300,6 +312,10 @@ $jobFoot->addColumn(4, $runTemplateButton);
 
 // Build panel content - include orphaned warning if present
 $panelContent = [];
+
+if ($blockedWarning) {
+    $panelContent[] = $blockedWarning;
+}
 
 if ($orphanedWarning) {
     $panelContent[] = $orphanedWarning;
