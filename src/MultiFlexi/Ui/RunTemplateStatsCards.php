@@ -120,23 +120,17 @@ class RunTemplateStatsCards extends \Ease\TWB4\Row
 
         $execCol->addItem($execChips);
 
-        // Visualization Row: Job Graph Widget
-        $vizRow = new \Ease\TWB4\Row();
-        $vizRow->addTagClass('mt-3');
-        $jobGraphWidget = new \Ease\Html\DivTag([
+        // Visualization + Chart Row: Job Chart alongside Job Graph Widget
+        $chartsRow = new \Ease\TWB4\Row();
+        $chartsRow->addTagClass('mt-3');
+        $chartsRow->addColumn(8, new \MultiFlexi\Ui\RunTemplateJobsLastMonthChart($this->runtemplate, ['style' => 'width: 100%;']), 'md', ['class' => 'p-2 border-top']);
+        $chartsRow->addColumn(4, [
             new \Ease\Html\H5Tag(_('Recent Jobs Visualization'), ['class' => 'mb-2 font-weight-bold text-muted text-uppercase small']),
             new \MultiFlexi\Ui\JobGraphWidget($this->runtemplate, 20, 10),
-        ], ['class' => 'col-12 p-2 border-top']);
-        $vizRow->addItem($jobGraphWidget);
-
-        // Chart Row: Full-width Job Chart
-        $chartRow = new \Ease\TWB4\Row();
-        $chartRow->addTagClass('mt-2');
-        $chartCol = $chartRow->addColumn(12, new \MultiFlexi\Ui\RunTemplateJobsLastMonthChart($this->runtemplate, ['style' => 'width: 100%;']));
+        ], 'md', ['class' => 'p-2 border-top']);
 
         $this->addItem($mainRow);
-        $this->addItem($vizRow);
-        $this->addItem($chartRow);
+        $this->addItem($chartsRow);
     }
 
     /**
