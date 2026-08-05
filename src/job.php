@@ -198,9 +198,38 @@ if (!$jobber->getDataValue('begin') && !$jobber->isScheduled()) {
     ], ['style' => 'border-left: 5px solid #ff9800;']);
 }
 
+WebPage::singleton()->addJavaScript(<<<'EOD'
+
+function copyJobOutput(textareaId, btnEl) {
+    var el = document.getElementById(textareaId);
+    if (!el) { return; }
+    var text = el.value;
+    var done = function () {
+        var original = btnEl.innerHTML;
+        btnEl.innerHTML = '✅ ' + (btnEl.getAttribute('data-copied-label') || 'Copied');
+        setTimeout(function () { btnEl.innerHTML = original; }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+    } else {
+        el.style.display = 'block';
+        el.select();
+        document.execCommand('copy');
+        el.style.display = 'none';
+        done();
+    }
+}
+EOD, '0', false);
+
+$stdOutputRaw = new \Ease\Html\TextareaTag('raw-output-std', htmlspecialchars($jobber->getOutput(), \ENT_QUOTES | \ENT_SUBSTITUTE), ['id' => 'raw-output-std', 'style' => 'display:none;']);
+$errOutputRaw = new \Ease\Html\TextareaTag('raw-output-err', htmlspecialchars($jobber->getErrorOutput(), \ENT_QUOTES | \ENT_SUBSTITUTE), ['id' => 'raw-output-err', 'style' => 'display:none;']);
+
+$copyStdButton = new \Ease\TWB4\LinkButton('#', '📋 '._('Copy'), 'secondary btn-block', ['onclick' => "copyJobOutput('raw-output-std', this); return false;", 'data-copied-label' => _('Copied')]);
+$copyErrButton = new \Ease\TWB4\LinkButton('#', '📋 '._('Copy'), 'secondary btn-block', ['onclick' => "copyJobOutput('raw-output-err', this); return false;", 'data-copied-label' => _('Copied')]);
+
 $outputTabs = new \Ease\TWB4\Tabs();
-$outputTabs->addTab(_('Output').' '.(\strlen($jobber->getOutput()) ? ' <span class="badge badge-secondary">'.substr_count($jobber->getOutput(), "\n").'</span>' : '<span class="badge badge-invers">💭</span>'), [$stdTerminal, \strlen($jobber->getOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=std', _('Download'), 'secondary btn-block') : _('No output'), new \Ease\Html\PreTag('', ['id' => 'live-output'])]);
-$outputTabs->addTab(_('Errors').' '.(empty($jobber->getErrorOutput()) ? ' <span class="badge badge-success">0</span>' : '<span class="badge badge-warning">'.substr_count($jobber->getErrorOutput(), "\n").'</span>'), [$errorTerminal, \strlen($jobber->getErrorOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=err', _('Download'), 'secondary btn-block') : _('No errors')], empty($jobber->getOutput()));
+$outputTabs->addTab(_('Output').' '.(\strlen($jobber->getOutput()) ? ' <span class="badge badge-secondary">'.substr_count($jobber->getOutput(), "\n").'</span>' : '<span class="badge badge-invers">💭</span>'), [$stdTerminal, $stdOutputRaw, \strlen($jobber->getOutput()) ? $copyStdButton : '', \strlen($jobber->getOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=std', _('Download'), 'secondary btn-block') : _('No output'), new \Ease\Html\PreTag('', ['id' => 'live-output'])]);
+$outputTabs->addTab(_('Errors').' '.(empty($jobber->getErrorOutput()) ? ' <span class="badge badge-success">0</span>' : '<span class="badge badge-warning">'.substr_count($jobber->getErrorOutput(), "\n").'</span>'), [$errorTerminal, $errOutputRaw, \strlen($jobber->getErrorOutput()) ? $copyErrButton : '', \strlen($jobber->getErrorOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=err', _('Download'), 'secondary btn-block') : _('No errors')], empty($jobber->getOutput()));
 
 $artifactor = new \MultiFlexi\Artifact();
 $artifacts = $artifactor->listingQuery()->where('job_id', $jobID);

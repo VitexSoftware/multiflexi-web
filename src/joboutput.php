@@ -23,7 +23,7 @@ $mode = WebPage::singleton()->getRequestValue('mode');
 $jobber = new \MultiFlexi\Job($jobID);
 
 $output = ($mode === 'err') ? $jobber->getErrorOutput() : $jobber->getOutput();
-$quoted = sprintf('"job-%s"', $jobber->getMyKey().'-'.str_replace(' ', '_', $jobber->application->getRecordName()).'.'.($mode === 'err' ? 'stderr' : 'stdout').'.txt');
+$quoted = sprintf('"job-%s"', $jobber->getMyKey().'-'.str_replace(' ', '_', $jobber->getApplication()->getRecordName()).'.'.($mode === 'err' ? 'stderr' : 'stdout').'.txt');
 header('Content-Description: File Transfer');
 header('Content-Type: application/octet-stream');
 header('Content-Disposition: attachment; filename='.$quoted);
