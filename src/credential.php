@@ -49,7 +49,21 @@ if (WebPage::singleton()->isPosted()) {
             $kredenc->addStatusMessage(_('Credential field Saved'), 'success');
         }
     } catch (\PDOException $exc) {
+        error_log(sprintf('Credential save failed (id=%d): %s', $credId, $exc->getMessage()));
         $kredenc->addStatusMessage(_('Error saving Credential field'), 'error');
+    } catch (\MultiFlexi\Security\EncryptionUnavailableException $exc) {
+        // $exc->getMessage() is a safe, generic message for the user; the
+        // chained previous exception carries the technical diagnosis (what's
+        // wrong and how to fix it) meant for the administrator's log only.
+        error_log(sprintf(
+            'Credential save failed (id=%d) due to encryption-at-rest failure: %s',
+            $credId,
+            $exc->getPrevious() ? $exc->getPrevious()->getMessage() : $exc->getMessage(),
+        ));
+        $kredenc->addStatusMessage(_('Nepodařilo se uložit citlivé údaje: šifrování dat je momentálně nedostupné. Kontaktujte prosím administrátora.'), 'error');
+    } catch (\Throwable $exc) {
+        error_log(sprintf('Credential save failed (id=%d): %s', $credId, $exc->getMessage()));
+        $kredenc->addStatusMessage(_('Nepodařilo se uložit záznam kvůli neočekávané chybě. Kontaktujte prosím administrátora.'), 'error');
     }
 } else {
     $forcedCredTypeId = WebPage::getRequestValue('credential_type_id');
