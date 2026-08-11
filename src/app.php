@@ -114,12 +114,17 @@ switch ($action) {
 
         break;
     case 'delete':
-        $configurator = new \MultiFlexi\Configuration();
-        $configurator->deleteFromSQL(['app_id' => $apps->getMyKey()]);
+        $appName = $apps->getRecordName();
 
-        $apps->deleteFromSQL();
-        $apps->addStatusMessage(sprintf(_('Application %s removal'), $apps->getRecordName()), 'success');
-        WebPage::singleton()->redirect('apps.php');
+        try {
+            $apps->deleteFromSQL();
+            $apps->addStatusMessage(sprintf(_('Application %s removal'), $appName), 'success');
+            WebPage::singleton()->redirect('apps.php');
+
+            exit;
+        } catch (\Throwable $e) {
+            $apps->addStatusMessage($e->getMessage(), 'error');
+        }
 
         break;
 

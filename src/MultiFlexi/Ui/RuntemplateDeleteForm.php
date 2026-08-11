@@ -15,8 +15,10 @@ declare(strict_types=1);
 
 namespace MultiFlexi\Ui;
 
+use Ease\Html\CheckboxTag;
+use Ease\Html\DivTag;
 use Ease\Html\InputHiddenTag;
-use Ease\TWB4\Checkbox;
+use Ease\Html\LabelTag;
 use Ease\TWB4\SubmitButton;
 
 /**
@@ -41,30 +43,43 @@ class RuntemplateDeleteForm extends SecureForm
 
         $this->addItem(new InputHiddenTag('action', 'delete'));
 
-        // Ease\TWB4\Checkbox forces the checkbox tag's id to equal its $name,
-        // so the confirmation checkbox always renders as id="confirm_delete"
-        // regardless of any 'id' passed in properties — this page only ever
-        // shows a single RunTemplate at a time, so that fixed id is safe here.
-        $this->addItem(new Checkbox(
-            'confirm_delete',
-            'yes',
-            sprintf(
-                _('I understand this will permanently delete "%s", all its jobs, logs, artifacts, and settings. This cannot be undone.'),
-                $runtemplate->getRecordName(),
-            ),
-            false,
-        ));
+        // Built from raw CheckboxTag/LabelTag rather than Ease\TWB4\Checkbox:
+        // the installed 1.12.0 declares `public CheckboxTag $checkbox = null;`
+        // on a non-nullable typed property, which is a fatal PHP error the
+        // moment the class is instantiated.
+        $checkbox = new CheckboxTag('confirm_delete', false, 'yes', ['class' => 'form-check-input', 'id' => 'confirm_delete']);
+        $label = new LabelTag('confirm_delete', sprintf(
+            _('I understand this will permanently delete "%s", all its jobs, logs, artifacts, and settings. This cannot be undone.'),
+            $runtemplate->getRecordName(),
+        ), ['class' => 'form-check-label']);
+        $this->addItem(new DivTag([$checkbox, $label], ['class' => 'form-check mb-3']));
 
         $submitId = 'delete_submit_'.$runtemplateId;
+        $hintId = 'delete_hint_'.$runtemplateId;
+        $hintChecked = _('Ready — clicking this button deletes the RunTemplate immediately.');
+        $hintUnchecked = _('Check the box above to enable this button.');
         $deleteButton = new SubmitButton('🗑️ '._('Delete this RunTemplate'), 'danger', [
             'id' => $submitId,
             'disabled' => 'disabled',
+            'title' => $hintUnchecked,
         ]);
         $this->addItem($deleteButton);
+        $this->addItem(new \Ease\Html\SmallTag($hintUnchecked, ['id' => $hintId, 'class' => 'text-muted d-block mt-1']));
+
+        $hintCheckedJs = json_encode($hintChecked, \JSON_THROW_ON_ERROR);
+        $hintUncheckedJs = json_encode($hintUnchecked, \JSON_THROW_ON_ERROR);
 
         $this->addJavaScript(<<<EOD
             document.getElementById('confirm_delete').addEventListener('change', function () {
-                document.getElementById('{$submitId}').disabled = !this.checked;
+                var btn = document.getElementById('{$submitId}');
+                var hint = document.getElementById('{$hintId}');
+                var hintChecked = {$hintCheckedJs};
+                var hintUnchecked = {$hintUncheckedJs};
+                btn.disabled = !this.checked;
+                btn.title = this.checked ? hintChecked : hintUnchecked;
+                hint.textContent = this.checked ? hintChecked : hintUnchecked;
+                hint.classList.toggle('text-danger', this.checked);
+                hint.classList.toggle('text-muted', !this.checked);
             });
             EOD);
     }

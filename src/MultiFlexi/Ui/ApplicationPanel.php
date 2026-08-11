@@ -82,7 +82,22 @@ class ApplicationPanel extends Panel
         }
 
         if ($application->getMyKey()) {
-            $actionCol = $this->headRow->addColumn(2, new LinkButton('?id='.$application->getMyKey().'&action=delete', '🪦&nbsp;'._('Remove'), 'outline-danger btn-sm shadow-sm'));
+            $runtemplateCount = \count((new \MultiFlexi\RunTemplate())->getFluentPDO()->from('runtemplate')->where('app_id', $application->getMyKey())->fetchAll());
+
+            if ($runtemplateCount > 0) {
+                $removeButton = new LinkButton('#', '🪦&nbsp;'._('Remove'), 'outline-danger btn-sm shadow-sm disabled', [
+                    'aria-disabled' => 'true',
+                    'tabindex' => '-1',
+                    'title' => sprintf(_('%d RunTemplate(s) must be removed before deleting this application'), $runtemplateCount),
+                ]);
+            } else {
+                // Always target app.php explicitly: this panel is also embedded on
+                // runtemplate.php and other pages, where a relative '?id=...' link
+                // would resolve against that page instead and delete the wrong thing.
+                $removeButton = new LinkButton('app.php?id='.$application->getMyKey().'&action=delete', '🪦&nbsp;'._('Remove'), 'outline-danger btn-sm shadow-sm');
+            }
+
+            $actionCol = $this->headRow->addColumn(2, $removeButton);
             $actionCol->addTagClass('text-right my-auto');
         }
 
