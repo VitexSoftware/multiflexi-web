@@ -31,6 +31,25 @@ WebPage::singleton()->onlyForLogged();
 $companer = new Company(WebPage::getRequestValue('company_id', 'int'));
 $application = new Application(WebPage::getRequestValue('app_id', 'int'));
 
+if (WebPage::isPosted() && WebPage::getRequestValue('action') === 'unassign') {
+    $runtemplateCount = \count((new RunTemplate())->getFluentPDO()->from('runtemplate')
+        ->where('app_id', $application->getMyKey())
+        ->where('company_id', $companer->getMyKey())
+        ->fetchAll());
+
+    if ($runtemplateCount === 0) {
+        $unassigner = new \MultiFlexi\CompanyApp($companer);
+        $assignedRaw = $unassigner->getAssigned()->fetchAll('app_id');
+        $remaining = array_filter(array_keys($assignedRaw), static fn ($id) => (int) $id !== $application->getMyKey());
+        $unassigner->assignApps($remaining);
+        WebPage::singleton()->redirect('company.php?id='.$companer->getMyKey());
+
+        exit;
+    }
+
+    WebPage::singleton()->addStatusMessage(_('Cannot remove application: RunTemplates still exist for it'), 'error');
+}
+
 WebPage::singleton()->addItem(new PageTop(_($application->getRecordName()).'@'.$companer->getRecordName()));
 
 // Create CompanyApp object for chart

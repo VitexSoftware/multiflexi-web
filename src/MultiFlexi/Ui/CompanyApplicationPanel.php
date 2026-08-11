@@ -19,6 +19,7 @@ use Ease\TWB4\LinkButton;
 use Ease\TWB4\Panel;
 use Ease\TWB4\Row;
 use MultiFlexi\Application;
+use MultiFlexi\Company;
 
 /**
  * Description of ApplicationPanel.
@@ -31,6 +32,7 @@ class CompanyApplicationPanel extends Panel
 {
     public Row $headRow;
     private Application $application;
+    private Company $company;
 
     /**
      * Application Panel.
@@ -41,6 +43,7 @@ class CompanyApplicationPanel extends Panel
     public function __construct(\MultiFlexi\CompanyApp $companyApp, $content = null, $footer = null)
     {
         $company = $companyApp->getCompany();
+        $this->company = $company;
         $this->application = $companyApp->getApplication();
         $this->headRow = new Row();
 
@@ -74,6 +77,24 @@ class CompanyApplicationPanel extends Panel
     public function finalize(): void
     {
         $this->footer->addItem(new LinkButton('jobs.php?app_id='.$this->application->getMyKey(), '🧑‍💻&nbsp;'._('App Jobs'), 'secondary btn-lg'));
+
+        $runtemplateCount = \count((new \MultiFlexi\RunTemplate())->getFluentPDO()->from('runtemplate')
+            ->where('app_id', $this->application->getMyKey())
+            ->where('company_id', $this->company->getMyKey())
+            ->fetchAll());
+
+        if ($runtemplateCount > 0) {
+            $hint = sprintf(_('%d RunTemplate(s) must be removed before removing this application from the company'), $runtemplateCount);
+            $removeButton = new LinkButton('#', '🗑️&nbsp;'._('Remove from Company'), 'outline-danger btn-lg disabled', [
+                'aria-disabled' => 'true',
+                'tabindex' => '-1',
+                'title' => $hint,
+            ]);
+            $this->footer->addItem($removeButton);
+            $this->footer->addItem(new \Ease\TWB4\Badge('warning', (string) $runtemplateCount, ['class' => 'ml-1', 'title' => $hint]));
+        } else {
+            $this->footer->addItem(new CompanyAppUnassignForm($this->company, $this->application));
+        }
         parent::finalize();
     }
 }
