@@ -39,9 +39,31 @@ if (WebPage::getRequestValue('new', 'int') === 1) {
     $runTemplate->dbsync();
 }
 
-if (WebPage::getRequestValue('action') === 'delete') {
-    $runTemplate->deleteFromSQL();
-    WebPage::singleton()->redirect('companyapp.php?company_id='.$runTemplate->getDataValue('company_id').'&app_id='.$runTemplate->getDataValue('app_id'));
+if (WebPage::getRequestValue('action') === 'delete' && WebPage::isPosted()) {
+    if (WebPage::getRequestValue('confirm_delete') === 'yes') {
+        $companyId = $runTemplate->getDataValue('company_id');
+        $appId = $runTemplate->getDataValue('app_id');
+        $runTemplateName = $runTemplate->getRecordName();
+
+        try {
+            $runTemplate->deleteFromSQL();
+            WebPage::singleton()->addStatusMessage(
+                sprintf(_('RunTemplate "%s" has been deleted'), $runTemplateName),
+                'success',
+            );
+        } catch (\Throwable $e) {
+            WebPage::singleton()->addStatusMessage(
+                sprintf(_('Error deleting RunTemplate: %s'), $e->getMessage()),
+                'error',
+            );
+        }
+
+        WebPage::singleton()->redirect('companyapp.php?company_id='.$companyId.'&app_id='.$appId);
+
+        exit;
+    }
+
+    WebPage::singleton()->addStatusMessage(_('Deletion was not confirmed'), 'warning');
 }
 
 $companies = new Company($runTemplate->getDataValue('company_id'));

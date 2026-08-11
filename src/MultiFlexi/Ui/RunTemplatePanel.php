@@ -76,12 +76,6 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
 
         $statsCards = new \MultiFlexi\Ui\RunTemplateStatsCards($runtemplate);
 
-        if (WebPage::getRequestValue('delete', 'int') === 1) {
-            $deleteButton = new \Ease\TWB4\LinkButton('runtemplate.php?delete=2&id='.$runtemplateId, _('Delete !!!').'&nbsp;&nbsp;❌', 'danger btn-sm');
-        } else {
-            $deleteButton = new \Ease\TWB4\LinkButton('runtemplate.php?delete=1&id='.$runtemplateId, _('Delete ?').'&nbsp;&nbsp;❌', 'warning btn-sm');
-        }
-
         $runtemplateJobs = new \MultiFlexi\Ui\RuntemplateJobsListing($runtemplate);
         $nameInput = new \Ease\Html\ATag('#', $runtemplate->getRecordName(), ['class' => 'editable', 'style' => 'font-size: xx-large; font-weight: bold;', 'id' => 'name', 'data-pk' => $runtemplate->getMyKey(), 'data-url' => 'runtemplatesave.php', 'data-title' => _('Update RunTemplate name')]);
 
@@ -154,7 +148,6 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
             new \Ease\Html\DivTag([
                 new \Ease\Html\StrongTag(_('Executor')), $executorChooser,
             ], ['class' => 'card card-body bg-light']),
-            new \Ease\Html\DivTag($deleteButton, ['class' => 'mt-4 text-right']),
         ]);
 
         $runtemplateBottom = new \Ease\TWB4\Row();
@@ -162,6 +155,12 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
         if ($runtemplate->getMyKey()) {
             $runtemplateBottom->addColumn(6, new RuntemplateCloneForm($runtemplate));
             $runtemplateBottom->addColumn(6, new RuntemplatePopulateForm($runtemplate));
+
+            $dangerZone = new \Ease\Html\DivTag([
+                new \Ease\Html\H5Tag('⚠️ '._('Danger Zone')),
+                new RuntemplateDeleteForm($runtemplate),
+            ], ['class' => 'danger-zone']);
+            $runtemplateBottom->addColumn(12, $dangerZone);
         }
 
         $this->addCSS(<<<'CSS'
@@ -172,6 +171,9 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
             .dashboard-card { transition: transform 0.2s, box-shadow 0.2s; border: none; border-radius: 8px; }
             .dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
             .btn-group-vertical > .btn { border-radius: 4px !important; margin-bottom: 2px; }
+            .danger-zone { margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid #dc3545; border-radius: 8px; background: #fff5f5; }
+            .danger-zone h5 { color: #dc3545; margin-bottom: 0.75rem; }
+            .danger-zone .form-check { margin-bottom: 0.75rem; }
 CSS);
         $this->addTagClass('runtemplate-tabs');
 
