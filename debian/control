@@ -10,7 +10,7 @@ Package: multiflexi-web
 Multi-Arch: foreign
 Architecture: all
 Depends: ${misc:Depends},
- multiflexi-common,
+ multiflexi-common (>= 2.3.4),
  php-vitexsoftware-multiflexi-core,
  php-vitexsoftware-ease-html-widgets (>=1.1.1),
  php-vitexsoftware-ease-bootstrap4-widgets (>=1.7),
