@@ -27,12 +27,12 @@ class CompanyRuntemplatesLinks extends \Ease\Html\DivTag
     public function __construct(\MultiFlexi\Company $company, \MultiFlexi\Application $application, array $properties = [])
     {
         $runTemplater = new \MultiFlexi\RunTemplate();
-        $runtemplatesRaw = $runTemplater->listingQuery()->where('active', true)->where('app_id', $application->getMyKey())->where('company_id', $company->getMyKey());
+        $runtemplatesRaw = $runTemplater->listingQuery()->where('active', true)->where('app_id', $application->getMyKey())->where('company_id', $company->getMyKey())->fetchAll();
         $jobber = new \MultiFlexi\Job();
 
         $runtemplatesDiv = new \Ease\Html\DivTag();
 
-        if ($runtemplatesRaw->count()) {
+        if ($runtemplatesRaw) {
             WebPage::singleton()->addCss(<<<'CSS'
                 .runtemplate-compact-group .btn { padding: 0.1rem 0.4rem; font-size: 0.75rem; line-height: 1.5; }
                 .runtemplate-compact-id { font-weight: 500; background-color: #f1f3f5; color: #495057; border-color: #dee2e6; }
@@ -40,23 +40,39 @@ class CompanyRuntemplatesLinks extends \Ease\Html\DivTag
                 .runtemplate-compact-queued { padding: 0.1rem 0.3rem !important; }
 CSS);
 
-            foreach ($runtemplatesRaw as $runtemplateData) {
-                // Get last finished job
-                $lastFinishedJob = $jobber->listingQuery()
-                    ->select(['id', 'exitcode'], true)
-                    ->where(['runtemplate_id' => $runtemplateData['id']])
-                    ->where('exitcode IS NOT NULL')
-                    ->order('id DESC')
-                    ->limit(1)
-                    ->fetch();
+            $runtemplateIds = array_map(static fn (array $rt): int => (int) $rt['id'], $runtemplatesRaw);
 
-                // Check for queued jobs (begin is null)
-                $queuedJob = $jobber->listingQuery()
-                    ->select(['id', 'schedule'])
-                    ->where(['runtemplate_id' => $runtemplateData['id'], 'begin' => null])
-                    ->order('id DESC')
-                    ->limit(1)
-                    ->fetch();
+            // Batched instead of 2 queries per RunTemplate (was N+1 on pages embedding
+            // ApplicationPanel for an app shared by many companies). Capped at 200 rows
+            // per lookup: for the normal case of a handful of active RunTemplates per
+            // company+app pair this still finds every group's most recent job; only a
+            // company with an unusually large number of RunTemplates for one app could
+            // see a stale/empty status for its least-recently-run ones.
+            $lastFinishedJobs = [];
+
+            foreach ($jobber->listingQuery()
+                ->select(['id', 'exitcode', 'runtemplate_id'], true)
+                ->where('runtemplate_id', $runtemplateIds)
+                ->where('exitcode IS NOT NULL')
+                ->order('id DESC')
+                ->limit(200) as $job) {
+                $lastFinishedJobs[$job['runtemplate_id']] ??= $job;
+            }
+
+            $queuedJobs = [];
+
+            foreach ($jobber->listingQuery()
+                ->select(['id', 'schedule', 'runtemplate_id'], true)
+                ->where('runtemplate_id', $runtemplateIds)
+                ->where('begin', null)
+                ->order('id DESC')
+                ->limit(200) as $job) {
+                $queuedJobs[$job['runtemplate_id']] ??= $job;
+            }
+
+            foreach ($runtemplatesRaw as $runtemplateData) {
+                $lastFinishedJob = $lastFinishedJobs[$runtemplateData['id']] ?? null;
+                $queuedJob = $queuedJobs[$runtemplateData['id']] ?? null;
 
                 $group = new \Ease\Html\DivTag(null, ['class' => 'btn-group runtemplate-compact-group shadow-sm mr-2 mb-2', 'role' => 'group']);
 

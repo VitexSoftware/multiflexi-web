@@ -29,6 +29,11 @@ use MultiFlexi\Application;
  */
 class ApplicationPanel extends Panel
 {
+    /**
+     * Cap on how many "used by" companies are rendered directly on this panel.
+     */
+    private const USED_BY_LIMIT = 20;
+
     public Row $headRow;
     private Application $application;
 
@@ -53,7 +58,13 @@ class ApplicationPanel extends Panel
         $titleCol->addTagClass('my-auto');
 
         $ca = new \MultiFlexi\CompanyApp(null);
-        $usedIncompanies = $ca->listingQuery()->select(['companyapp.company_id', 'company.name', 'company.slug', 'company.logo'], true)->leftJoin('company ON company.id = companyapp.company_id')->where('app_id', $this->application->getMyKey())->fetchAll('company_id');
+        $usedInCompaniesQuery = $ca->listingQuery()->select(['companyapp.company_id', 'company.name', 'company.slug', 'company.logo'], true)->leftJoin('company ON company.id = companyapp.company_id')->where('app_id', $this->application->getMyKey());
+        // Count first (cheap), then fetch only a capped page of rows: rendering every
+        // company that uses this app (each pulling in CompanyRuntemplatesLinks and its
+        // own queries) was previously unbounded and could exhaust memory_limit for apps
+        // shared by many companies.
+        $usedInCompaniesTotal = (clone $usedInCompaniesQuery)->count();
+        $usedIncompanies = $usedInCompaniesQuery->orderBy('company.name')->limit(self::USED_BY_LIMIT)->fetchAll('company_id');
 
         if ($usedIncompanies) {
             $usedByDiv = new \Ease\Html\DivTag(null, ['class' => 'p-2 bg-light rounded shadow-sm border']);
@@ -76,13 +87,21 @@ class ApplicationPanel extends Panel
             }
 
             $usedByDiv->addItem($usedByTable);
+
+            if ($usedInCompaniesTotal > \count($usedIncompanies)) {
+                $usedByDiv->addItem(new \Ease\Html\SmallTag(
+                    sprintf(_('+ %d more'), $usedInCompaniesTotal - \count($usedIncompanies)),
+                    ['class' => 'd-block mt-1 text-muted'],
+                ));
+            }
+
             $this->headRow->addColumn(4, $usedByDiv);
         } else {
             $this->headRow->addColumn(4, '');
         }
 
         if ($application->getMyKey()) {
-            $runtemplateCount = \count((new \MultiFlexi\RunTemplate())->getFluentPDO()->from('runtemplate')->where('app_id', $application->getMyKey())->fetchAll());
+            $runtemplateCount = (new \MultiFlexi\RunTemplate())->getFluentPDO()->from('runtemplate')->where('app_id', $application->getMyKey())->count();
 
             if ($runtemplateCount > 0) {
                 $removeButton = new LinkButton('#', '🪦&nbsp;'._('Remove'), 'outline-danger btn-sm shadow-sm disabled', [
