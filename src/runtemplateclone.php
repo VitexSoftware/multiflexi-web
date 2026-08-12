@@ -16,9 +16,7 @@ declare(strict_types=1);
 namespace MultiFlexi\Ui;
 
 use Ease\WebPage;
-use MultiFlexi\Configuration;
 use MultiFlexi\RunTemplate;
-use MultiFlexi\RunTplCreds;
 
 require_once './init.php';
 WebPage::singleton()->onlyForLogged();
@@ -39,48 +37,13 @@ try {
     // Load source runtemplate
     $sourceTemplate = new RunTemplate($sourceId);
 
-    // Create new runtemplate
-    $newTemplate = new RunTemplate();
-
-    // Copy basic data from source template
-    $templateData = $sourceTemplate->getData();
-    unset($templateData[$sourceTemplate->getKeyColumn()]); // Remove ID
-    $templateData['name'] = $cloneName;
-    unset($templateData['last_schedule'], $templateData['next_schedule'], $templateData['failed_jobs_count'], $templateData['successfull_jobs_count']);
-
-    // Insert new template
-    $newId = $newTemplate->insertToSQL($templateData);
+    // Clone always comes back disabled, regardless of the source's state
+    $newId = $sourceTemplate->cloneAs($cloneName);
 
     if ($newId) {
-        // Copy configurations
-        $configFields = $sourceTemplate->getRuntemplateEnvironment()->getFields();
-
-        $newConfigurator = new Configuration([], ['autoload' => false]);
-
-        foreach ($configFields as $field) {
-            $newConfigurator->insertToSQL([
-                'runtemplate_id' => $newId,
-                'app_id' => $templateData['app_id'],
-                'company_id' => $templateData['company_id'],
-                'name' => $field->getName(),
-                'value' => $field->getValue(),
-                'config_type' => $field->getType()]);
-        }
-
-        // Copy credential assignments
-        $credHelper = new RunTplCreds();
-        $credentials = $credHelper->getCredentialsForRuntemplate($sourceId)->fetchAll();
-
-        foreach ($credentials as $cred) {
-            $credHelper->insertToSQL([
-                'runtemplate_id' => $newId,
-                'credentials_id' => $cred['credentials_id'],
-            ]);
-        }
-
         WebPage::singleton()->addStatusMessage(
             sprintf(
-                _('Runtemplate %s cloned as %s'),
+                _('Runtemplate %s cloned as %s (disabled — review and enable when ready)'),
                 $sourceTemplate->getRecordName(),
                 $cloneName,
             ),
