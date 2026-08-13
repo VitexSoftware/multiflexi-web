@@ -6525,3 +6525,51 @@ msgstr "chybějící heslo"
 
 #~ msgid "Manual Schedule"
 #~ msgstr "Ruční plánování"
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:52
+msgid "I understand this will permanently delete \"%s\", all its jobs, logs, artifacts, and settings. This cannot be undone."
+msgstr "Rozumím, že tímto trvale smažu „%s“, všechny jeho úlohy, logy, artefakty a nastavení. Tuto akci nelze vrátit zpět."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:59
+msgid "Ready — clicking this button deletes the RunTemplate immediately."
+msgstr "Připraveno — kliknutím na toto tlačítko okamžitě smažete RunTemplate."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:60
+msgid "Check the box above to enable this button."
+msgstr "Zaškrtnutím políčka výše toto tlačítko povolíte."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:61
+msgid "Delete this RunTemplate"
+msgstr "Smazat tento RunTemplate"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:83
+msgid "Click to add notes..."
+msgstr "Kliknutím přidáte poznámky..."
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:90
+msgid "Update RunTemplate notes"
+msgstr "Aktualizovat poznámky RunTemplate"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:139
+msgid "Interval & Persistence"
+msgstr "Interval a perzistence"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:142
+msgid "Cron Expression"
+msgstr "Cron výraz"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:143
+msgid "Startup Delay"
+msgstr "Zpoždění spuštění"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:147
+msgid "Execution Environment"
+msgstr "Prostředí spuštění"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:160
+msgid "Danger Zone"
+msgstr "Nebezpečná zóna"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:200
+msgid "Scheduling"
+msgstr "Plánování"

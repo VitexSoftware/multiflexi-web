@@ -6619,3 +6619,51 @@ msgstr "missing password"
 
 #~ msgid "ℹ️ Custom Field"
 #~ msgstr "ℹ️ Custom Field"
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:52
+msgid "I understand this will permanently delete \"%s\", all its jobs, logs, artifacts, and settings. This cannot be undone."
+msgstr "I understand this will permanently delete \"%s\", all its jobs, logs, artifacts, and settings. This cannot be undone."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:59
+msgid "Ready — clicking this button deletes the RunTemplate immediately."
+msgstr "Ready — clicking this button deletes the RunTemplate immediately."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:60
+msgid "Check the box above to enable this button."
+msgstr "Check the box above to enable this button."
+
+#: src/MultiFlexi/Ui/RuntemplateDeleteForm.php:61
+msgid "Delete this RunTemplate"
+msgstr "Delete this RunTemplate"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:83
+msgid "Click to add notes..."
+msgstr "Click to add notes..."
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:90
+msgid "Update RunTemplate notes"
+msgstr "Update RunTemplate notes"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:139
+msgid "Interval & Persistence"
+msgstr "Interval & Persistence"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:142
+msgid "Cron Expression"
+msgstr "Cron Expression"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:143
+msgid "Startup Delay"
+msgstr "Startup Delay"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:147
+msgid "Execution Environment"
+msgstr "Execution Environment"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:160
+msgid "Danger Zone"
+msgstr "Danger Zone"
+
+#: src/MultiFlexi/Ui/RunTemplatePanel.php:200
+msgid "Scheduling"
+msgstr "Scheduling"
