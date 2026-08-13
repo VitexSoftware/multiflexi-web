@@ -45,7 +45,7 @@ class CredentialProtoTypeLister extends \Ease\TWB4\Table
 
         // Get all prototypes from database (includes synced PHP class-based ones)
         $protoTypesRaw = $credentialProtoTypes->getColumnsFromSQL(
-            ['id', 'code', 'name', 'version', 'uuid'],
+            ['id', 'code', 'name', 'version', 'uuid', 'logo'],
             null,
             'name',
             'id',
@@ -53,6 +53,7 @@ class CredentialProtoTypeLister extends \Ease\TWB4\Table
 
         // Create header row
         $headerRow = new \Ease\Html\TrTag();
+        $headerRow->addItem(new \Ease\Html\ThTag(_('Logo')));
         $headerRow->addItem(new \Ease\Html\ThTag(_('ID')));
         $headerRow->addItem(new \Ease\Html\ThTag(_('Code')));
         $headerRow->addItem(new \Ease\Html\ThTag(_('Name')));
@@ -93,6 +94,14 @@ class CredentialProtoTypeLister extends \Ease\TWB4\Table
                     $actions->addItem(new \Ease\TWB4\Badge('secondary', _('System')));
                 }
 
+                $logo = (string) ($protoTypeInfo['logo'] ?? '');
+                $logoImg = new \Ease\Html\ImgTag(
+                    'logoimage.php?file='.rawurlencode($logo),
+                    _($protoTypeInfo['name']),
+                    ['height' => '32', 'style' => 'object-fit: contain;'],
+                );
+
+                $row->addItem(new \Ease\Html\TdTag($logoImg));
                 $row->addItem(new \Ease\Html\TdTag($protoTypeInfo['id']));
                 $row->addItem(new \Ease\Html\TdTag(new \Ease\TWB4\Badge($codeColor, $protoTypeInfo['code'])));
                 $row->addItem(new \Ease\Html\TdTag(new \Ease\TWB4\Badge($sourceColor, $protoTypeInfo['name'])));
@@ -104,7 +113,7 @@ class CredentialProtoTypeLister extends \Ease\TWB4\Table
             }
         } else {
             $row = new \Ease\Html\TrTag();
-            $row->addItem(new \Ease\Html\TdTag(_('No credential prototypes found'), ['colspan' => '6']));
+            $row->addItem(new \Ease\Html\TdTag(_('No credential prototypes found'), ['colspan' => '7']));
             $this->addItem($row);
         }
     }
