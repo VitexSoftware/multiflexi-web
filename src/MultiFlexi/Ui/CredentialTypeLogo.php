@@ -64,7 +64,8 @@ EOD;
     public function __construct(\MultiFlexi\CredentialType $credType, array $tagProperties = [])
     {
         if ($credType->getDataValue('logo')) {
-            parent::__construct($credType->getDataValue('logo'), $credType->getDataValue('name'), $tagProperties);
+            $logo = $credType->getDataValue('logo');
+            $title = $credType->getDataValue('name');
         } else {
             $helper = $credType->getPrototype();
 
@@ -75,8 +76,16 @@ EOD;
                 $logo = 'data:image/svg+xml;base64,'.base64_encode(self::$none);
                 $title = _('none');
             }
-
-            parent::__construct($logo, $title, $tagProperties);
         }
+
+        // Bare filenames (as returned by CredentialProtoType::logo()) are served
+        // through logoimage.php, which looks them up in the dev tree and in
+        // /usr/share/multiflexi/images (deb-installed credential-prototype logos).
+        // data: URIs (the "none" fallback) are already directly usable as <img src>.
+        if (!str_starts_with((string) $logo, 'data:')) {
+            $logo = 'logoimage.php?file='.rawurlencode((string) $logo);
+        }
+
+        parent::__construct($logo, $title, $tagProperties);
     }
 }
