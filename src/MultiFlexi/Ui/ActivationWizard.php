@@ -1061,14 +1061,9 @@ EOD,
 
         switch ($type) {
             case 'bool':
-            case 'boolean':
-                $input = new \Ease\Html\InputTag($fieldName, '1', ['type' => 'checkbox', 'class' => 'form-check-input']);
+                $rawValue = \is_bool($value) ? ($value ? 'true' : 'false') : (string) $value;
 
-                if ($value) {
-                    $input->setTagProperty('checked', 'checked');
-                }
-
-                return new \Ease\Html\DivTag($input, ['class' => 'form-check']);
+                return new \Ease\Html\DivTag(BoolFieldWidget::toggle($fieldName, $rawValue));
             case 'password':
                 return new \Ease\Html\InputTag($fieldName, $value, ['type' => 'password', 'class' => 'form-control']);
             case 'int':

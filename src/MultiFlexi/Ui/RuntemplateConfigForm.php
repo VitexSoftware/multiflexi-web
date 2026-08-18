@@ -55,6 +55,10 @@ class RuntemplateConfigForm extends EngineForm
             .required-field.expiring-field { border-left: 3px solid #dc3545 !important; border-right: 3px solid #ffc107 !important; }
             .field-flags { display: inline; margin-left: 0.4rem; }
             .field-flags .badge { font-size: 0.7rem; margin-left: 0.15rem; vertical-align: middle; }
+            .config-category-nav { position: sticky; top: 80px; }
+            .config-category-section { scroll-margin-top: 80px; padding-top: 0.5rem; }
+            .config-category-section + .config-category-section { margin-top: 1.5rem; }
+            .config-category-title { margin: 0.25rem 0 0.75rem; padding-bottom: 0.3rem; border-bottom: 1px solid #dee2e6; }
 CSS);
         $this->addTagClass('runtemplate-config-form');
 
@@ -65,7 +69,29 @@ CSS);
 
         $appFields->takeValues($customized);
 
+        // Configuration option categories as defined by the application
+        // schema (multiflexi-core schema/application.json: environment.*.category).
+        $categoryOrder = ['API', 'Database', 'Behavior', 'Security', 'Other'];
+        $categoryOf = $this->readFieldCategories($engine->getApplication());
+        $categoryBuckets = [];
+
+        foreach ($categoryOrder as $categoryName) {
+            $categoryBuckets[$categoryName] = new \Ease\Html\DivTag(null, ['class' => 'config-category-fields']);
+        }
+
         foreach ($appFields as $fieldName => $field) {
+            $fieldCategory = $field->getCategory();
+
+            if ($fieldCategory === '' || !isset($categoryBuckets[$fieldCategory])) {
+                $fieldCategory = $categoryOf[$fieldName] ?? 'Other';
+            }
+
+            if (!isset($categoryBuckets[$fieldCategory])) {
+                $fieldCategory = 'Other';
+            }
+
+            $bucket = $categoryBuckets[$fieldCategory];
+
             $inputCaption = new \Ease\Html\StrongTag($fieldName);
             $credential = null;
             $credValue = null;
@@ -86,17 +112,18 @@ CSS);
             $value = $credValue ?? $field->getValue();
 
             if ($field->getType() === 'bool') {
-                $toggleAttrs = ['data-size' => 'small'];
-
-                if ($isDisabled) {
-                    $toggleAttrs['disabled'] = 'disabled';
-                }
-
-                $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldName, $value === 'true' ? true : false, 'true', $toggleAttrs));
+                $toggleAttrs = $isDisabled ? ['disabled' => 'disabled'] : [];
+                $input = new \Ease\Html\DivTag(BoolFieldWidget::toggle($fieldName, $value, $toggleAttrs));
             } elseif ($field->isMultiLine()) {
                 $input = new \Ease\Html\TextareaTag($fieldName, $value, ['class' => 'form-control form-control-sm', 'rows' => 4]);
+            } elseif ($field->isRedactable()) {
+                $input = new \Ease\Html\InputTag($fieldName, '', [
+                    'type' => 'password',
+                    'class' => 'form-control form-control-sm',
+                    'placeholder' => \MultiFlexi\ConfigField::maskValue($value),
+                ]);
             } else {
-                $input = new \Ease\Html\InputTag($fieldName, $value, ['type' => $field->getType(), 'class' => 'form-control form-control-sm']);
+                $input = new \Ease\Html\InputTag($fieldName, $value, self::inputAttrsForType($field->getType()));
             }
 
             if ($runTemplateField) { // Filed by Credential
@@ -122,9 +149,9 @@ CSS);
                     $field->setDescription($credentialType->getFields()->getField($fieldName)->getDescription());
                 }
 
-                $formGroup = $this->addInput($input, $inputCaption, $runTemplateField->getValue(), $field->getDescription());
+                $formGroup = $bucket->addItem(new \Ease\TWB4\FormGroup($inputCaption, $input, $runTemplateField->getValue(), $field->getDescription()));
             } else { // Simple Fields
-                $formGroup = $this->addInput($input, $fieldName, $field->getDefaultValue(), $field->getDescription());
+                $formGroup = $bucket->addItem(new \Ease\TWB4\FormGroup($fieldName, $input, $field->getDefaultValue(), $field->getDescription()));
             }
 
             $flags = new \Ease\Html\SpanTag(null, ['class' => 'field-flags']);
@@ -161,6 +188,54 @@ CSS);
 
         // $this->addItem( new RuntemplateTopicsChooser('topics', $engine)); //TODO
 
+        // Lay the categorised fields out with a Scrollspy sidebar for navigation.
+        $categoryEmoji = [
+            'API' => '🔌',
+            'Database' => '🗄️',
+            'Behavior' => '🎛️',
+            'Security' => '🔐',
+            'Other' => '➕',
+        ];
+
+        $categoryNav = new \Ease\Html\DivTag(null, ['class' => 'list-group', 'id' => 'configCategoryNav']);
+        $categorySections = new \Ease\Html\DivTag(null, ['class' => 'config-category-sections']);
+        $firstCategory = true;
+        $anyCategorized = false;
+
+        foreach ($categoryOrder as $categoryName) {
+            if (empty($categoryBuckets[$categoryName]->pageParts)) {
+                continue; // no fields in this category
+            }
+
+            $anyCategorized = true;
+            $sectionId = 'cfg-cat-'.$categoryName;
+            $heading = ($categoryEmoji[$categoryName] ?? '').'&nbsp;'._($categoryName);
+
+            $categoryNav->addItem(new \Ease\Html\ATag(
+                '#'.$sectionId,
+                $heading,
+                ['class' => 'list-group-item list-group-item-action'.($firstCategory ? ' active' : '')],
+            ));
+
+            $categorySections->addItem(new \Ease\Html\DivTag([
+                new \Ease\Html\DivTag($heading, ['class' => 'config-category-title h5']),
+                $categoryBuckets[$categoryName],
+            ], ['id' => $sectionId, 'class' => 'config-category-section']));
+
+            $firstCategory = false;
+        }
+
+        if ($anyCategorized) {
+            $layoutRow = new \Ease\TWB4\Row();
+            $layoutRow->addColumn(3, new \Ease\Html\DivTag($categoryNav, ['class' => 'config-category-nav']));
+            $layoutRow->addColumn(9, $categorySections);
+            $this->addItem($layoutRow);
+
+            $this->addJavaScript(<<<'JS'
+                $('body').scrollspy({ target: '#configCategoryNav' });
+JS);
+        }
+
         $this->addItem(new \Ease\Html\InputHiddenTag('app_id', $engine->getDataValue('app_id')));
         $this->addItem(new \Ease\Html\InputHiddenTag('company_id', $engine->getDataValue('company_id')));
 
@@ -175,5 +250,60 @@ CSS);
         }
 
         $this->addItem($saveRow);
+    }
+
+    /**
+     * HTML input attributes for a MultiFlexi ConfigField type that isn't
+     * bool/multiline/redactable (those are handled separately). Maps
+     * MultiFlexi's type vocabulary onto valid HTML5 input types instead of
+     * passing the raw type string straight through (e.g. 'integer'/'float'
+     * are not valid HTML5 input types).
+     *
+     * @return array<string, string>
+     */
+    private static function inputAttrsForType(string $type): array
+    {
+        $class = 'form-control form-control-sm';
+
+        return match ($type) {
+            'integer' => ['type' => 'number', 'step' => '1', 'class' => $class],
+            'float' => ['type' => 'number', 'step' => 'any', 'class' => $class],
+            'email' => ['type' => 'email', 'class' => $class],
+            'url' => ['type' => 'url', 'class' => $class],
+            default => ['type' => 'text', 'class' => $class],
+        };
+    }
+
+    /**
+     * Build a field-name → category map from the application definition file.
+     *
+     * Used as a fallback for applications imported before the conffield
+     * category column existed (the category is then read straight from the
+     * *.multiflexi.app.json definition on disk).
+     *
+     * @return array<string, string>
+     */
+    private function readFieldCategories(\MultiFlexi\Application $application): array
+    {
+        $categories = [];
+        $deffile = (string) $application->getDataValue('deffile');
+
+        if ($deffile === '' || !is_file($deffile)) {
+            return $categories;
+        }
+
+        $appDef = json_decode((string) file_get_contents($deffile), true);
+
+        if (!\is_array($appDef) || empty($appDef['environment']) || !\is_array($appDef['environment'])) {
+            return $categories;
+        }
+
+        foreach ($appDef['environment'] as $envKey => $envCfg) {
+            if (\is_array($envCfg) && !empty($envCfg['category'])) {
+                $categories[$envKey] = (string) $envCfg['category'];
+            }
+        }
+
+        return $categories;
     }
 }

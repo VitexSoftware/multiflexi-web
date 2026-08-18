@@ -98,7 +98,12 @@ foreach ($conffields->appConfigs($appId) as $configInfo) {
     }
 
     $cnfRow->addColumn(2, $flags);
-    $cnfRow->addColumn(1, new \Ease\TWB4\LinkButton('?app_id='.$appId.'&delete='.$configInfo['id'], 'X', 'danger btn-sm'));
+    $cnfRow->addColumn(1, new \Ease\TWB4\LinkButton(
+        '?app_id='.$appId.'&delete='.$configInfo['id'],
+        'X',
+        'danger btn-sm',
+        ['onclick' => 'return confirm("'._('Delete this field definition and all company overrides using it?').'")'],
+    ));
     $cfgs->addItemSmart($cnfRow);
 }
 

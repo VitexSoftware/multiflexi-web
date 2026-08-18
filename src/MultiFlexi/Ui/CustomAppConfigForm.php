@@ -38,13 +38,16 @@ class CustomAppConfigForm extends EngineForm
         $values = $job->getFullEnvironment();
 
         foreach (\MultiFlexi\Conffield::getAppConfigs(new \MultiFlexi\Application($engine->getDataValue('app_id'))) as $fieldInfo) {
-            if ($fieldInfo['type'] === 'checkbox') {
-                $input = new \Ease\Html\DivTag(new \Ease\TWB4\Widgets\Toggle($fieldInfo['keyname'], \array_key_exists($fieldInfo['keyname'], $values) ? ($values[$fieldInfo['keyname']]['value'] === 'true' ? true : false) : $fieldInfo['defval'], 'true', []));
+            $keyname = $fieldInfo->getCode();
+            $currentValue = \array_key_exists($keyname, $values) ? $values[$keyname]['value'] : $fieldInfo->getDefaultValue();
+
+            if ($fieldInfo->getType() === 'bool') {
+                $input = new \Ease\Html\DivTag(BoolFieldWidget::toggle($keyname, $currentValue));
             } else {
-                $input = new \Ease\Html\InputTag($fieldInfo['keyname'], \array_key_exists($fieldInfo['keyname'], $values) ? $values[$fieldInfo['keyname']]['value'] : $fieldInfo['defval'], ['type' => $fieldInfo['type']]);
+                $input = new \Ease\Html\InputTag($keyname, $currentValue, ['type' => $fieldInfo->getType()]);
             }
 
-            $this->addInput($input, $fieldInfo['keyname'].'&nbsp;('.$fieldInfo['source'].')', $fieldInfo['defval'], $fieldInfo['description']);
+            $this->addInput($input, $keyname.'&nbsp;('.$fieldInfo->getSource().')', $fieldInfo->getDefaultValue(), $fieldInfo->getDescription());
         }
 
         $this->addItem(new \Ease\Html\InputHiddenTag('app_id', $engine->getDataValue('app_id')));

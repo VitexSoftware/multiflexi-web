@@ -60,9 +60,9 @@ class AppLaunchForm extends SecureForm
                         }
 
                         break;
-                    case 'checkbox':
+                    case 'bool':
                         if (!\array_key_exists($fieldKey, $envArray)) {
-                            $this->addInput(new \Ease\TWB4\Widgets\Toggle($fieldKey, (bool) $fieldProps->getDefaultValue()), $fieldKey.'&nbsp;', $fieldProps->getDefaultValue(), $fieldProps->getDescription());
+                            $this->addInput(BoolFieldWidget::toggle($fieldKey, $fieldProps->getDefaultValue()), $fieldKey.'&nbsp;', $fieldProps->getDefaultValue(), $fieldProps->getDescription());
                         }
 
                         break;
