@@ -111,6 +111,13 @@ class CsrfProtection
 
     /**
      * Handle CSRF validation failure.
+     *
+     * A mismatched/missing token almost always means the session that
+     * rendered the form is gone (expired, destroyed, or its file was
+     * reaped by the OS session cleaner - see SessionManager). Send the user
+     * back through login rather than dead-ending on a bare 403, so they
+     * land back where they were after re-authenticating, same as the
+     * session-expiry redirect in init.php.
      */
     public function handleCsrfFailure(): void
     {
@@ -120,6 +127,8 @@ class CsrfProtection
             $logger->addStatusMessage('CSRF token validation failed', 'security');
         }
 
+        $loginRedirect = 'login.php?session_expired=1&redirect='.urlencode($_SERVER['REQUEST_URI'] ?? '');
+
         // Send appropriate response
         if (self::isAjaxRequest()) {
             http_response_code(403);
@@ -127,12 +136,13 @@ class CsrfProtection
             echo json_encode([
                 'error' => 'CSRF token validation failed',
                 'code' => 403,
+                'session_expired' => true,
+                'redirect' => $loginRedirect,
             ]);
-        } else {
-            http_response_code(403);
-            echo '<h1>403 Forbidden</h1>';
-            echo '<p>CSRF token validation failed. Please refresh the page and try again.</p>';
+            exit;
         }
+
+        header('Location: '.$loginRedirect);
 
         exit;
     }
