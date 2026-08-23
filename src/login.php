@@ -45,13 +45,30 @@ if (isset($GLOBALS['ipWhitelist']) && !$GLOBALS['ipWhitelist']->isWhitelisted(\M
 
 $shared = Shared::singleton();
 
+/**
+ * Only accept post-login redirect targets that point back into this app.
+ * $_GET['redirect'] is attacker-controllable (crafted "session expired"
+ * links), so an absolute or protocol-relative URL here would be an open
+ * redirect once WebPage::redirect() emits it as a Location header.
+ */
+function isSafeWaybackTarget(?string $url): bool
+{
+    return $url !== null
+        && $url !== ''
+        && $url[0] === '/'
+        && (!isset($url[1]) || $url[1] !== '/')
+        && !str_contains($url, '\\')
+        && !preg_match('#^/[^/]*://#i', $url)
+        && !preg_match('/[\x00-\x1f]/', $url);
+}
+
 // Handle session expiration message
 if (isset($_GET['session_expired'])) {
     Shared::user()->addStatusMessage(_('Your session has expired. Please log in again.'), 'warning');
 }
 
 // Handle redirect parameter - store in session for post-login redirect
-if (isset($_GET['redirect']) && !empty($_GET['redirect'])) {
+if (isset($_GET['redirect']) && isSafeWaybackTarget($_GET['redirect'])) {
     $_SESSION['wayback'] = $_GET['redirect'];
 }
 
@@ -112,13 +129,9 @@ if ($login && $_SERVER['REQUEST_METHOD'] === 'POST') {
                         $GLOBALS['sessionManager']->regenerateId();
                     }
 
-                    if (\array_key_exists('wayback', $_SESSION) && !empty($_SESSION['wayback'])) {
-                        $wayback = $_SESSION['wayback'];
-                        unset($_SESSION['wayback']);
-                        WebPage::singleton()->redirect($wayback);
-                    } else {
-                        WebPage::singleton()->redirect('main.php');
-                    }
+                    $wayback = $_SESSION['wayback'] ?? null;
+                    unset($_SESSION['wayback']);
+                    WebPage::singleton()->redirect(isSafeWaybackTarget($wayback) ? $wayback : 'main.php');
 
                     session_write_close();
 
@@ -132,13 +145,9 @@ if ($login && $_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Fallback without rate limiting
             if (Shared::user()->tryToLogin($_POST)) {
-                if (\array_key_exists('wayback', $_SESSION) && !empty($_SESSION['wayback'])) {
-                    $wayback = $_SESSION['wayback'];
-                    unset($_SESSION['wayback']);
-                    WebPage::singleton()->redirect($wayback);
-                } else {
-                    WebPage::singleton()->redirect('main.php');
-                }
+                $wayback = $_SESSION['wayback'] ?? null;
+                unset($_SESSION['wayback']);
+                WebPage::singleton()->redirect(isSafeWaybackTarget($wayback) ? $wayback : 'main.php');
 
                 session_write_close();
 

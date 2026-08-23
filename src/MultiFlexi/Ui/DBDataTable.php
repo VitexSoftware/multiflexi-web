@@ -423,6 +423,19 @@ EOD.$this->ajax2db.<<<'EOD'
                 if (csrfToken) {
                     xhr.setRequestHeader('X-CSRF-Token', csrfToken);
                 }
+            },
+            "dataSrc": function(json) {
+                // Background poll found the session gone (e.g. cron-reaped
+                // session file). ajax2db.php can't stash a wayback URL for
+                // us here, but the browser already knows where it is - send
+                // it back to login with the real current location.
+                if (json.session_expired) {
+                    window.location.href = 'login.php?session_expired=1&redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+
+                    return [];
+                }
+
+                return json.data;
             }
         },
         //ajax: loadDataTableData(data, callback, settings),
