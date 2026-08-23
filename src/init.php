@@ -37,8 +37,14 @@ if (class_exists('\MultiFlexi\Security\SessionManager')) {
     );
 
     if (!$sessionManager->startSecureSession()) {
-        // Session security validation failed, redirect to login
-        if (basename($_SERVER['SCRIPT_NAME']) !== 'login.php') {
+        // Session security validation failed, redirect to login.
+        // AJAX/API endpoints (marked via BYPASS_CSRF_PROTECTION, e.g. ajax2db.php)
+        // must keep responding in their own format instead of receiving an HTML
+        // redirect here - that breaks client-side JSON parsing (e.g. DataTables
+        // "Invalid JSON response"). Let them fall through: the session was
+        // already destroyed, so Shared::user()->isLogged() reports false and
+        // the endpoint's own auth check produces a proper JSON error.
+        if (basename($_SERVER['SCRIPT_NAME']) !== 'login.php' && !\defined('BYPASS_CSRF_PROTECTION')) {
             $currentUrl = $_SERVER['REQUEST_URI'];
             header('Location: login.php?session_expired=1&redirect='.urlencode($currentUrl));
 
