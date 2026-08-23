@@ -100,6 +100,13 @@ class CredentialForm extends SecureForm
                 if (class_exists($uiHelperClassName)) {
                     $formContents[] = (string) (new $uiHelperClassName($kredenc));
                 } elseif (null !== $kredenc->getMyKey()) {
+                    // getPrototype()->load() only pulls credential-type-level defaults
+                    // (CrTypeOption, scoped by credential_type_id); overlay this specific
+                    // credential's actual stored values before checking availability.
+                    if (method_exists($credtypeHelper, 'fieldsInternal')) {
+                        $credtypeHelper->fieldsInternal()->arrayToValues($kredenc->getFields()->getRawEnvArray());
+                    }
+
                     $formContents[] = self::availabilityPanel($credtypeHelper->checkAvailability());
                 }
             }
