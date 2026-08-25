@@ -27,7 +27,7 @@ if (!$artifactor->getMyKey()) {
     exit;
 }
 
-$artifactData = stripslashes((string) $artifactor->getDataValue('artifact'));
+$artifactData = (string) $artifactor->getDataValue('artifact');
 $contentType = $artifactor->getDataValue('content_type');
 $filename = $artifactor->getDataValue('filename');
 
