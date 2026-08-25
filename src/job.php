@@ -289,19 +289,29 @@ if ($artifacts->count()) {
     $artifactsDiv = new \Ease\Html\DivTag();
 
     foreach ($artifacts->fetchAll() as $artifactData) {
-        switch ($artifactData['content_type']) {
-            case 'application/json':
-                $code = json_encode(json_decode($artifactData['artifact']), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_LINE_TERMINATORS);
+        if ($artifactData['content_type'] === 'application/pdf') {
+            $artifactBody = new \Ease\Html\DivTag(new \Ease\Html\Tag('embed', [
+                'src' => 'getartifact.php?id='.$artifactData['id'].'&inline=1',
+                'type' => 'application/pdf',
+                'style' => 'width: 100%; height: 600px; border: 0;',
+            ]));
+        } else {
+            switch ($artifactData['content_type']) {
+                case 'application/json':
+                    $code = json_encode(json_decode($artifactData['artifact']), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_LINE_TERMINATORS);
 
-                break;
+                    break;
 
-            default:
-                $code = $artifactData['artifact'];
+                default:
+                    $code = $artifactData['artifact'];
 
-                break;
+                    break;
+            }
+
+            $artifactBody = new \Ease\Html\DivTag(new \Ease\Html\PreTag('<code>'.htmlspecialchars((string) $code, \ENT_QUOTES | \ENT_HTML5, 'UTF-8').'</code>'), ['style' => 'font-family: monospace; color: black']);
         }
 
-        $artifactsDiv->addItem(new \Ease\TWB4\Panel([new \Ease\Html\ATag('getartifact.php?id='.$artifactData['id'], '💾', ['class' => 'btn btn-info btn-sm']), '&nbsp;'.htmlspecialchars((string) ($artifactData['filename'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')], 'inverse', new \Ease\Html\DivTag(new \Ease\Html\PreTag('<code>'.htmlspecialchars((string) $code, \ENT_QUOTES | \ENT_HTML5, 'UTF-8').'</code>'), ['style' => 'font-family: monospace; color: black']), htmlspecialchars((string) ($artifactData['note'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')));
+        $artifactsDiv->addItem(new \Ease\TWB4\Panel([new \Ease\Html\ATag('getartifact.php?id='.$artifactData['id'], '💾', ['class' => 'btn btn-info btn-sm']), '&nbsp;'.htmlspecialchars((string) ($artifactData['filename'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')], 'inverse', $artifactBody, htmlspecialchars((string) ($artifactData['note'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')));
     }
 
     $outputTabs->addTab(_('Artifacts').' <span class="badge badge-success">'.$artifacts->count().'</span>', $artifactsDiv);

@@ -32,9 +32,10 @@ $contentType = $artifactor->getDataValue('content_type');
 $filename = $artifactor->getDataValue('filename');
 
 $quoted = '"'.str_replace(['"', '\\', "\r", "\n"], ['\\"', '\\\\', '', ''], basename((string) $filename)).'"';
+$disposition = WebPage::singleton()->getRequestValue('inline', 'int') ? 'inline' : 'attachment';
 header('Content-Description: File Transfer');
 header('Content-Type: '.($contentType !== null && $contentType !== '' ? $contentType : 'application/octet-stream'));
-header('Content-Disposition: attachment; filename='.$quoted);
+header('Content-Disposition: '.$disposition.'; filename='.$quoted);
 header('Content-Transfer-Encoding: binary');
 header('Connection: Keep-Alive');
 header('Expires: 0');
