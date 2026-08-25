@@ -43,6 +43,7 @@ class TasksTable extends \Ease\Html\DivTag
 
         try {
             $tasker = new \MultiFlexi\Task();
+            $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
 
             $query = $tasker->getFluentPDO()
                 ->from('task')
@@ -52,11 +53,12 @@ task.id, task.state, task.window_start, task.window_end, task.deadline,
                      task.runtemplate_id,
                      runtemplate.name as rt_name,
                      company.id as company_id, company.name as company_name,
-                     apps.name as app_name
+                     apps.name as app_name, app_translations.name as app_name_localized
 EOD,)
                 ->leftJoin('runtemplate ON runtemplate.id = task.runtemplate_id')
                 ->leftJoin('company ON company.id = runtemplate.company_id')
                 ->leftJoin('apps ON apps.id = runtemplate.app_id')
+                ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
                 ->orderBy('task.id DESC')
                 ->limit(500);
 
@@ -113,8 +115,10 @@ EOD,)
                     $parts[] = '🏢 '.htmlspecialchars($task['company_name']);
                 }
 
-                if ($task['app_name']) {
-                    $parts[] = '🧩 '.htmlspecialchars($task['app_name']);
+                $appName = !empty($task['app_name_localized']) ? $task['app_name_localized'] : $task['app_name'];
+
+                if ($appName) {
+                    $parts[] = '🧩 '.htmlspecialchars($appName);
                 }
 
                 $companyApp = $parts ? implode(' / ', $parts) : '—';

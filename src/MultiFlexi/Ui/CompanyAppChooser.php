@@ -35,10 +35,15 @@ class CompanyAppChooser extends \Ease\Html\SelectTag
     public function __construct(string $name, Company $company, string $defaultValue = '', array $properties = [])
     {
         $companyApp = new \MultiFlexi\CompanyApp($company);
-        $assignedRaw = $companyApp->getAssigned()->leftJoin('apps ON apps.id = companyapp.app_id')->select('apps.name')->fetchAll('app_id');
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+        $assignedRaw = $companyApp->getAssigned()
+            ->leftJoin('apps ON apps.id = companyapp.app_id')
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->select(['apps.name', 'app_translations.name AS name_localized'])
+            ->fetchAll('app_id');
 
         foreach ($assignedRaw as $appId => $appProperties) {
-            $assignedRaw[$appId] = $appProperties['name'];
+            $assignedRaw[$appId] = !empty($appProperties['name_localized']) ? $appProperties['name_localized'] : $appProperties['name'];
         }
 
         $assigned = empty($assignedRaw) ? [] : $assignedRaw;

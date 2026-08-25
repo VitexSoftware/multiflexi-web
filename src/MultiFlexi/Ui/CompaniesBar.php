@@ -48,7 +48,12 @@ class CompaniesBar extends \Ease\Html\DivTag
 
             $companyAppStatus = new \Ease\Html\DivTag(null, ['style' => 'display: flex; flex-wrap: wrap; justify-content: center;']);
 
-            $companyApps = (new CompanyApp($companer))->getAssigned()->leftJoin('apps ON apps.id = companyapp.app_id')->select(['apps.name', 'apps.description', 'apps.id', 'apps.uuid'], true)->fetchAll();
+            $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+            $companyApps = (new CompanyApp($companer))->getAssigned()
+                ->leftJoin('apps ON apps.id = companyapp.app_id')
+                ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+                ->select(['apps.name', 'apps.description', 'apps.id', 'apps.uuid', 'app_translations.name AS name_localized', 'app_translations.description AS description_localized'], true)
+                ->fetchAll();
 
             foreach ($companyApps as $companyApp) {
                 $appId = $companyApp['id'];
@@ -71,7 +76,9 @@ class CompaniesBar extends \Ease\Html\DivTag
                     $jobCounts->addItem(new ATag('jobs.php?app_id='.$appId.'&company_id='.$companyId.'&status=waiting', (string) $waitingJobs, ['class' => 'badge badge-pill badge-warning']));
                 }
 
-                $appIcon = new ATag('companyapp.php?company_id='.$companer->getMyKey().'&app_id='.$appId, new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], _($companyApp['name']), ['title' => _($companyApp['description']), 'width' => '50', 'height' => '50', 'style' => 'padding: 5px; margin: 5px;max-height: 50px;max-width: 50px;object-fit: contain;']));
+                $appName = !empty($companyApp['name_localized']) ? $companyApp['name_localized'] : $companyApp['name'];
+                $appDescription = !empty($companyApp['description_localized']) ? $companyApp['description_localized'] : $companyApp['description'];
+                $appIcon = new ATag('companyapp.php?company_id='.$companer->getMyKey().'&app_id='.$appId, new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], $appName, ['title' => $appDescription, 'width' => '50', 'height' => '50', 'style' => 'padding: 5px; margin: 5px;max-height: 50px;max-width: 50px;object-fit: contain;']));
                 $appBlock = new \Ease\Html\DivTag($appIcon);
 
                 if ($successJobs > 0 || $failedJobs > 0 || $waitingJobs > 0) {

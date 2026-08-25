@@ -52,7 +52,7 @@ class ApplicationPanel extends Panel
         $logoCol->addTagClass('text-center my-auto');
 
         $titleCol = $this->headRow->addColumn(4, [
-            new \Ease\Html\H2Tag($application->getRecordName(), ['class' => 'mb-0']),
+            new \Ease\Html\H2Tag(\MultiFlexi\LocalizedApplication::nameOf($application), ['class' => 'mb-0']),
             new \Ease\Html\SmallTag($application->getDataValue('uuid'), ['class' => 'text-muted d-block small']),
         ]);
         $titleCol->addTagClass('my-auto');

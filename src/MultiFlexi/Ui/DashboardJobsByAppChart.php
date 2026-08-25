@@ -36,10 +36,13 @@ class DashboardJobsByAppChart extends \Ease\Html\DivTag
             $jobber = new \MultiFlexi\Job();
 
             // Data pro graf - top 10 aplikací podle počtu jobů
+            $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+
             $appJobsData = $jobber->getFluentPDO()
                 ->from('job')
-                ->select('apps.name, COUNT(job.id) as job_count')
+                ->select('apps.name, app_translations.name as name_localized, COUNT(job.id) as job_count')
                 ->leftJoin('apps ON apps.id = job.app_id')
+                ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
                 ->groupBy('apps.id')
                 ->orderBy('job_count DESC')
                 ->limit(10)
@@ -49,7 +52,8 @@ class DashboardJobsByAppChart extends \Ease\Html\DivTag
                 $chartData = [];
 
                 foreach ($appJobsData as $row) {
-                    $chartData[$row['name'] ?? _('Unknown')] = (int) $row['job_count'];
+                    $appName = !empty($row['name_localized']) ? $row['name_localized'] : $row['name'];
+                    $chartData[$appName ?? _('Unknown')] = (int) $row['job_count'];
                 }
 
                 $graph = new \Goat1000\SVGGraph\SVGGraph(600, 400, [

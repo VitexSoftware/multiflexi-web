@@ -32,7 +32,7 @@ if (WebPage::getRequestValue('new', 'int') === 1) {
     $runTemplate->setDataValue('app_id', WebPage::getRequestValue('app_id', 'int'));
     $runTemplate->setDataValue('company_id', WebPage::getRequestValue('company_id', 'int'));
     $runTemplate->setDataValue('interv', 'n');
-    $runTemplate->setDataValue('name', _($app->getRecordName()));
+    $runTemplate->setDataValue('name', \MultiFlexi\LocalizedApplication::nameOf($app));
 
     $runTemplate->takeData([]);
 
@@ -71,7 +71,7 @@ $app = new Application($runTemplate->getDataValue('app_id'));
 
 $app->setDataValue('company_id', $companies->getMyKey());
 $app->setDataValue('app_id', $app->getMyKey());
-$app->setDataValue('app_name', $app->getRecordName());
+$app->setDataValue('app_name', \MultiFlexi\LocalizedApplication::nameOf($app));
 
 $configurator = new \MultiFlexi\Configuration([
     'runtemplate_id' => $runTemplate->getMyKey(),

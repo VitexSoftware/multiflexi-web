@@ -21,10 +21,10 @@ use Ease\TWB4\LinkButton;
 use Ease\TWB4\Row;
 use Ease\TWB4\Table;
 use Ease\TWB4\Tabs;
-use MultiFlexi\Application;
 use MultiFlexi\Company;
 use MultiFlexi\Conffield;
 use MultiFlexi\Job;
+use MultiFlexi\LocalizedApplication;
 
 require_once './init.php';
 WebPage::singleton()->onlyForLogged();
@@ -39,8 +39,8 @@ if ($importUuid && !$action) {
     $_REQUEST['app_json_url'] = rtrim($hubUrl, '/').'/app.php?export='.urlencode($importUuid);
 }
 
-$apps = new Application(WebPage::getRequestValue('id', 'int') + WebPage::getRequestValue('app', 'int'));
-$instanceName = _($apps->getDataValue('name') ?: _('n/a'));
+$apps = new LocalizedApplication(WebPage::getRequestValue('id', 'int') + WebPage::getRequestValue('app', 'int'));
+$instanceName = $apps->getRecordName() ?: _('n/a');
 
 switch ($action) {
     case 'import':

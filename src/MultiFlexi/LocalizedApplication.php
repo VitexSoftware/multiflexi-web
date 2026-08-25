@@ -25,24 +25,36 @@ class LocalizedApplication extends Application
     use ApplicationTranslation;
 
     /**
-     * Override the base method to check if method exists
-     * This allows compatibility with existing code.
-     *
-     * @param mixed $method
-     * @param mixed $args
+     * Return the application name localized to the current locale, falling
+     * back to the raw record name when no translation is available.
      */
-    public function __call($method, $args)
+    public function getRecordName()
     {
-        // Check if it's a localization method
-        if (method_exists($this, $method)) {
-            return \call_user_func_array([$this, $method], $args);
+        return $this->getLocalizedName() ?? parent::getRecordName();
+    }
+
+    /**
+     * Localized name for a plain Application instance, without requiring
+     * every call site to construct a LocalizedApplication itself.
+     */
+    public static function nameOf(Application $app): string
+    {
+        if ($app instanceof self) {
+            return (string) $app->getRecordName();
         }
 
-        // Fall back to parent
-        if (method_exists(parent::class, '__call')) {
-            return parent::__call($method, $args);
-        }
+        $localized = new self($app->getMyKey());
 
-        throw new \BadMethodCallException("Method {$method} does not exist");
+        return (string) $localized->getRecordName();
+    }
+
+    /**
+     * Localized description for a plain Application instance.
+     */
+    public static function descriptionOf(Application $app): string
+    {
+        $localized = $app instanceof self ? $app : new self($app->getMyKey());
+
+        return (string) ($localized->getLocalizedDescription() ?? $app->getDataValue('description'));
     }
 }

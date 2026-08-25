@@ -198,7 +198,7 @@ EOD);
 
         // Add selected application logo
         if (!empty($this->wizardData['app_id'])) {
-            $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+            $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
             $uuid = $app->getDataValue('uuid');
 
             if ($uuid) {
@@ -804,7 +804,7 @@ EOD,
         }
 
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
-        $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+        $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
 
         $container->addItem(new \Ease\Html\H3Tag(_('Create RunTemplate')));
         $container->addItem(new \Ease\Html\PTag(sprintf(_('Creating RunTemplate for %s in %s'), $app->getRecordName(), $company->getRecordName())));
@@ -882,7 +882,7 @@ EOD,
         }
 
         $runTemplate = new \MultiFlexi\RunTemplate($this->wizardData['runtemplate_id']);
-        $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+        $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
 
         $headingText = _('Assign Credentials');
@@ -980,7 +980,7 @@ EOD,
         }
 
         $runTemplate = new \MultiFlexi\RunTemplate($this->wizardData['runtemplate_id']);
-        $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+        $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
 
         $actualId = $runTemplate->getMyKey();
         $configTitle = _('Configure').' '.$runTemplate->getRecordName();
@@ -1133,7 +1133,7 @@ EOD,
         }
 
         $runTemplate = new \MultiFlexi\RunTemplate($this->wizardData['runtemplate_id']);
-        $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+        $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
 
         $container->addItem(new \Ease\Html\H3Tag('🎉 '._('Activation Complete')));
@@ -1291,7 +1291,7 @@ EOD,
         }
 
         $runTemplate = new \MultiFlexi\RunTemplate($this->wizardData['runtemplate_id']);
-        $app = new \MultiFlexi\Application($this->wizardData['app_id']);
+        $app = new \MultiFlexi\LocalizedApplication($this->wizardData['app_id']);
         $company = new \MultiFlexi\Company($this->wizardData['company_id']);
 
         // Add status message about created RunTemplate with actual ID

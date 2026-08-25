@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace MultiFlexi\Ui;
 
-use MultiFlexi\Application;
+use MultiFlexi\LocalizedApplication;
 
 require_once './init.php';
 WebPage::singleton()->onlyForLogged();
@@ -72,8 +72,8 @@ if (!$runTemplate->getMyKey()) {
 }
 
 $appInfo = $runTemplate->getAppInfo();
-$apps = new Application($appInfo['app_id']);
-$instanceName = $appInfo['app_name'];
+$apps = new LocalizedApplication($appInfo['app_id']);
+$instanceName = $apps->getRecordName() ?: $appInfo['app_name'];
 
 $errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getErrorOutput()))), ['style' => 'background: #330000; font-family: monospace;']);
 $stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getOutput()))), ['style' => 'background:  black; font-family: monospace;']);

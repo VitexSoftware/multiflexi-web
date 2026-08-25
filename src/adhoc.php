@@ -39,13 +39,13 @@ $assignedRaw = $companyApp->getAssigned()->fetchAll('app_id');
 $assigned = empty($assignedRaw) ? [] : array_keys($assignedRaw);
 WebPage::singleton()->container->addItem($addAppForm);
 
-$apper = new \MultiFlexi\Application();
+$apper = new \MultiFlexi\LocalizedApplication();
 
 $launchTabs = new \Ease\TWB4\Tabs();
 
 foreach ($assigned as $assignedAppId) {
     $apper->loadFromSQL($assignedAppId);
-    $launchTabs->addTab(new AppLogo($apper, ['style' => 'height: 20px']).'&nbsp;'._($apper->getRecordName()), new AppInfo($apper, $companer->getMyKey()));
+    $launchTabs->addTab(new AppLogo($apper, ['style' => 'height: 20px']).'&nbsp;'.$apper->getRecordName(), new AppInfo($apper, $companer->getMyKey()));
 }
 
 WebPage::singleton()->container->addItem(new CompanyPanel($companer, [new \Ease\Html\H2Tag(_('Application Launcher')), $launchTabs]));

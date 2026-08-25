@@ -47,10 +47,13 @@ class DashboardRecentJobsTable extends \Ease\Html\DivTag
                 $scheduledCounts[$item['job']] = $index + 1; // Position in queue (1-based)
             }
 
+            $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+
             $recentJobs = $jobber->getFluentPDO()
                 ->from('job')
-                ->select('job.id, job.begin, job.end, job.exitcode, job.app_id, job.company_id, job.runtemplate_id, job.launched_by, job.schedule, apps.name as app_name, company.name as company_name, runtemplate.name as runtemplate_name, user.login as user_login, user.enabled as user_enabled, user.firstname, user.lastname, schedule.id as schedule_id, schedule.after as schedule_after')
+                ->select('job.id, job.begin, job.end, job.exitcode, job.app_id, job.company_id, job.runtemplate_id, job.launched_by, job.schedule, apps.name as app_name, app_translations.name as app_name_localized, company.name as company_name, runtemplate.name as runtemplate_name, user.login as user_login, user.enabled as user_enabled, user.firstname, user.lastname, schedule.id as schedule_id, schedule.after as schedule_after')
                 ->leftJoin('apps ON apps.id = job.app_id')
+                ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
                 ->leftJoin('company ON company.id = job.company_id')
                 ->leftJoin('runtemplate ON runtemplate.id = job.runtemplate_id')
                 ->leftJoin('user ON user.id = job.launched_by')
@@ -89,8 +92,9 @@ class DashboardRecentJobsTable extends \Ease\Html\DivTag
                     }
 
                     // Create links with emoticons
-                    $appLink = $job['app_id'] && $job['app_name']
-                        ? new \Ease\Html\ATag('app.php?id='.$job['app_id'], '🧩 '.$job['app_name'])
+                    $appName = !empty($job['app_name_localized']) ? $job['app_name_localized'] : $job['app_name'];
+                    $appLink = $job['app_id'] && $appName
+                        ? new \Ease\Html\ATag('app.php?id='.$job['app_id'], '🧩 '.$appName)
                         : '-';
                     $companyLink = $job['company_id'] && $job['company_name']
                         ? new \Ease\Html\ATag('company.php?id='.$job['company_id'], '🏢 '.$job['company_name'])

@@ -26,6 +26,6 @@ class AppLinkButton extends \Ease\TWB4\LinkButton
 {
     public function __construct(\MultiFlexi\Application $app, $properties = [])
     {
-        parent::__construct('app.php?id='.$app->getMyKey(), [new AppLogo($app, ['style' => 'height: 64px']), '&nbsp;', _($app->getRecordName())], 'inverse', $properties);
+        parent::__construct('app.php?id='.$app->getMyKey(), [new AppLogo($app, ['style' => 'height: 64px']), '&nbsp;', \MultiFlexi\LocalizedApplication::nameOf($app)], 'inverse', $properties);
     }
 }

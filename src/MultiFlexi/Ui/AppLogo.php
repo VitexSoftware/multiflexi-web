@@ -36,7 +36,7 @@ class AppLogo extends ImgTag
     {
         parent::__construct(
             empty($application->getMyKey()) ? 'images/apps.svg' : 'appimage.php?uuid='.$application->getDataValue('uuid'),
-            (string) $application->getDataValue('name'),
+            \MultiFlexi\LocalizedApplication::nameOf($application),
             $properties,
         );
         $this->addTagClass('img-fluid');

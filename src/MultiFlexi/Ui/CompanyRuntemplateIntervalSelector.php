@@ -40,9 +40,20 @@ class CompanyRuntemplateIntervalSelector extends CompanyAppSelector
         $runTemplate = new \MultiFlexi\RunTemplate();
         $companyRuntemplates = $runTemplate->getCompanyTemplates($this->companyId)->fetchAll('id');
 
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+        $appNamesLocalized = $runTemplate->getFluentPDO()
+            ->from('runtemplate')
+            ->leftJoin('apps ON apps.id = runtemplate.app_id')
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->where('runtemplate.company_id', $this->companyId)
+            ->select(['runtemplate.id', 'app_translations.name AS app_name_localized'])
+            ->fetchPairs('id', 'app_name_localized');
+
         foreach ($companyRuntemplates as $id => $companyRuntemplate) {
+            $appName = !empty($appNamesLocalized[$id]) ? $appNamesLocalized[$id] : $companyRuntemplate['app_name'];
+
             if (empty($companyRuntemplate['name'])) {
-                $companyRuntemplates[$id]['name'] = (string) $id.' '.$companyRuntemplate['app_name'];
+                $companyRuntemplates[$id]['name'] = (string) $id.' '.$appName;
             }
 
             if ($companyRuntemplate['interv'] !== 'n') {

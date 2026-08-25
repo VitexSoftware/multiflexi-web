@@ -36,6 +36,14 @@ class CompanyAppSelector extends AppsSelector
 
     public function availbleApps()
     {
-        return (new CompanyApp(new Company($this->companyId)))->getAssigned()->leftJoin('apps ON apps.id = companyapp.app_id')->select(['apps.name', 'apps.description', 'apps.id', 'apps.image'], true)->fetchAll();
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+
+        $apps = (new CompanyApp(new Company($this->companyId)))->getAssigned()
+            ->leftJoin('apps ON apps.id = companyapp.app_id')
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->select(['apps.name', 'apps.description', 'apps.id', 'apps.image', 'app_translations.name AS name_localized', 'app_translations.description AS description_localized'], true)
+            ->fetchAll();
+
+        return self::applyLocalizedNames($apps);
     }
 }

@@ -36,11 +36,11 @@ class AppInfo extends \Ease\Html\DivTag
      */
     public function __construct($app, $companyId, $properties = [])
     {
-        parent::__construct(new \Ease\Html\H2Tag($app->getRecordName()));
+        parent::__construct(new \Ease\Html\H2Tag(\MultiFlexi\LocalizedApplication::nameOf($app)));
 
         $mainRow = new \Ease\TWB4\Row();
         $mainRow->addColumn(2, [
-            new \Ease\Html\DivTag($app->getDataValue('description'), ['style' => 'color: white;']),
+            new \Ease\Html\DivTag(\MultiFlexi\LocalizedApplication::descriptionOf($app), ['style' => 'color: white;']),
             new \Ease\Html\DivTag(new \Ease\Html\ATag($app->getDataValue('homepage'), $app->getDataValue('homepage'))),
             new \Ease\Html\DivTag(new AppLogo($app), ['style' => 'margin: auto;  width: 90%;  padding: 10px;']),
             new Label($app->getDataValue('enabled') ? 'success' : 'danger', $app->getDataValue('enabled') ? _('Enabled') : _('Disabled'), ['style' => 'text-align: center; text-shadow: 1px 1px 2px white;']),

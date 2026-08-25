@@ -26,14 +26,21 @@ class CompanyAppsBar extends \Ease\Html\DivTag
     public function __construct(Company $company, $properties = [])
     {
         parent::__construct('', []);
-        $companyApps = (new CompanyApp($company))->getAssigned()->leftJoin('apps ON apps.id = companyapp.app_id')->select(['apps.name', 'apps.description', 'apps.id', 'apps.uuid'], true)->fetchAll();
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+        $companyApps = (new CompanyApp($company))->getAssigned()
+            ->leftJoin('apps ON apps.id = companyapp.app_id')
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->select(['apps.name', 'apps.description', 'apps.id', 'apps.uuid', 'app_translations.name AS name_localized', 'app_translations.description AS description_localized'], true)
+            ->fetchAll();
 
         $jobber = new \MultiFlexi\Job();
 
         $cardGroup = new \Ease\Html\DivTag(null, ['class' => 'card-group']);
 
         foreach ($companyApps as $companyApp) {
-            $companyAppCard = new \Ease\TWB4\Card(new \Ease\Html\ATag('companyapp.php?company_id='.$company->getMyKey().'&app_id='.$companyApp['id'], new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], _($companyApp['name']), ['title' => _($companyApp['description']), 'class' => 'card-img-top', 'width' => '150', 'height' => '150', 'style' => 'padding: 5px; margin: 5px;max-height: 150px;max-width: 150px;object-fit: contain;'])), ['style' => 'width: 10rem; min-width: 120px;']);
+            $appName = !empty($companyApp['name_localized']) ? $companyApp['name_localized'] : $companyApp['name'];
+            $appDescription = !empty($companyApp['description_localized']) ? $companyApp['description_localized'] : $companyApp['description'];
+            $companyAppCard = new \Ease\TWB4\Card(new \Ease\Html\ATag('companyapp.php?company_id='.$company->getMyKey().'&app_id='.$companyApp['id'], new \Ease\Html\ImgTag('appimage.php?uuid='.$companyApp['uuid'], $appName, ['title' => $appDescription, 'class' => 'card-img-top', 'width' => '150', 'height' => '150', 'style' => 'padding: 5px; margin: 5px;max-height: 150px;max-width: 150px;object-fit: contain;'])), ['style' => 'width: 10rem; min-width: 120px;']);
             $companyAppCard->addTagClass('text-center');
             // Get last executed job (begin is not null)
             $lastJobInfo = $jobber->listingQuery()
@@ -79,7 +86,7 @@ class CompanyAppsBar extends \Ease\Html\DivTag
                 $companyAppStatus = new \Ease\TWB4\Badge('disabled', '🪤', ['style' => 'font-size: 2.0em; font-family: monospace;']);
             }
 
-            $companyAppCard->addItem(new \Ease\Html\DivTag(new \Ease\Html\H5Tag(_($companyApp['name']), ['class' => 'card-title']), ['class' => 'card-body']));
+            $companyAppCard->addItem(new \Ease\Html\DivTag(new \Ease\Html\H5Tag($appName, ['class' => 'card-title']), ['class' => 'card-body']));
             $companyAppCard->addItem(new \Ease\Html\DivTag($companyAppStatus, ['class' => 'card-footer  bg-transparent']));
 
             $cardGroup->addItem($companyAppCard);

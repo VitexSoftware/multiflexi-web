@@ -43,7 +43,7 @@ class CompanyAppUnassignForm extends SecureForm
 
         $this->addItem(new InputHiddenTag('action', 'unassign'));
 
-        $confirmMessage = sprintf(_('Remove %s from %s?'), $application->getRecordName(), $company->getRecordName());
+        $confirmMessage = sprintf(_('Remove %s from %s?'), \MultiFlexi\LocalizedApplication::nameOf($application), $company->getRecordName());
 
         $this->addItem(new SubmitButton('🗑️&nbsp;'._('Remove from Company'), 'outline-danger btn-lg', [
             'onclick' => 'return confirm('.json_encode($confirmMessage, \JSON_THROW_ON_ERROR).');',

@@ -40,31 +40,36 @@ class AppsSelector extends \Ease\Html\InputTextTag
         $properties['render']['option'] = 'function (item, escape) { return "<div><img height=40 align=right src=\"appimage.php?uuid=" + escape(item.uuid) + "\">" + escape(item.name) + "<br><small>" + escape(item.description) + "</small></div>" }';
         $properties['plugins'] = ['remove_button'];
 
-        $this->selectize($properties, self::translateColumns($this->availbleApps(), ['name', 'description'], true));
+        $this->selectize($properties, self::applyLocalizedNames($this->availbleApps()));
     }
 
     public function availbleApps()
     {
         $apper = new \MultiFlexi\Application();
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
 
-        return $apper->listingQuery()->select(['id', 'name', 'description', 'homepage', 'uuid'], true)->fetchAll();
+        return $apper->listingQuery()
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->select(['id', 'name', 'description', 'homepage', 'uuid', 'app_translations.name AS name_localized', 'app_translations.description AS description_localized'], true)
+            ->fetchAll();
     }
 
     /**
-     * Translate strings in specified column using GetText.
-     *
-     * @param mixed $addslashes
+     * Replace name/description with their app_translations-localized value
+     * (falling back to the raw value) and drop the helper columns.
      */
-    public static function translateColumns(array $data, array $columns, $addslashes = false): array
+    public static function applyLocalizedNames(array $data): array
     {
         foreach ($data as $rowId => $record) {
-            foreach ($columns as $transcol) {
-                if (\array_key_exists($transcol, $record)) {
-                    if (\strlen($record[$transcol])) {
-                        $data[$rowId][$transcol] = $addslashes ? addslashes(_($data[$rowId][$transcol])) : _($data[$rowId][$transcol]);
-                    }
-                }
+            if (!empty($record['name_localized'])) {
+                $data[$rowId]['name'] = $record['name_localized'];
             }
+
+            if (!empty($record['description_localized'])) {
+                $data[$rowId]['description'] = $record['description_localized'];
+            }
+
+            unset($data[$rowId]['name_localized'], $data[$rowId]['description_localized']);
         }
 
         return $data;

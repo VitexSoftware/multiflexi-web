@@ -99,7 +99,7 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
         $logoCol->addTagClass('text-center my-auto');
 
         $titleCol = $headerRow->addColumn(4, [
-            new \Ease\Html\SmallTag($this->runtemplate->getApplication()->getRecordName(), ['class' => 'text-muted d-block font-weight-bold text-uppercase small']),
+            new \Ease\Html\SmallTag(\MultiFlexi\LocalizedApplication::nameOf($this->runtemplate->getApplication()), ['class' => 'text-muted d-block font-weight-bold text-uppercase small']),
             $nameInput,
             $noteInput,
         ]);

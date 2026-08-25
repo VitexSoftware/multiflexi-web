@@ -35,7 +35,7 @@ class ArchivedJobPanel extends Panel
     {
         $cid = $job->getApplication()->getMyKey();
         $this->headRow = new Row();
-        $this->headRow->addColumn(4, [new \Ease\Html\ATag('app.php?id='.$cid, new AppLogo($job->getApplication(), ['style' => 'height: 120px'])), '&nbsp;', $job->getApplication()->getRecordName()]);
+        $this->headRow->addColumn(4, [new \Ease\Html\ATag('app.php?id='.$cid, new AppLogo($job->getApplication(), ['style' => 'height: 120px'])), '&nbsp;', \MultiFlexi\LocalizedApplication::nameOf($job->getApplication())]);
         //            new LinkButton('jobs.php?app_id='.$cid, '🧑‍💻&nbsp;'._('Jobs history'), 'secondary btn-lg')]);
 
         $ca = new \MultiFlexi\CompanyApp(null);

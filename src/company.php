@@ -53,7 +53,8 @@ switch ($showOnly) {
         break;
 }
 
-$jobs = $jobber->listingQuery()->select(['apps.name AS appname', 'apps.uuid AS uuid', 'job.id', 'begin', 'exitcode', 'launched_by', 'job.executor', 'job.schedule_type', 'login', 'job.app_id AS app_id', 'runtemplate.id AS runtemplate_id', 'runtemplate.name AS runtemplate_name', 'schedule AS scheduled'], true)->leftJoin('apps ON apps.id = job.app_id')->leftJoin('user ON user.id = job.launched_by')->leftJoin('runtemplate ON runtemplate.id = job.runtemplate_id')->where('job.company_id', $companies->getMyKey())->limit(20)->orderBy('job.id DESC')->where($condition)->fetchAll();
+$currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+$jobs = $jobber->listingQuery()->select(['COALESCE(app_translations.name, apps.name) AS appname', 'apps.uuid AS uuid', 'job.id', 'begin', 'exitcode', 'launched_by', 'job.executor', 'job.schedule_type', 'login', 'job.app_id AS app_id', 'runtemplate.id AS runtemplate_id', 'runtemplate.name AS runtemplate_name', 'schedule AS scheduled'], true)->leftJoin('apps ON apps.id = job.app_id')->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)->leftJoin('user ON user.id = job.launched_by')->leftJoin('runtemplate ON runtemplate.id = job.runtemplate_id')->where('job.company_id', $companies->getMyKey())->limit(20)->orderBy('job.id DESC')->where($condition)->fetchAll();
 $jobList = new \Ease\TWB4\Table();
 $jobList->addRowHeaderColumns([_('Run template').' / '._('Application'), _('Job ID'), _('Launch time'), _('Launcher'), _('Schedule Launch')]);
 

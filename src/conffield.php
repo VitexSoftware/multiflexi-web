@@ -25,7 +25,7 @@ WebPage::singleton()->onlyForLogged();
 $appId = WebPage::getRequestValue('app_id', 'int');
 $confId = WebPage::getRequestValue('id', 'int');
 
-$appliacation = new \MultiFlexi\Application($appId);
+$appliacation = new \MultiFlexi\LocalizedApplication($appId);
 
 $_SESSION['application'] = $appliacation->getMyKey();
 

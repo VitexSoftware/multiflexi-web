@@ -20,16 +20,16 @@ use Ease\Html\H3Tag;
 use Ease\TWB4\LinkButton;
 use Ease\TWB4\Row;
 use Ease\TWB4\Table;
-use MultiFlexi\Application;
 use MultiFlexi\Company;
 use MultiFlexi\Job;
+use MultiFlexi\LocalizedApplication;
 use MultiFlexi\RunTemplate;
 
 require_once './init.php';
 WebPage::singleton()->onlyForLogged();
 
 $companer = new Company(WebPage::getRequestValue('company_id', 'int'));
-$application = new Application(WebPage::getRequestValue('app_id', 'int'));
+$application = new LocalizedApplication(WebPage::getRequestValue('app_id', 'int'));
 
 if (WebPage::isPosted() && WebPage::getRequestValue('action') === 'unassign') {
     $runtemplateCount = \count((new RunTemplate())->getFluentPDO()->from('runtemplate')
@@ -50,7 +50,7 @@ if (WebPage::isPosted() && WebPage::getRequestValue('action') === 'unassign') {
     WebPage::singleton()->addStatusMessage(_('Cannot remove application: RunTemplates still exist for it'), 'error');
 }
 
-WebPage::singleton()->addItem(new PageTop(_($application->getRecordName()).'@'.$companer->getRecordName()));
+WebPage::singleton()->addItem(new PageTop($application->getRecordName().'@'.$companer->getRecordName()));
 
 // Create CompanyApp object for chart
 $companyApp = (new \MultiFlexi\CompanyApp($companer))->setApp($application);

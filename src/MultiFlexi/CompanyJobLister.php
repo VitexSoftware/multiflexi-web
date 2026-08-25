@@ -159,7 +159,7 @@ class CompanyJobLister extends CompanyJob
             $this->scheduledCounts[$scheduledJob['job']] = $position++;
         }
 
-        $query->select(['apps.name AS appname', 'apps.uuid', 'apps.image AS appimage', 'apps.description AS appdescription', 'apps.homepage AS apphomepage', 'app_translations.description AS appdescription_localized', 'job.id', 'begin', 'end', 'exitcode', 'job.block_reason', 'job.blocked_at', 'launched_by', 'login', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'company.ic', 'company.enabled', 'schedule', 'schedule_type', 'job.runtemplate_id', 'runtemplate.name AS runtemplate_name', 'runtemplate.note AS runtemplate_note', 'runtemplate.interv AS runtemplate_interv', 'runtemplate.cron AS runtemplate_cron', 'runtemplate.last_schedule AS runtemplate_last_schedule', 'runtemplate.next_schedule AS runtemplate_next_schedule', 'runtemplate.delay AS runtemplate_delay', 'schedule.id AS schedule_id'], true)
+        $query->select(['apps.name AS appname', 'apps.uuid', 'apps.image AS appimage', 'apps.description AS appdescription', 'apps.homepage AS apphomepage', 'app_translations.name AS appname_localized', 'app_translations.description AS appdescription_localized', 'job.id', 'begin', 'end', 'exitcode', 'job.block_reason', 'job.blocked_at', 'launched_by', 'login', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'company.ic', 'company.enabled', 'schedule', 'schedule_type', 'job.runtemplate_id', 'runtemplate.name AS runtemplate_name', 'runtemplate.note AS runtemplate_note', 'runtemplate.interv AS runtemplate_interv', 'runtemplate.cron AS runtemplate_cron', 'runtemplate.last_schedule AS runtemplate_last_schedule', 'runtemplate.next_schedule AS runtemplate_next_schedule', 'runtemplate.delay AS runtemplate_delay', 'schedule.id AS schedule_id'], true)
             ->leftJoin('apps ON apps.id = job.app_id')
             ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
             ->leftJoin('company ON company.id = job.company_id')
@@ -258,6 +258,7 @@ class CompanyJobLister extends CompanyJob
 
         // Format Application column with icon and rich popover
         if (isset($dataRowRaw['appname'])) {
+            $appName = !empty($dataRowRaw['appname_localized']) ? $dataRowRaw['appname_localized'] : $dataRowRaw['appname'];
             $appImageUrl = empty($dataRowRaw['appimage']) ? 'appimage.php?uuid='.$dataRowRaw['uuid'] : $dataRowRaw['appimage'];
 
             // Build rich popover content for application with large logo, description, and homepage
@@ -265,12 +266,12 @@ class CompanyJobLister extends CompanyJob
 
             // Large logo centered at top
             $appPopoverContent .= '<div style="text-align: center; margin-bottom: 10px;">';
-            $appPopoverContent .= '<img src="'.htmlspecialchars($appImageUrl).'" alt="'.htmlspecialchars($dataRowRaw['appname']).'" style="max-width: 80px; max-height: 80px;">';
+            $appPopoverContent .= '<img src="'.htmlspecialchars($appImageUrl).'" alt="'.htmlspecialchars($appName).'" style="max-width: 80px; max-height: 80px;">';
             $appPopoverContent .= '</div>';
 
             // Application name
             $appPopoverContent .= '<div style="text-align: center; margin-bottom: 8px;">';
-            $appPopoverContent .= '<strong style="font-size: 1.1em;">'.htmlspecialchars($dataRowRaw['appname']).'</strong>';
+            $appPopoverContent .= '<strong style="font-size: 1.1em;">'.htmlspecialchars($appName).'</strong>';
             $appPopoverContent .= '</div>';
 
             // Description if available - prefer localized version
@@ -296,7 +297,7 @@ class CompanyJobLister extends CompanyJob
                 $dataRowRaw['app_id'],
                 htmlspecialchars($appPopoverContent),
                 htmlspecialchars($appImageUrl),
-                htmlspecialchars($dataRowRaw['appname']),
+                htmlspecialchars($appName),
             );
         }
 

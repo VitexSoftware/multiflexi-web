@@ -59,9 +59,12 @@ class JobHistoryTable extends \Ease\TWB4\Table
 
     public function getJobs()
     {
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+
         return $this->jobber->listingQuery()->
-                        select(['apps.name AS appname', 'apps.uuid', 'job.id', 'begin', 'exitcode', 'launched_by', 'user.login', 'user.enabled AS user_enabled', 'user.firstname', 'user.lastname', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'schedule', 'schedule_type'], true)
+                        select(['apps.name AS appname', 'apps.uuid', 'app_translations.name AS appname_localized', 'job.id', 'begin', 'exitcode', 'launched_by', 'user.login', 'user.enabled AS user_enabled', 'user.firstname', 'user.lastname', 'job.app_id AS app_id', 'job.executor', 'job.company_id', 'company.name', 'company.logo', 'schedule', 'schedule_type'], true)
                             ->leftJoin('apps ON apps.id = job.app_id')
+                            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
                             ->leftJoin('user ON user.id = job.launched_by')
                             ->limit($this->limit)
                             ->orderBy('job.id DESC');
@@ -76,14 +79,16 @@ class JobHistoryTable extends \Ease\TWB4\Table
             $company->setDataValue('logo', $job['logo']);
             $company->setDataValue('name', $job['name']);
 
+            $appName = !empty($job['appname_localized']) ? $job['appname_localized'] : $job['appname'];
+
             if ($this->showIcon) {
-                $job['uuid'] = new \Ease\Html\ATag('app.php?id='.$job['app_id'], [new \Ease\TWB4\Badge('light', [new \Ease\Html\ImgTag(empty($job['appimage']) ? 'appimage.php?uuid='.$job['uuid'] : $job['appimage'], _($job['appname']), ['width' => 60, 'height' => 60, 'style' => 'object-fit: contain;', 'title' => $job['appname']]), '&nbsp;', _($job['appname'])])]);
+                $job['uuid'] = new \Ease\Html\ATag('app.php?id='.$job['app_id'], [new \Ease\TWB4\Badge('light', [new \Ease\Html\ImgTag(empty($job['appimage']) ? 'appimage.php?uuid='.$job['uuid'] : $job['appimage'], $appName, ['width' => 60, 'height' => 60, 'style' => 'object-fit: contain;', 'title' => $appName]), '&nbsp;', $appName])]);
             } else {
                 unset($job['uuid']);
             }
 
             $job['id'] = new \Ease\Html\ATag('job.php?id='.$job['id'], [new ExitCode($exitCode, ['style' => 'font-size: 1.0em; font-family: monospace;']), '<br>', new \Ease\TWB4\Badge('info', '🏁 '.$job['id'])], ['title' => _('Job Info')]);
-            unset($job['appname'], $job['app_id']);
+            unset($job['appname'], $job['appname_localized'], $job['app_id']);
 
             if ($job['begin']) {
                 $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(\DateTime::createFromFormat('!Y-m-d H:i:s', $job['begin'])))];

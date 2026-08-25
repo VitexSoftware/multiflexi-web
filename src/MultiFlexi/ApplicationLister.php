@@ -43,11 +43,24 @@ class ApplicationLister extends Application
         ]);
     }
 
+    public function listingQuery(): \Envms\FluentPDO\Queries\Select
+    {
+        $currentLang = substr(\Ease\Locale::$localeUsed ?? 'en_US', 0, 2);
+
+        return parent::listingQuery()
+            ->leftJoin('app_translations ON app_translations.app_id = apps.id AND app_translations.lang = ?', $currentLang)
+            ->select(['app_translations.name AS name_localized', 'app_translations.description AS description_localized']);
+    }
+
     public function completeDataRow(array $dataRowRaw)
     {
-        $dataRow = current(Ui\AppsSelector::translateColumns([$dataRowRaw], ['name', 'description']));
-        $dataRow['name'] = '<a title="'.$dataRowRaw['name'].'" href="app.php?id='.$dataRowRaw['id'].'">'.$dataRowRaw['name'].'</a>';
-        $dataRow['icon'] = '<a title="'.$dataRowRaw['name'].'" href="app.php?id='.$dataRowRaw['id'].'"><img src="appimage.php?uuid='.$dataRowRaw['uuid'].'" width="50" height="50" style="object-fit: contain;">';
+        $name = !empty($dataRowRaw['name_localized']) ? $dataRowRaw['name_localized'] : $dataRowRaw['name'];
+        $description = !empty($dataRowRaw['description_localized']) ? $dataRowRaw['description_localized'] : $dataRowRaw['description'];
+
+        $dataRow = $dataRowRaw;
+        $dataRow['name'] = '<a title="'.$name.'" href="app.php?id='.$dataRowRaw['id'].'">'.$name.'</a>';
+        $dataRow['description'] = $description;
+        $dataRow['icon'] = '<a title="'.$name.'" href="app.php?id='.$dataRowRaw['id'].'"><img src="appimage.php?uuid='.$dataRowRaw['uuid'].'" width="50" height="50" style="object-fit: contain;">';
 
         $topics = new \Ease\Html\DivTag();
 

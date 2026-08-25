@@ -52,16 +52,18 @@ class ServicesForCompanyForm extends SecureForm
 
         foreach ($platformApps as $appData) {
             $apper->setData($appData);
+            $appName = \MultiFlexi\LocalizedApplication::nameOf($apper);
             $appData['company_id'] = $companyID;
             $appData['app_id'] = $appData['id'];
-            $appData['app_name'] = $appData['name'];
+            $appData['app_name'] = $appName;
+            $appData['description'] = \MultiFlexi\LocalizedApplication::descriptionOf($apper);
 
             if (\array_key_exists($appData['id'], $assigned)) {
                 $appData['interv'] = $assigned[$appData['id']]['interv'];
                 $appData['runtemplateid'] = $assigned[$appData['id']]['id'];
             }
 
-            $appTabs->addTab(new AppLogo($apper, ['style' => 'height: 20px']).'&nbsp;'._($apper->getRecordName()), new AppRow($appData));
+            $appTabs->addTab(new AppLogo($apper, ['style' => 'height: 20px']).'&nbsp;'.$appName, new AppRow($appData));
         }
 
         $this->addItem($appTabs);
