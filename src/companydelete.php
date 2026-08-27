@@ -66,8 +66,37 @@ if (empty($instanceName) === false) {
     $instanceLink = null;
 }
 
+$leftColumn = [new DeleteCompanyForm($companies, null, ['action' => 'companydelete.php'])];
+
+$runtemplatesToRemove = (new \MultiFlexi\RunTemplate())->listingQuery()->where('company_id', $companies->getMyKey())->fetchAll('id');
+$credentialsToRemove = (new \MultiFlexi\Credential())->listingQuery()->where('company_id', $companies->getMyKey())->fetchAll('id');
+
+if ($runtemplatesToRemove || $credentialsToRemove) {
+    $removalPanel = new \Ease\TWB4\Panel(_('The following records will also be removed'), 'warning');
+
+    if ($runtemplatesToRemove) {
+        $removalPanel->addItem(new \Ease\Html\StrongTag(_('Run Templates')));
+        $rtplList = $removalPanel->addItem(new \Ease\Html\UlTag());
+
+        foreach ($runtemplatesToRemove as $runtemplateRow) {
+            $rtplList->addItem(new \Ease\Html\LiTag($runtemplateRow['name']));
+        }
+    }
+
+    if ($credentialsToRemove) {
+        $removalPanel->addItem(new \Ease\Html\StrongTag(_('Credentials')));
+        $credList = $removalPanel->addItem(new \Ease\Html\UlTag());
+
+        foreach ($credentialsToRemove as $credentialRow) {
+            $credList->addItem(new \Ease\Html\LiTag($credentialRow['name']));
+        }
+    }
+
+    $leftColumn[] = $removalPanel;
+}
+
 $instanceRow = new Row();
-$instanceRow->addColumn(4, new DeleteCompanyForm($companies, null, ['action' => 'companydelete.php']));
+$instanceRow->addColumn(4, $leftColumn);
 
 if (empty($companies->getDataValue('logo')) === false) {
     $rightColumn[] = new \Ease\Html\ImgTag($companies->getDataValue('logo'), 'logo', ['class' => 'img-fluid']);
