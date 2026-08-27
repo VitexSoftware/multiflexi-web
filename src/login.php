@@ -85,14 +85,11 @@ if (isset($_GET['logout'])) {
 }
 
 try {
-    $hasAdmin = false;
+    // This interface does not use RBAC, so show first-run setup only when
+    // no users exist at all in the database.
+    $userCount = (new \MultiFlexi\User())->listingQuery()->count();
 
-    if (isset($GLOBALS['rbac'])) {
-        $rbac = $GLOBALS['rbac'];
-        $hasAdmin = $rbac->isRoleAssigned('admin') || $rbac->isRoleAssigned('super_admin');
-    }
-
-    if (!$hasAdmin) {
+    if ($userCount === 0) {
         Shared::user()->addStatusMessage(_('There are no administrators in the database.'), 'warning');
         WebPage::singleton()->container->addItem(new LinkButton('createaccount.php', _('Create first Administrator Account'), 'success', ['id' => 'createAdmin']));
     }
