@@ -279,6 +279,100 @@ $outputTabs = new \Ease\TWB4\Tabs();
 $outputTabs->addTab(_('Output').' '.(\strlen($jobber->getOutput()) ? ' <span class="badge badge-secondary">'.substr_count($jobber->getOutput(), "\n").'</span>' : '<span class="badge badge-invers">💭</span>'), [$stdTerminal, $stdOutputRaw, \strlen($jobber->getOutput()) ? $copyStdButton : '', \strlen($jobber->getOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=std', _('Download'), 'secondary btn-block') : _('No output'), new \Ease\Html\PreTag('', ['id' => 'live-output'])]);
 $outputTabs->addTab(_('Errors').' '.(empty($jobber->getErrorOutput()) ? ' <span class="badge badge-success">0</span>' : '<span class="badge badge-warning">'.substr_count($jobber->getErrorOutput(), "\n").'</span>'), [$errorTerminal, $errOutputRaw, \strlen($jobber->getErrorOutput()) ? $copyErrButton : '', \strlen($jobber->getErrorOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=err', _('Download'), 'secondary btn-block') : _('No errors')], empty($jobber->getOutput()));
 
+function multiflexiFormatArtifactBytes(int $bytes): string
+{
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $size = (float) $bytes;
+    $unit = 0;
+
+    while ($size >= 1024 && $unit < \count($units) - 1) {
+        $size /= 1024;
+        $unit++;
+    }
+
+    return ($unit === 0 ? (string) $bytes : number_format($size, 2)).' '.$units[$unit];
+}
+
+function multiflexiImageMetadataBody(array $artifactData): \Ease\Html\DlTag
+{
+    $bytes = (string) $artifactData['artifact'];
+    $list = new \Ease\Html\DlTag(null, ['class' => 'row']);
+    $list->addDef(_('Filename'), htmlspecialchars((string) ($artifactData['filename'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8'));
+    $list->addDef(_('Content type'), htmlspecialchars((string) $artifactData['content_type'], \ENT_QUOTES | \ENT_HTML5, 'UTF-8'));
+    $list->addDef(_('Size'), multiflexiFormatArtifactBytes(\strlen($bytes)));
+
+    $dataUri = 'data://application/octet-stream;base64,'.base64_encode($bytes);
+    $info = @getimagesize($dataUri);
+
+    if ($info === false) {
+        $list->addDef(_('Note'), _('Image dimensions could not be read'));
+
+        return $list;
+    }
+
+    $list->addDef(_('Dimensions'), $info[0].' × '.$info[1].' px');
+    $list->addDef(_('Detected type'), htmlspecialchars((string) ($info['mime'] ?? ''), \ENT_QUOTES | \ENT_HTML5, 'UTF-8'));
+
+    if (($info[2] ?? null) === \IMAGETYPE_JPEG && \function_exists('exif_read_data')) {
+        $stream = @fopen($dataUri, 'rb');
+
+        if ($stream !== false) {
+            $exif = @exif_read_data($stream, null, true);
+            fclose($stream);
+
+            foreach (['EXIF', 'IFD0'] as $section) {
+                if (isset($exif[$section]) && \is_array($exif[$section])) {
+                    foreach ($exif[$section] as $tag => $value) {
+                        if (\is_scalar($value)) {
+                            $list->addDef((string) $tag, htmlspecialchars((string) $value, \ENT_QUOTES | \ENT_HTML5, 'UTF-8'));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return $list;
+}
+
+/**
+ * Nested Preview/Metadata (or Rendered/Source) mini-tabs for one artifact.
+ *
+ * \Ease\TWB4\Tabs derives DOM ids purely from the tab label text with no
+ * per-instance salt, so nesting one per artifact on this page would collide
+ * across artifacts sharing the same labels. Ids here are salted with $uid.
+ *
+ * @param array<string, \Ease\Html\DivTag> $tabs label => tab body
+ */
+function multiflexiRenderMiniTabs(string $uid, array $tabs, string $activeLabel): \Ease\Html\DivTag
+{
+    $nav = new \Ease\Html\UlTag(null, ['class' => 'nav nav-tabs']);
+    $content = new \Ease\Html\DivTag(null, ['class' => 'tab-content']);
+
+    foreach ($tabs as $label => $body) {
+        $tabId = $uid.'-'.preg_replace('/[^A-Za-z0-9_\\-]/', '', $label);
+        $isActive = $label === $activeLabel;
+
+        $nav->addItemSmart(new \Ease\Html\ATag('#'.$tabId, $label, [
+            'class' => 'nav-link'.($isActive ? ' active' : ''),
+            'id' => $tabId.'-tab',
+            'data-toggle' => 'tab',
+            'role' => 'tab',
+            'aria-controls' => $tabId,
+            'aria-selected' => $isActive ? 'true' : 'false',
+        ]), ['class' => 'nav-item']);
+
+        $content->addItem(new \Ease\Html\DivTag($body, [
+            'class' => 'tab-pane fade'.($isActive ? ' show active' : ''),
+            'id' => $tabId,
+            'role' => 'tabpanel',
+            'aria-labelledby' => $tabId.'-tab',
+        ]));
+    }
+
+    return new \Ease\Html\DivTag([$nav, $content]);
+}
+
 $artifactor = new \MultiFlexi\Artifact();
 $artifacts = $artifactor->listingQuery()->where('job_id', $jobID);
 
@@ -289,14 +383,27 @@ if ($artifacts->count()) {
     $artifactsDiv = new \Ease\Html\DivTag();
 
     foreach ($artifacts->fetchAll() as $artifactData) {
-        if ($artifactData['content_type'] === 'application/pdf') {
+        $contentType = (string) $artifactData['content_type'];
+        $filename = (string) ($artifactData['filename'] ?? '');
+        $isImage = str_starts_with($contentType, 'image/') || (bool) preg_match('/\.svg$/i', $filename);
+        $isHtml = $contentType === 'text/html';
+
+        if ($contentType === 'application/pdf') {
             $artifactBody = new \Ease\Html\DivTag(new \Ease\Html\Tag('embed', [
                 'src' => 'getartifact.php?id='.$artifactData['id'].'&inline=1',
                 'type' => 'application/pdf',
                 'style' => 'width: 100%; height: 600px; border: 0;',
             ]));
+        } elseif ($isImage) {
+            $previewBody = new \Ease\Html\DivTag(new \Ease\Html\ImgTag('getartifact.php?id='.$artifactData['id'].'&inline=1', $filename, ['style' => 'max-width: 100%; height: auto;']));
+            $metaBody = new \Ease\Html\DivTag(multiflexiImageMetadataBody($artifactData), ['style' => 'padding: 10px;']);
+            $artifactBody = multiflexiRenderMiniTabs('artifact-'.$artifactData['id'], [_('Preview') => $previewBody, _('Metadata') => $metaBody], _('Preview'));
+        } elseif ($isHtml) {
+            $renderedBody = new \Ease\Html\DivTag(new \Ease\Html\IframeTag('getartifact.php?id='.$artifactData['id'].'&inline=1', ['style' => 'width: 100%; height: 600px; border: 0;', 'sandbox' => 'allow-same-origin']));
+            $sourceBody = new \Ease\Html\DivTag(new \Ease\Html\PreTag('<code>'.htmlspecialchars((string) $artifactData['artifact'], \ENT_QUOTES | \ENT_HTML5, 'UTF-8').'</code>'), ['style' => 'font-family: monospace; color: black']);
+            $artifactBody = multiflexiRenderMiniTabs('artifact-'.$artifactData['id'], [_('Rendered') => $renderedBody, _('Source') => $sourceBody], _('Rendered'));
         } else {
-            switch ($artifactData['content_type']) {
+            switch ($contentType) {
                 case 'application/json':
                     $code = json_encode(json_decode($artifactData['artifact']), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_LINE_TERMINATORS);
 
