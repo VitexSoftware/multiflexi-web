@@ -194,6 +194,10 @@ class CompanyJobLister extends CompanyJob
                     $query->where($todayCondition);
 
                     break;
+                case 'waiting':
+                    $query->where('job.exitcode IS NULL');
+
+                    break;
             }
         }
 

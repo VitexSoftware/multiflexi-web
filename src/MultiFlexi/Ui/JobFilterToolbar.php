@@ -70,6 +70,8 @@ class JobFilterToolbar extends \Ease\Html\DivTag
                 return _('Scheduled Jobs');
             case 'today':
                 return _('Today\'s Jobs');
+            case 'waiting':
+                return _('Waiting Jobs');
 
             default:
                 return _('Job history');
