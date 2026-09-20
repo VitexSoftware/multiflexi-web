@@ -20,30 +20,26 @@ session_cache_limiter('');
 
 require_once __DIR__.'/init.php';
 
-// Public endpoint: application icons are not sensitive and are consumed by
+// Public endpoint: company logos are not sensitive and are consumed by
 // external tools (e.g. node-red-contrib-multiflexi) without a session.
 
-$uuid = WebPage::getRequestValue('uuid');
+$id = (int) WebPage::getRequestValue('id');
 $contentType = 'image/svg+xml';
+$imageData = false;
 
-// Shared image search paths (development source tree first, then deb-installed locations)
-$imageDirectories = [
-    __DIR__.'/images',                    // Development: src/images/
-    '/usr/share/multiflexi/images',       // Deb packages: app-specific SVGs
-];
+if ($id) {
+    // Company.logo is stored as a base64 data: URI in the database.
+    $logo = (string) (new \MultiFlexi\Company($id))->getDataValue('logo');
 
-foreach ($imageDirectories as $dir) {
-    $candidate = $dir.'/'.$uuid.'.svg';
-
-    if (is_file($candidate)) {
-        $imageData = file_get_contents($candidate);
-
-        break;
+    if ($logo !== '' && preg_match('#^data:([^;]+);base64,(.*)$#s', $logo, $m)) {
+        $contentType = $m[1];
+        $imageData = base64_decode($m[2], true);
     }
 }
 
-if (!isset($imageData) || $imageData === false) {
-    $imageData = file_get_contents(__DIR__.'/images/apps.svg');
+if ($imageData === false || $imageData === '') {
+    $contentType = 'image/svg+xml';
+    $imageData = file_get_contents(__DIR__.'/images/company.svg');
 }
 
 $etag = '"'.md5($imageData).'"';

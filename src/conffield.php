@@ -76,8 +76,7 @@ foreach ($conffields->appConfigs($appId) as $configInfo) {
     $cnfRow = new Row();
     $cnfRow->addColumn(1, $configInfo['type']);
     $cnfRow->addColumn(3, new ATag('conffield.php?app_id='.$appId.'&id='.$configInfo['id'], new \Ease\TWB4\Badge('success', $configInfo['keyname'])));
-    $cnfRow->addColumn(2, !empty($configInfo['name']) ? $configInfo['name'] : '');
-    $cnfRow->addColumn(3, $configInfo['description']);
+    $cnfRow->addColumn(5, $configInfo['description']);
 
     $flags = new \Ease\Html\SpanTag();
 

@@ -128,6 +128,7 @@ EOD;
             Job::SCHEDULE_TYPE_ADHOC_WEB => _('Ad-hoc (Web)'),
             Job::SCHEDULE_TYPE_ADHOC_CLI => _('Ad-hoc (CLI)'),
             Job::SCHEDULE_TYPE_ADHOC_API => _('Ad-hoc (API)'),
+            Job::SCHEDULE_TYPE_EVENT => _('Event'),
             Job::SCHEDULE_TYPE_COMMAND_LINE => _('Scheduled (CLI/API)'),
         ];
 
