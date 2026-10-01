@@ -109,7 +109,7 @@ if (WebPage::isPosted() || $when === 'now') {
     $infoDiv->addItem(new \Ease\Html\DivTag([new \Ease\Html\StrongTag(_('Original Schedule: ')), $jobber->getDataValue('schedule')]));
     $panel->addItem($infoDiv);
 
-    $form = new \Ease\TWB4\Form(['action' => 'reschedule.php']);
+    $form = new \MultiFlexi\Ui\SecureForm(['method' => 'POST', 'action' => 'reschedule.php']);
     $form->addItem(new \Ease\Html\InputHiddenTag('job_id', $jobID));
 
     $form->addItem(new \Ease\TWB4\FormGroup(
