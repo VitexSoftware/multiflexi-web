@@ -126,7 +126,7 @@ class RunTemplateStatsCards extends \Ease\TWB4\Row
         $chartsRow->addColumn(8, new \MultiFlexi\Ui\RunTemplateJobsLastMonthChart($this->runtemplate, ['style' => 'width: 100%;']), 'md', ['class' => 'p-2 border-top']);
         $chartsRow->addColumn(4, [
             new \Ease\Html\H5Tag(_('Recent Jobs Visualization'), ['class' => 'mb-2 font-weight-bold text-muted text-uppercase small']),
-            new \MultiFlexi\Ui\JobGraphWidget($this->runtemplate, 20, 10),
+            new \MultiFlexi\Ui\JobGraphWidget($this->runtemplate),
         ], 'md', ['class' => 'p-2 border-top']);
 
         $this->addItem($mainRow);

@@ -34,6 +34,11 @@ WebPage::singleton()->addItem(new PageTop($pageTitle));
 // Add filter toolbar
 WebPage::singleton()->container->addItem(new JobFilterToolbar($filter, 'jobs.php'));
 
+// Job history graph scoped to the active company/app filters
+$companyIdInt = $companyId ? (int) $companyId : null;
+$appIdInt = $appId ? (int) $appId : null;
+WebPage::singleton()->container->addItem(new JobGraphWidget(null, $companyIdInt, $appIdInt));
+
 // Add custom success row styling
 WebPage::singleton()->addCSS(<<<CSS
     /* Custom success row styling - lighter green with better contrast */

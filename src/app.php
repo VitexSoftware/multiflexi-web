@@ -197,6 +197,7 @@ $appTabs = new Tabs();
 $appTabs->addTab(_('Overview'), $appOverview);
 $appTabs->addTab(_('Configuration'), $instanceRow);
 $appTabs->addTab(_('Jobs'), [
+    new JobGraphWidget(null, null, (int) $apps->getMyKey()),
     $jobList,
     new LinkButton('logs.php?apps_id='.$apps->getMyKey(), _('Application Log'), 'info', ['title' => _('View application log'), 'id' => 'applicationlogbutton']),
     new LinkButton('jobs.php?app_id='.$apps->getMyKey(), _('All Application Jobs history'), 'info', ['title' => _('View all application jobs history'), 'id' => 'allapplicationjobshistorybutton']),

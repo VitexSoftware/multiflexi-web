@@ -28,6 +28,11 @@ $oPage->container->addItem(new DashboardMetricsCards());
 // Druhý řádek - úspěšnost jobů
 $oPage->container->addItem(new DashboardStatusCards());
 
+// Job history graph overview
+$jobGraphRow = new \Ease\TWB4\Row();
+$jobGraphRow->addColumn(12, new JobGraphWidget());
+$oPage->container->addItem($jobGraphRow);
+
 // Grafy
 $chartsRow = new \Ease\TWB4\Row();
 $chartsRow->addColumn(6, new DashboardJobsByAppChart());

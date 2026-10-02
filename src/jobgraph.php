@@ -17,10 +17,13 @@ namespace MultiFlexi\Ui;
 
 require_once './init.php';
 
+WebPage::singleton()->onlyForLogged();
+
 $companyId = WebPage::getRequestValue('company_id', 'int');
 $runtemplateId = WebPage::getRequestValue('runtemplate_id', 'int');
-$width = WebPage::getRequestValue('width', 'int');
-$height = WebPage::getRequestValue('height', 'int');
+$appId = WebPage::getRequestValue('app_id', 'int');
+$width = WebPage::getRequestValue('width', 'int') ?: 20;
+$height = WebPage::getRequestValue('height', 'int') ?: 10;
 
 $jobber = new \MultiFlexi\Job();
 
@@ -31,12 +34,18 @@ if ($runtemplateId) {
     $query->where('runtemplate_id', $runtemplateId);
 } elseif ($companyId) {
     $query->where('company_id', $companyId);
+
+    if ($appId) {
+        $query->where('app_id', $appId);
+    }
+} elseif ($appId) {
+    $query->where('app_id', $appId);
 }
 
 $todaysJobs = $query->fetchAll();
 
 $jobGraph = new JobGraph($width, $height, $todaysJobs);
-$base64Image = $jobGraph->generateImage();
+$jobGraph->generateImage();
 
 header('Content-Type: image/png');
 

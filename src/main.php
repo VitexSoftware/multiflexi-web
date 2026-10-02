@@ -33,7 +33,10 @@ if (!empty($filter)) {
     $chartEngine->applyFilter($filter);
 }
 
-WebPage::singleton()->container->addItem(new AllJobsLastMonthChart($chartEngine, ['id' => 'container']));
+$chartsRow = new \Ease\TWB4\Row();
+$chartsRow->addColumn(8, new AllJobsLastMonthChart($chartEngine, ['id' => 'container']));
+$chartsRow->addColumn(4, new JobGraphWidget());
+WebPage::singleton()->container->addItem($chartsRow);
 
 // Queue: same information as `multiflexi-cli queue:list`, with IDs used only as link targets
 $engine = new \MultiFlexi\ScheduleLister();

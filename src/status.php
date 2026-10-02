@@ -26,13 +26,21 @@ $jobber = new \MultiFlexi\Job();
 $width = 500;
 $height = 500;
 
-$todaysJobs = $jobber->listingQuery()->select('exitcode', true)->limit($width * $height)->orderBy('id')->fetchAll();
+$todaysJobs = $jobber->listingQuery()->select('exitcode', true)->limit($width * $height)->orderBy('id DESC')->fetchAll();
 
 $jobGraph = new JobGraph($width, $height, $todaysJobs);
-$jobGraph->generateImage();
-$base64Image = $jobGraph->getBase64Image();
+$jobGraph->calcultateStats();
 
-$imageTag = new \Ease\Html\ImgTag('data:image/png;base64,'.$base64Image, 'Job Success/Failure Graph', ['width' => $width, 'height' => $height]);
+$imageTag = new \Ease\Html\ImgTag(
+    'jobgraph.php?width='.$width.'&height='.$height,
+    _('Job Success/Failure Graph'),
+    [
+        'width' => $width,
+        'height' => $height,
+        'style' => 'image-rendering: pixelated;',
+        'class' => 'border',
+    ],
+);
 
 // Calculate percentages
 $totalJobs = $jobGraph->getTotalJobs();

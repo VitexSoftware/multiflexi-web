@@ -18,43 +18,68 @@ namespace MultiFlexi\Ui;
 /**
  * Job Graph Widget Component.
  *
- * Displays a visual grid of recent job exit codes for a RunTemplate
+ * Displays a visual grid of recent job exit codes, scoped to a single
+ * RunTemplate, a single Company (optionally filtered to one App), or
+ * (when nothing is given) to every company the signed-in user may see.
  *
  * @author vitex
  */
 class JobGraphWidget extends \Ease\Html\DivTag
 {
-    private \MultiFlexi\RunTemplate $runtemplate;
+    private ?\MultiFlexi\RunTemplate $runtemplate;
+    private ?int $companyId;
+    private ?int $appId;
     private int $width;
     private int $height;
 
     /**
      * Constructor.
      *
-     * @param \MultiFlexi\RunTemplate $runtemplate RunTemplate instance
-     * @param int                     $width       Grid width in cells (default: 20)
-     * @param int                     $height      Grid height in cells (default: 10)
-     * @param array                   $properties  HTML element properties
+     * @param null|\MultiFlexi\RunTemplate $runtemplate RunTemplate to scope the graph to (takes precedence over companyId/appId)
+     * @param null|int                     $companyId   Company to scope the graph to (ignored if $runtemplate is given)
+     * @param null|int                     $appId       App to further scope the graph to within $companyId
+     * @param int                          $width       Grid width in cells (default: 20)
+     * @param int                          $height      Grid height in cells (default: 10)
+     * @param array                        $properties  HTML element properties
      */
-    public function __construct(\MultiFlexi\RunTemplate $runtemplate, int $width = 20, int $height = 10, array $properties = [])
-    {
+    public function __construct(
+        ?\MultiFlexi\RunTemplate $runtemplate = null,
+        ?int $companyId = null,
+        ?int $appId = null,
+        int $width = 20,
+        int $height = 10,
+        array $properties = [],
+    ) {
         $this->runtemplate = $runtemplate;
+        $this->companyId = $companyId;
+        $this->appId = $appId;
         $this->width = $width;
         $this->height = $height;
 
         parent::__construct(null, $properties);
 
-        // Create image tag pointing to jobgraph.php
-        $graphUrl = 'jobgraph.php?runtemplate_id='.$runtemplate->getMyKey()
-                  .'&width='.$width
-                  .'&height='.$height;
+        $params = ['width' => $width, 'height' => $height];
+
+        if ($runtemplate) {
+            $params['runtemplate_id'] = $runtemplate->getMyKey();
+        } elseif ($companyId) {
+            $params['company_id'] = $companyId;
+
+            if ($appId) {
+                $params['app_id'] = $appId;
+            }
+        } elseif ($appId) {
+            $params['app_id'] = $appId;
+        }
+
+        $graphUrl = 'jobgraph.php?'.http_build_query($params);
 
         $imgTag = new \Ease\Html\ImgTag(
             $graphUrl,
             _('Job History Graph'),
             [
                 'class' => 'img-fluid border',
-                'style' => 'max-width: 100%; height: auto;',
+                'style' => 'height: 212px; width: auto; max-width: 100%; image-rendering: pixelated;',
                 'title' => _('Visual representation of recent job executions. Each cell represents a job, colored by exit code.'),
             ],
         );
