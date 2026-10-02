@@ -49,6 +49,8 @@ distributions.each { distro ->
             ansiColor('xterm') {
                 stage('Checkout ' + distroName) {
                     sh 'sudo chown -R jenkins:jenkins . 2>/dev/null || true'
+                    // git writes objects read-only; unstash cannot overwrite them in a reused workspace
+                    sh 'chmod -R u+w .git 2>/dev/null || true'
                     unstash 'src'
                     def imageName = vendor + '/' + distro
                     buildImage = docker.image(imageName)
