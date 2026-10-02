@@ -38,23 +38,44 @@ if (null !== $delete) {
 }
 
 if (WebPage::singleton()->isPosted()) {
-    $eventRule->takeData($_POST);
+    $posted = $_POST;
 
-    // Validate env_mapping JSON
-    $envMapping = $eventRule->getDataValue('env_mapping');
-
-    if (!empty($envMapping) && null === json_decode($envMapping, true)) {
-        $eventRule->addStatusMessage(_('Invalid JSON in Environment Variable Mapping'), 'error');
-    } else {
-        if (null !== $eventRule->dbsync()) {
-            $eventRule->addStatusMessage(_('Event Rule saved'), 'success');
+    // Select "0" / empty means NULL for optional FK columns
+    foreach (['event_source_id', 'runtemplate_source_id'] as $optionalFk) {
+        if (!isset($posted[$optionalFk]) || $posted[$optionalFk] === '' || $posted[$optionalFk] === '0') {
+            $posted[$optionalFk] = null;
         } else {
-            $eventRule->addStatusMessage(_('Error saving Event Rule'), 'error');
+            $posted[$optionalFk] = (int) $posted[$optionalFk];
+        }
+    }
+
+    if (empty($posted['runtemplate_id']) || (int) $posted['runtemplate_id'] <= 0) {
+        $eventRule->addStatusMessage(_('Target RunTemplate is required'), 'error');
+    } elseif ($posted['event_source_id'] === null && $posted['runtemplate_source_id'] === null) {
+        $eventRule->addStatusMessage(_('Set either an Event Source or a Source RunTemplate'), 'error');
+    } else {
+        $eventRule->takeData($posted);
+
+        // Validate env_mapping JSON
+        $envMapping = $eventRule->getDataValue('env_mapping');
+
+        if (!empty($envMapping) && null === json_decode($envMapping, true)) {
+            $eventRule->addStatusMessage(_('Invalid JSON in Environment Variable Mapping'), 'error');
+        } else {
+            if (null !== $eventRule->dbsync()) {
+                $eventRule->addStatusMessage(_('Event Rule saved'), 'success');
+            } else {
+                $eventRule->addStatusMessage(_('Error saving Event Rule'), 'error');
+            }
         }
     }
 }
 
-WebPage::singleton()->addItem(new PageTop(_('Event Rule')));
+$pageTitle = $eventRule->getMyKey()
+    ? sprintf(_('Event Rule #%s'), $eventRule->getMyKey())
+    : _('New Event Rule');
+
+WebPage::singleton()->addItem(new PageTop($pageTitle));
 
 WebPage::singleton()->container->addItem(new EventRuleForm($eventRule));
 

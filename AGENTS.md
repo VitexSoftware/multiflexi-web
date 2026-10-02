@@ -152,7 +152,7 @@ make demorun       # runs demo on :8282 (login: demo/demo)
 | `credential-wizard.php` | Step-by-step credential setup wizard |
 | `users.php` / `user.php` | User management |
 | `eventsources.php` / `eventsource.php` | Event source configuration |
-| `eventrules.php` / `eventrule.php` | Event rule configuration (event → RunTemplate mapping) |
+| `eventrules.php` / `eventrule.php` | Event rule editor (Event Source or Source RunTemplate → target RunTemplate + env_mapping) |
 | `data-export.php` / `data-export-page.php` | GDPR Article 15 (data export) |
 | `admin-data-corrections.php` | GDPR Article 16 (data correction approval) |
 | `gdpr-user-deletion-request.php` / `admin-deletion-requests.php` | GDPR Article 17 (right to erasure) |

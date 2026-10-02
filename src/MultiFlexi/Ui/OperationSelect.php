@@ -31,16 +31,19 @@ class OperationSelect extends \Ease\Html\SelectTag
      */
     public function __construct(string $name, string $defaultValue = '', array $properties = [])
     {
-        parent::__construct(
-            $name,
-            [
-                'any' => _('Any'),
-                'create' => _('Create'),
-                'update' => _('Update'),
-                'delete' => _('Delete'),
-            ],
-            $defaultValue,
-            $properties,
-        );
+        $operations = [
+            'any' => _('Any'),
+            'create' => _('Create'),
+            'update' => _('Update'),
+            'delete' => _('Delete'),
+            'settled' => _('Settled'),
+        ];
+
+        // Preserve unknown adapter-specific operations already stored on the rule
+        if ($defaultValue !== '' && !\array_key_exists($defaultValue, $operations)) {
+            $operations[$defaultValue] = $defaultValue;
+        }
+
+        parent::__construct($name, $operations, $defaultValue, $properties);
     }
 }

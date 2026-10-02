@@ -30,26 +30,89 @@ class EventRuleForm extends SecureForm
      */
     public function __construct(\MultiFlexi\EventRule $eventRule, array $formProperties = [])
     {
-        $row1 = new \Ease\TWB4\Row();
-        $row1->addColumn(4, new \Ease\TWB4\FormGroup(_('Event Source'), new EventSourceSelect('event_source_id', (int) $eventRule->getDataValue('event_source_id'))));
-        $row1->addColumn(4, new \Ease\TWB4\FormGroup(_('Evidence Pattern'), new \Ease\Html\InputTextTag('evidence', $eventRule->getDataValue('evidence'), [], _('e.g. faktura-vydana or leave empty for any'))));
-        $row1->addColumn(4, new \Ease\TWB4\FormGroup(_('Operation'), new OperationSelect('operation', $eventRule->getDataValue('operation') ?: 'any')));
+        $eventSourceId = (int) ($eventRule->getDataValue('event_source_id') ?: 0);
+        $runtemplateSourceId = (int) ($eventRule->getDataValue('runtemplate_source_id') ?: 0);
+        $runtemplateId = (int) ($eventRule->getDataValue('runtemplate_id') ?: 0);
 
-        $row2 = new \Ease\TWB4\Row();
-        $row2->addColumn(4, new \Ease\TWB4\FormGroup(_('RunTemplate ID'), new \Ease\Html\InputNumberTag('runtemplate_id', (string) $eventRule->getDataValue('runtemplate_id'))));
-        $row2->addColumn(4, new \Ease\TWB4\FormGroup(_('Priority'), new \Ease\Html\InputNumberTag('priority', (string) ($eventRule->getDataValue('priority') ?: '0'))));
-        $row2->addColumn(4, new \Ease\TWB4\FormGroup(
+        $intro = new \Ease\Html\DivTag([
+            new \Ease\Html\PTag(_('Map an external event or a completed job to a RunTemplate. Set either an Event Source or a Source RunTemplate (job chain), then choose the target RunTemplate to launch.')),
+            new \Ease\TWB4\LinkButton('eventrules.php', '📋 '._('Back to Event Rules'), 'secondary btn-sm'),
+        ], ['class' => 'mb-3']);
+
+        $triggerHint = new \Ease\Html\SmallTag(
+            _('Leave Event Source empty when this rule is a job-chain binding triggered by Source RunTemplate completion.'),
+            ['class' => 'form-text text-muted'],
+        );
+
+        $rowTrigger = new \Ease\TWB4\Row();
+        $rowTrigger->addColumn(6, [
+            new \Ease\TWB4\FormGroup(_('Event Source'), new EventSourceSelect('event_source_id', $eventSourceId ?: null)),
+            $triggerHint,
+        ]);
+        $rowTrigger->addColumn(6, new \Ease\TWB4\FormGroup(
+            _('Source RunTemplate (job chain)'),
+            new RunTemplateSelect(
+                'runtemplate_source_id',
+                $runtemplateSourceId ?: null,
+                true,
+                _('None (external event source)'),
+            ),
+        ));
+
+        $rowMatch = new \Ease\TWB4\Row();
+        $rowMatch->addColumn(6, new \Ease\TWB4\FormGroup(
+            _('Evidence Pattern'),
+            new \Ease\Html\InputTextTag(
+                'evidence',
+                $eventRule->getDataValue('evidence'),
+                ['placeholder' => 'faktura-vydana', 'title' => _('Evidence name filter, or leave empty for any')],
+            ),
+        ));
+        $rowMatch->addColumn(6, new \Ease\TWB4\FormGroup(
+            _('Operation'),
+            new OperationSelect('operation', $eventRule->getDataValue('operation') ?: 'any'),
+        ));
+
+        $rowAction = new \Ease\TWB4\Row();
+        $rowAction->addColumn(6, new \Ease\TWB4\FormGroup(
+            _('Target RunTemplate'),
+            new RunTemplateSelect('runtemplate_id', $runtemplateId ?: null),
+        ));
+        $rowAction->addColumn(3, new \Ease\TWB4\FormGroup(
+            _('Priority'),
+            new \Ease\Html\InputNumberTag('priority', (string) ($eventRule->getDataValue('priority') ?: '0')),
+        ));
+        $rowAction->addColumn(3, new \Ease\TWB4\FormGroup(
             _('Enabled'),
-            new \Ease\Html\SelectTag('enabled', ['0' => _('No'), '1' => _('Yes')], (string) ($eventRule->getDataValue('enabled') ?: '1')),
+            new \Ease\Html\SelectTag('enabled', ['0' => _('No'), '1' => _('Yes')], (string) ($eventRule->getDataValue('enabled') ?? '1')),
         ));
 
-        $row3 = new \Ease\TWB4\Row();
-        $row3->addColumn(12, new \Ease\TWB4\FormGroup(
-            _('Environment Variable Mapping (JSON)'),
-            new \Ease\Html\TextareaTag('env_mapping', $eventRule->getDataValue('env_mapping') ?: '{"RECORD_ID": "recordid", "EVIDENCE": "evidence", "OPERATION": "operation"}', ['rows' => '4', 'class' => 'form-control']),
-        ));
+        $envHelp = new \Ease\Html\SmallTag(
+            _('JSON object: keys are environment variable names for the target job; values are field selectors from the event/produces payload (e.g. "firma", "$.customer.id", or "@file:invoices").'),
+            ['class' => 'form-text text-muted'],
+        );
 
-        $formContents = [$row1, $row2, $row3];
+        $envDefault = $eventRule->getDataValue('env_mapping');
+
+        if ($envDefault === null || $envDefault === '') {
+            $envDefault = "{\n  \"RECORD_ID\": \"recordid\",\n  \"EVIDENCE\": \"evidence\",\n  \"OPERATION\": \"operation\"\n}";
+        }
+
+        $rowEnv = new \Ease\TWB4\Row();
+        $rowEnv->addColumn(12, [
+            new \Ease\TWB4\FormGroup(
+                _('Environment Variable Mapping (JSON)'),
+                new \Ease\Html\TextareaTag('env_mapping', $envDefault, ['rows' => '6', 'class' => 'form-control', 'style' => 'font-family: monospace;']),
+            ),
+            $envHelp,
+        ]);
+
+        $triggerPanel = new \Ease\TWB4\Panel(_('Trigger'), 'primary', [$rowTrigger]);
+        $matchPanel = new \Ease\TWB4\Panel(_('Match criteria'), 'info', [$rowMatch]);
+        $actionPanel = new \Ease\TWB4\Panel(_('Action'), 'success', [$rowAction]);
+        $envPanel = new \Ease\TWB4\Panel(_('Environment overrides'), 'secondary', [$rowEnv]);
+
+        $formContents = [$intro, $triggerPanel, $matchPanel, $actionPanel, $envPanel];
 
         parent::__construct(['action' => 'eventrule.php', 'method' => 'POST'], $formContents);
 

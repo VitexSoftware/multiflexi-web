@@ -93,6 +93,7 @@ $allowedClasses = [
     \MultiFlexi\Logger::class,
     \MultiFlexi\Customer::class,
     \MultiFlexi\EventSourceLister::class,
+    \MultiFlexi\EventRuleLister::class,
 ];
 
 if (!\in_array($class, $allowedClasses, true)) {

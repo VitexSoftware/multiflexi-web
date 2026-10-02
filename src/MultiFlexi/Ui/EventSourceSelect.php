@@ -33,7 +33,7 @@ class EventSourceSelect extends \Ease\Html\SelectTag
     {
         $sourcer = new \MultiFlexi\EventSource();
 
-        $sources['0'] = _('Please Select Event Source');
+        $sources['0'] = _('None (use Source RunTemplate instead)');
 
         foreach ($sourcer->listingQuery() as $source) {
             $sources[(string) $source['id']] = empty($source['name']) ? (string) ($source['id']) : $source['name'];
