@@ -51,6 +51,14 @@ class EventRuleLister extends EventRule
             $data['event_source_id'] = (string) new \Ease\Html\ATag('eventsource.php?id='.$data['event_source_id'], $source->getRecordName());
         }
 
+        if (empty($data['event_source_id'])) {
+            // Job-chain rule: triggered by completion of another RunTemplate, not by an event source.
+            $data['event_source_id'] = empty($data['runtemplate_source_id']) ? '' : (string) new \Ease\Html\ATag('runtemplate.php?id='.$data['runtemplate_source_id'], _('Job').' #'.$data['runtemplate_source_id']);
+        }
+
+        // DataTables aborts the whole draw on null cells
+        $data['evidence'] ??= '';
+
         if (!empty($data['runtemplate_id'])) {
             $data['runtemplate_id'] = (string) new \Ease\Html\ATag('runtemplate.php?id='.$data['runtemplate_id'], '#'.$data['runtemplate_id']);
         }
