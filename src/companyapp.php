@@ -564,7 +564,8 @@ EOD.$objectName.<<<'EOD'
             data: {
                 runtemplate_ids: selectedRows,
                 when: 'now',
-                executor: 'Native'
+                executor: 'Native',
+                csrf_token: $('meta[name="csrf-token"]').attr('content')
             },
             dataType: 'json',
             success: function(response) {

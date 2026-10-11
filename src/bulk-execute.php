@@ -49,6 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Validate CSRF token
+if (isset($GLOBALS['csrfProtection'])
+    && \Ease\Shared::cfg('CSRF_PROTECTION_ENABLED', true)
+    && !$GLOBALS['csrfProtection']->validateToken($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'CSRF token validation failed']);
+
+    exit;
+}
+
 // Get POST parameters
 $runtemplateIds = $_POST['runtemplate_ids'] ?? [];
 $executor = $_POST['executor'] ?? 'Native';
