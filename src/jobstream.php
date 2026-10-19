@@ -51,7 +51,8 @@ if (\function_exists('set_time_limit')) {
 }
 
 $outputLines = new \MultiFlexi\JobOutputLine();
-$lastId = 0;
+// Optional cursor so the job page can skip lines already shown in the terminal snapshot
+$lastId = max(0, (int) WebPage::singleton()->getRequestValue('after', 'int'));
 $startTime = time();
 $maxRuntime = 1800; // 30 minutes
 $beginNotified = $jobber->getDataValue('begin') !== null;

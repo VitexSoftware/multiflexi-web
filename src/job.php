@@ -75,8 +75,9 @@ $appInfo = $runTemplate->getAppInfo();
 $apps = new LocalizedApplication($appInfo['app_id']);
 $instanceName = $apps->getRecordName() ?: $appInfo['app_name'];
 
-$errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getErrorOutput()))), ['style' => 'background: #330000; font-family: monospace;']);
-$stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getOutput()))), ['style' => 'background:  black; font-family: monospace;']);
+$terminalStyle = 'background: black; color: #ecf0f1; font-family: monospace; overflow-y: auto; max-height: 70vh;';
+$errorTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getErrorOutput()))), ['style' => 'background: #330000; color: #ecf0f1; font-family: monospace;']);
+$stdTerminal = new \Ease\Html\DivTag(nl2br(str_replace('background-color: black; ', '', (new \SensioLabs\AnsiConverter\AnsiToHtmlConverter())->convert($jobber->getOutput()))), ['id' => 'live-output', 'style' => $terminalStyle]);
 
 // Determine whether this job has a realistic chance of starting on its own
 // (queued in the schedule table, or already claimed by the executor within
@@ -106,7 +107,10 @@ $jobAlreadyRunning = $jobBegin !== null && $jobExitcode === null;
 // Connect SSE stream while the job is still running, or is expected to
 // start shortly (queued / just claimed by the executor) — the "waiting"
 // spinner below stays visible until a 'started' or 'output' event arrives.
+// New lines are appended into #live-output (the black terminal); the Download
+// button stays below that div. `after` skips lines already rendered from getOutput().
 if ($jobAlreadyRunning || $expectingStart) {
+    $liveAfterId = (new \MultiFlexi\JobOutputLine())->getMaxIdForJob((int) $jobID);
     WebPage::singleton()->addJavaScript(<<<EOD
 
 (function () {
@@ -130,7 +134,8 @@ if ($jobAlreadyRunning || $expectingStart) {
     }
 
     function ansiToHtml(text) {
-        var re = /\\x1b\\[([0-9;]*)m/g;
+        var esc = String.fromCharCode(27);
+        var re = new RegExp(esc + '\\\\[([0-9;]*)m', 'g');
         var result = '';
         var lastIndex = 0;
         var open = 0;
@@ -160,7 +165,7 @@ if ($jobAlreadyRunning || $expectingStart) {
 
         while (open > 0) { result += '</span>'; open--; }
 
-        return result;
+        return result.replace(/\\n/g, '<br>');
     }
 
     function exitCodeBadgeType(code) {
@@ -171,7 +176,7 @@ if ($jobAlreadyRunning || $expectingStart) {
         return 'danger';
     }
 
-    var es = new EventSource('jobstream.php?id={$jobID}');
+    var es = new EventSource('jobstream.php?id={$jobID}&after={$liveAfterId}');
     es.addEventListener('started', function () {
         hideSpinner();
     });
@@ -276,7 +281,7 @@ $copyStdButton = new \Ease\TWB4\LinkButton('#', '📋 '._('Copy'), 'secondary bt
 $copyErrButton = new \Ease\TWB4\LinkButton('#', '📋 '._('Copy'), 'secondary btn-block', ['onclick' => "copyJobOutput('raw-output-err', this); return false;", 'data-copied-label' => _('Copied')]);
 
 $outputTabs = new \Ease\TWB4\Tabs();
-$outputTabs->addTab(_('Output').' '.(\strlen($jobber->getOutput()) ? ' <span class="badge badge-secondary">'.substr_count($jobber->getOutput(), "\n").'</span>' : '<span class="badge badge-invers">💭</span>'), [$stdTerminal, $stdOutputRaw, \strlen($jobber->getOutput()) ? $copyStdButton : '', \strlen($jobber->getOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=std', _('Download'), 'secondary btn-block') : _('No output'), new \Ease\Html\PreTag('', ['id' => 'live-output'])]);
+$outputTabs->addTab(_('Output').' '.(\strlen($jobber->getOutput()) ? ' <span class="badge badge-secondary">'.substr_count($jobber->getOutput(), "\n").'</span>' : '<span class="badge badge-invers">💭</span>'), [$stdTerminal, $stdOutputRaw, \strlen($jobber->getOutput()) ? $copyStdButton : '', \strlen($jobber->getOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=std', _('Download'), 'secondary btn-block') : _('No output')]);
 $outputTabs->addTab(_('Errors').' '.(empty($jobber->getErrorOutput()) ? ' <span class="badge badge-success">0</span>' : '<span class="badge badge-warning">'.substr_count($jobber->getErrorOutput(), "\n").'</span>'), [$errorTerminal, $errOutputRaw, \strlen($jobber->getErrorOutput()) ? $copyErrButton : '', \strlen($jobber->getErrorOutput()) ? new \Ease\TWB4\LinkButton('joboutput.php?id='.$jobID.'&mode=err', _('Download'), 'secondary btn-block') : _('No errors')], empty($jobber->getOutput()));
 
 function multiflexiFormatArtifactBytes(int $bytes): string
