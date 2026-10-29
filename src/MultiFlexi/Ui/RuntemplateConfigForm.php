@@ -138,6 +138,18 @@ CSS);
                     $choices = ['' => ''] + $choices;
                 }
 
+                // SelectTag does not escape option values and labels; both the
+                // stored value and the labels from the application definition are
+                // untrusted, so escape them (the browser decodes them on submit).
+                $escapedChoices = [];
+
+                foreach ($choices as $choiceValue => $choiceLabel) {
+                    $escapedChoices[htmlspecialchars((string) $choiceValue, \ENT_QUOTES)] = htmlspecialchars((string) $choiceLabel, \ENT_QUOTES);
+                }
+
+                $selected = htmlspecialchars($selected, \ENT_QUOTES);
+                $choices = $escapedChoices;
+
                 $input = new \Ease\Html\SelectTag($fieldName, $choices, $selected, ['class' => 'form-control form-control-sm']);
             } elseif ($field->isMultiLine()) {
                 $input = new \Ease\Html\TextareaTag($fieldName, $value, ['class' => 'form-control form-control-sm', 'rows' => 4]);
