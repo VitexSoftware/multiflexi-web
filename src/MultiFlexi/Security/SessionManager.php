@@ -194,9 +194,10 @@ class SessionManager
             return;
         }
 
-        // Prevent clickjacking
-        header('X-Frame-Options: DENY');
-        header('Content-Security-Policy: frame-ancestors \'none\'');
+        // Prevent clickjacking from other origins; same-origin framing is needed
+        // by the "Rendered" artifact tab (job.php) and the app run console (launch.php)
+        header('X-Frame-Options: SAMEORIGIN');
+        header('Content-Security-Policy: frame-ancestors \'self\'');
 
         // Prevent MIME type sniffing
         header('X-Content-Type-Options: nosniff');
