@@ -131,6 +131,16 @@ if (WebPage::singleton()->isPosted()) {
         }
     }
 
+    // Secret inputs are always rendered empty (only a placeholder is shown), so an empty
+    // submitted value means "unchanged" - never overwrite the stored secret with it.
+    foreach ($app->getEnvironment() as $configField) {
+        $fieldCode = $configField->getCode();
+
+        if ($configField->isRedactable() && \array_key_exists($fieldCode, $dataToSave) && $dataToSave[$fieldCode] === '') {
+            unset($dataToSave[$fieldCode]);
+        }
+    }
+
     if ($configurator->takeData($dataToSave) && null !== $configurator->saveToSQL()) {
         $configurator->addStatusMessage(_('Config fields Saved'), 'success');
         // Spustit setup příkaz, pokud je nastaven
