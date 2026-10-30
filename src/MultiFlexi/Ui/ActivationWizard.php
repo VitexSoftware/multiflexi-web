@@ -1017,7 +1017,10 @@ EOD,
                         if ($credential) {
                             $credentialType = $credential->getCredentialType();
                             $credentialLink = new \Ease\Html\ATag('credential.php?id='.$credential->getMyKey(), new \Ease\Html\SmallTag($credential->getRecordName()));
-                            $formIcon = new \Ease\Html\ImgTag('images/'.$runTemplateField->getLogo(), (string) $credentialType->getRecordName(), ['height' => 20, 'title' => $credentialType->getRecordName()]);
+                            $formIcon = new CredentialTypeLogo($credentialType, [
+                                'height' => 20,
+                                'title' => (string) $credentialType->getRecordName(),
+                            ]);
                             $credentialTypeLink = new \Ease\Html\ATag('credentialtype.php?id='.$credentialType->getMyKey(), $formIcon);
                             $inputCaption = new \Ease\Html\SpanTag([$credentialTypeLink, new \Ease\Html\StrongTag($fieldName), '&nbsp;', $credentialLink]);
 
@@ -1191,7 +1194,7 @@ EOD,
                     $credList->addItem(new \Ease\Html\LiTag($credObj->getRecordName()));
                 } else {
                     $credList->addItem(new \Ease\Html\LiTag([
-                        new \Ease\Html\ImgTag('images/'.$credType->getLogo(), $credType->getRecordName(), ['height' => '16', 'style' => 'margin-right: 5px;']),
+                        new CredentialTypeLogo($credType, ['height' => '16', 'style' => 'margin-right: 5px;']),
                         $credObj->getRecordName().' ('.$credType->getRecordName().')',
                     ]));
                 }

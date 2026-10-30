@@ -323,7 +323,7 @@ if ($step === 'complete' && isset($runtemplateId)) {
             $credObj = new \MultiFlexi\Credential($cred['credential_id']);
             $credType = $credObj->getCredentialType();
             $credList->addItem(new \Ease\Html\LiTag([
-                new \Ease\Html\ImgTag('images/'.$credType->getLogo(), $credType->getRecordName(), ['height' => '16', 'style' => 'margin-right: 5px;']),
+                new \MultiFlexi\Ui\CredentialTypeLogo($credType, ['height' => '16', 'style' => 'margin-right: 5px;']),
                 $credObj->getRecordName().' ('.$credType->getRecordName().')',
             ]));
         }
