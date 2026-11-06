@@ -65,7 +65,9 @@ foreach ($creds as $crd) {
             $lastJobInfo = $jobber->listingQuery()->select(['id', 'exitcode'], true)->where(['company_id' => $runtemplateData['company_id'], 'app_id' => $runtemplateData['app_id']])->order('id DESC')->limit(1)->fetchAll();
 
             if ($lastJobInfo) {
-                $companyAppStatus = new \Ease\Html\ATag('job.php?id='.$lastJobInfo[0]['id'], new ExitCode($lastJobInfo[0]['exitcode'], ['style' => 'font-size: 1.0em; font-family: monospace;']), ['class' => 'btn btn-inverse btn-sm']);
+                $credApp = new \MultiFlexi\Application((int) $runtemplateData['app_id']);
+                $lastExitDescription = null !== $lastJobInfo[0]['exitcode'] ? $credApp->exitCodeDescription((int) $lastJobInfo[0]['exitcode']) : null;
+                $companyAppStatus = new \Ease\Html\ATag('job.php?id='.$lastJobInfo[0]['id'], new ExitCode($lastJobInfo[0]['exitcode'], ['style' => 'font-size: 1.0em; font-family: monospace;'], $lastExitDescription), ['class' => 'btn btn-inverse btn-sm']);
             } else {
                 $companyAppStatus = new \Ease\TWB4\Badge('disabled', '🪤', ['style' => 'font-size: 1.0em; font-family: monospace;']);
             }

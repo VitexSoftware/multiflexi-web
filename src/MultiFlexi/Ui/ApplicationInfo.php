@@ -45,7 +45,43 @@ class ApplicationInfo extends Panel
 
         $body->addItem($row);
 
+        $exitCodesTable = $this->exitCodesTable($application);
+
+        if (null !== $exitCodesTable) {
+            $body->addItem($exitCodesTable);
+        }
+
         parent::__construct(null, 'default', $body, new AppLastMonthChart($application));
+    }
+
+    /**
+     * Table of exit codes declared by the application (from app_exit_codes).
+     *
+     * @return null|\Ease\Html\DivTag null when the application declares no exit codes
+     */
+    private function exitCodesTable(Application $application): ?\Ease\Html\DivTag
+    {
+        $exitCodes = $application->getExitCodes();
+
+        if (empty($exitCodes)) {
+            return null;
+        }
+
+        $severityBadge = ['success' => 'success', 'info' => 'info', 'warning' => 'warning', 'error' => 'danger', 'critical' => 'dark'];
+
+        $table = new \Ease\TWB4\Table(null, ['class' => 'table table-sm']);
+        $table->addRowHeaderColumns([_('Exit Code'), _('Meaning'), _('Severity'), _('Retry')]);
+
+        foreach ($exitCodes as $code => $definition) {
+            $table->addRowColumns([
+                new \Ease\Html\StrongTag((string) $code),
+                htmlspecialchars($definition['description'], \ENT_QUOTES | \ENT_HTML5, 'UTF-8'),
+                new \Ease\TWB4\Badge($severityBadge[$definition['severity']] ?? 'danger', $definition['severity']),
+                $definition['retry'] ? _('Yes') : _('No'),
+            ]);
+        }
+
+        return new \Ease\Html\DivTag([new \Ease\Html\H4Tag(_('Exit codes')), $table], ['class' => 'mt-4']);
     }
 
     /**

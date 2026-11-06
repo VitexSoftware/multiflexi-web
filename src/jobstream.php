@@ -120,6 +120,7 @@ while (true) {
 
         $emit('done', [
             'exitcode' => (int) $exitcode,
+            'exitcode_description' => $jobber->getExitCodeDescription(),
             'end' => $endValue,
             'end_ts' => $endValue ? (new \DateTime($endValue))->getTimestamp() : time(),
         ]);

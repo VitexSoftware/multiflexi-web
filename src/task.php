@@ -157,13 +157,14 @@ if (empty($jobs)) {
     ]);
 
     $fulfilledByJobId = (int) $task->getDataValue('fulfilled_by_job_id');
+    $taskApp = new \MultiFlexi\Application((int) ($jobs[0]['app_id'] ?? 0));
 
     foreach ($jobs as $jobRow) {
         $rowCls = ((int) $jobRow['id'] === $fulfilledByJobId) ? 'table-success' : '';
         $tr = new \Ease\Html\TrTag(null, ['class' => $rowCls]);
 
         $tr->addItem(new \Ease\Html\TdTag(new \Ease\Html\ATag('job.php?id='.$jobRow['id'], '🏁 #'.$jobRow['id'])));
-        $tr->addItem(new \Ease\Html\TdTag(new ExitCode($jobRow['exitcode'])));
+        $tr->addItem(new \Ease\Html\TdTag(new ExitCode($jobRow['exitcode'], [], null !== $jobRow['exitcode'] ? $taskApp->exitCodeDescription((int) $jobRow['exitcode']) : null)));
         $tr->addItem(new \Ease\Html\TdTag($jobRow['begin'] ?? '—'));
         $tr->addItem(new \Ease\Html\TdTag($jobRow['end'] ?? '—'));
 

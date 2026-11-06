@@ -158,8 +158,8 @@ foreach ($jobs as $job) {
         ];
     }
 
-    // Exit code
-    $jobRow[] = new ExitCode($job['exitcode']);
+    // Exit code (with its meaning in the tooltip)
+    $jobRow[] = new ExitCode($job['exitcode'], [], null !== $job['exitcode'] ? $application->exitCodeDescription((int) $job['exitcode']) : null);
 
     // Launcher
     $jobRow[] = $job['launched_by']

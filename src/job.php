@@ -196,7 +196,14 @@ if ($jobAlreadyRunning || $expectingStart) {
 
         if (badge) {
             badge.className = 'badge badge-' + exitCodeBadgeType(d.exitcode);
+            badge.title = d.exitcode_description || badge.title;
             badge.innerHTML = '&nbsp;' + d.exitcode + '&nbsp;';
+        }
+
+        var descEl = document.getElementById('live-exitcode-desc');
+
+        if (descEl && d.exitcode_description) {
+            descEl.innerHTML = escapeHtml(d.exitcode_description);
         }
 
         var endEl = document.getElementById('live-end');

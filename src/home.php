@@ -104,6 +104,7 @@ $recentJobs = $jobEngine->getFluentPDO()->from('job j')
     ->select('c.name as company')
     ->select('j.begin')
     ->select('j.exitcode')
+    ->select('j.app_id')
     ->select('j.schedule as launched')
     ->leftJoin('apps a ON j.app_id = a.id')
     ->leftJoin('company c ON j.company_id = c.id')
@@ -122,6 +123,8 @@ if (!empty($recentJobs)) {
         _('Status'),
     ]);
 
+    $appCache = [];
+
     foreach ($recentJobs as $job) {
         $statusBadge = '';
 
@@ -130,7 +133,22 @@ if (!empty($recentJobs)) {
         } elseif ($job['exitcode'] === 0 || $job['exitcode'] === '0') {
             $statusBadge = new \Ease\TWB4\Badge('✅ '._('Success'), 'success');
         } elseif ($job['exitcode'] !== null) {
-            $statusBadge = new \Ease\TWB4\Badge('❌ '._('Failed'), 'danger');
+            $badgeProperties = [];
+            $jobAppId = (int) ($job['app_id'] ?? 0);
+
+            if ($jobAppId > 0) {
+                if (!isset($appCache[$jobAppId])) {
+                    $appCache[$jobAppId] = new \MultiFlexi\Application($jobAppId);
+                }
+
+                $exitCodeDescription = $appCache[$jobAppId]->exitCodeDescription((int) $job['exitcode']);
+
+                if ('' !== $exitCodeDescription) {
+                    $badgeProperties['title'] = $exitCodeDescription;
+                }
+            }
+
+            $statusBadge = new \Ease\TWB4\Badge('danger', '❌ '._('Failed').' ('.$job['exitcode'].')', $badgeProperties);
         } else {
             $statusBadge = new \Ease\TWB4\Badge('⏳ '._('Pending'), 'warning');
         }

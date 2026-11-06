@@ -24,8 +24,24 @@ namespace MultiFlexi\Ui;
  */
 class ExitCode extends \Ease\TWB4\Badge
 {
-    public function __construct($exitcode, $properties = [])
+    /**
+     * @param null|int    $exitcode    Exit code value (null = pending)
+     * @param array       $properties  HTML tag properties
+     * @param null|string $description Localized meaning of the exit code (from app_exit_codes);
+     *                                 shown as tooltip when set
+     */
+    public function __construct($exitcode, $properties = [], ?string $description = null)
     {
+        if (!isset($properties['title'])) {
+            if (null === $exitcode) {
+                $properties['title'] = _('Pending');
+            } elseif (null !== $description && '' !== $description) {
+                $properties['title'] = $description;
+            } else {
+                $properties['title'] = self::status($exitcode);
+            }
+        }
+
         parent::__construct(self::status($exitcode), '&nbsp'.(null === $exitcode ? '⏳' : $exitcode).'&nbsp', $properties);
     }
 

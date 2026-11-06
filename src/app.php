@@ -178,7 +178,7 @@ foreach ($jobs as $job) {
         $job['begin'] = [$job['begin'], '<br>', new SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone())))];
     }
 
-    $job['exitcode'] = new ExitCode($job['exitcode']);
+    $job['exitcode'] = new ExitCode($job['exitcode'], [], null !== $job['exitcode'] ? $apps->exitCodeDescription((int) $job['exitcode']) : null);
     $jobList->addRowColumns($job);
 }
 

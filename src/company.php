@@ -58,6 +58,8 @@ $jobs = $jobber->listingQuery()->select(['COALESCE(app_translations.name, apps.n
 $jobList = new \Ease\TWB4\Table();
 $jobList->addRowHeaderColumns([_('Run template').' / '._('Application'), _('Job ID'), _('Launch time'), _('Launcher'), _('Schedule Launch')]);
 
+$appCache = [];
+
 foreach ($jobs as $job) {
     $job['appname'] = '<strong>'.(empty($job['runtemplate_name']) ? '#'.$job['runtemplate_id'] : $job['runtemplate_name']).'</strong>&nbsp;/&nbsp;'.$job['appname'];
     unset($job['runtemplate_name']);
@@ -85,9 +87,16 @@ foreach ($jobs as $job) {
             ),
         ],
     );
+    $jobAppId = (int) $job['app_id'];
     unset($job['appname'], $job['runtemplate_id'], $job['app_id']);
 
-    $job['id'] = new \Ease\Html\ATag('job.php?id='.$job['id'], [new ExitCode($job['exitcode'], ['style' => 'font-size: 1.0em; font-family: monospace;']), '<br>', new \Ease\TWB4\Badge('info', '🏁 '.$job['id'])], ['title' => _('Job Info')]);
+    if (!isset($appCache[$jobAppId])) {
+        $appCache[$jobAppId] = new \MultiFlexi\Application($jobAppId);
+    }
+
+    $exitCodeDescription = null !== $job['exitcode'] && $jobAppId > 0 ? $appCache[$jobAppId]->exitCodeDescription((int) $job['exitcode']) : null;
+
+    $job['id'] = new \Ease\Html\ATag('job.php?id='.$job['id'], [new ExitCode($job['exitcode'], ['style' => 'font-size: 1.0em; font-family: monospace;'], $exitCodeDescription), '<br>', new \Ease\TWB4\Badge('info', '🏁 '.$job['id'])], ['title' => _('Job Info')]);
 
     if ($job['begin']) {
         $job['begin'] = [$job['begin'], '<br>', new \Ease\Html\SmallTag(new \Ease\Html\Widgets\LiveAge(new \DateTime($job['begin'], \MultiFlexi\DateTimeHelper::getConfiguredTimezone())))];

@@ -35,7 +35,8 @@ class JobInfo extends \Ease\Html\DivTag
         $executorImage = new ExecutorImage($job->getDataValue('executor'), ['height' => 20]);
 
         $jobInfoRow = new \Ease\TWB4\Row();
-        $jobInfoRow->addColumn(1, [_('Exitcode').'<br>', new ExitCode($job->getDataValue('exitcode'), ['style' => 'font-size: 2.0em; font-family: monospace;', 'id' => 'live-exitcode'])]);
+        $exitCodeDescription = $job->getDataValue('exitcode') !== null ? $job->getExitCodeDescription() : '';
+        $jobInfoRow->addColumn(1, [_('Exitcode').'<br>', new ExitCode($job->getDataValue('exitcode'), ['style' => 'font-size: 2.0em; font-family: monospace;', 'id' => 'live-exitcode'], $exitCodeDescription), '' !== $exitCodeDescription ? new \Ease\Html\SmallTag(htmlspecialchars($exitCodeDescription, \ENT_QUOTES | \ENT_HTML5, 'UTF-8'), ['id' => 'live-exitcode-desc']) : '']);
         $jobInfoRow->addColumn(4, [_('Commandline').'<br>', htmlspecialchars((string) $job->getDataValue('command'), \ENT_QUOTES | \ENT_HTML5, 'UTF-8'), '<br>', htmlspecialchars(\MultiFlexi\LocalizedApplication::nameOf($job->getApplication()), \ENT_QUOTES | \ENT_HTML5, 'UTF-8').' v.:'.htmlspecialchars((string) $job->getDataValue('app_version'), \ENT_QUOTES | \ENT_HTML5, 'UTF-8')]);
         $jobInfoRow->addColumn(2, [_('Scheduled').'<br>',
             $job->getDataValue('schedule') ? $job->getDataValue('schedule').'<br>'.new \Ease\Html\Widgets\LiveAge(new \DateTime($job->getDataValue('schedule'))) : '', '<br>', $executorImage, _('Executor').' '.$executorClass::name()]);
