@@ -101,7 +101,18 @@ if ($jobBegin === null && $jobber->isScheduled() === false) {
     }
 }
 
-$expectingStart = $jobBegin === null && $jobExitcode === null && ($jobber->isScheduled() || $withinGrace);
+// A queued job only gets a live stream when it is due soon: a stream for a job
+// scheduled hours ahead would just hold an Apache worker until it times out.
+$startsSoon = false;
+
+if ($jobBegin === null && $jobber->isScheduled()) {
+    $scheduleTime = $jobber->getDataValue('schedule');
+    $timezone = \MultiFlexi\DateTimeHelper::getConfiguredTimezone();
+    $startsSoon = empty($scheduleTime)
+        || (new \DateTime($scheduleTime, $timezone))->getTimestamp() <= (new \DateTime('now', $timezone))->getTimestamp() + 900;
+}
+
+$expectingStart = $jobBegin === null && $jobExitcode === null && ($startsSoon || $withinGrace);
 $jobAlreadyRunning = $jobBegin !== null && $jobExitcode === null;
 
 // Connect SSE stream while the job is still running, or is expected to

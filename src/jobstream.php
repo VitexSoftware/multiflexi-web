@@ -27,6 +27,13 @@ if ($jobId <= 0) {
     exit;
 }
 
+// Optional cursor so the job page can skip lines already shown in the terminal snapshot
+$lastId = max(0, (int) WebPage::singleton()->getRequestValue('after', 'int'));
+
+// The stream may run for many minutes. Release the session lock now, otherwise
+// every other request of this user's session blocks until the stream ends.
+session_write_close();
+
 $jobber = new \MultiFlexi\Job($jobId);
 
 if (!$jobber->getMyKey()) {
@@ -51,19 +58,20 @@ if (\function_exists('set_time_limit')) {
 }
 
 $outputLines = new \MultiFlexi\JobOutputLine();
-// Optional cursor so the job page can skip lines already shown in the terminal snapshot
-$lastId = max(0, (int) WebPage::singleton()->getRequestValue('after', 'int'));
 $startTime = time();
 $maxRuntime = 1800; // 30 minutes
+$heartbeatInterval = 15; // seconds
+$lastWrite = time();
 $beginNotified = $jobber->getDataValue('begin') !== null;
 
 /**
  * Emit a single SSE event.
  */
-$emit = static function (string $event, array $data): void {
+$emit = static function (string $event, array $data) use (&$lastWrite): void {
     echo "event: {$event}\n";
     echo 'data: '.json_encode($data)."\n\n";
     flush();
+    $lastWrite = time();
 };
 
 // Stream loop
@@ -126,6 +134,18 @@ while (true) {
         ]);
 
         break;
+    }
+
+    // SSE comment as heartbeat: when the browser has gone away the write fails
+    // and PHP ends the script, so the Apache worker is not held for 30 minutes.
+    if (time() - $lastWrite >= $heartbeatInterval) {
+        echo ": keepalive\n\n";
+        flush();
+        $lastWrite = time();
+
+        if (connection_aborted()) {
+            break;
+        }
     }
 
     usleep(300000); // 300 ms poll interval
