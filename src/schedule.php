@@ -34,7 +34,10 @@ if (null === $runTemplate->getMyKey()) {
     $company = $runTemplate->getCompany();
     $when = WebPage::getRequestValue('when');
 
-    if (WebPage::isPosted() || $when === 'now') {
+    if (!$runTemplate->getDataValue('active')) {
+        // A disabled RunTemplate must not be launched or scheduled, whatever the request says.
+        WebPage::singleton()->container->addItem(new \Ease\TWB4\Alert('warning', _('RunTemplate is disabled and cannot be launched or scheduled')));
+    } elseif (WebPage::isPosted() || $when === 'now') {
         $uploadEnv = new \MultiFlexi\ConfigFields('');
         $uploadedFiles = [];
         $allFieldsFilled = true;

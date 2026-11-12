@@ -74,6 +74,23 @@ class RunTemplatePanel extends \Ease\TWB4\Panel
         $launchButton->addTagClass('text-white d-flex align-items-center justify-content-center shadow-sm mb-1');
         $launchButton->setTagProperties(['style' => 'background-color: #7bc2af; border-color: #7bc2af; color: white !important;']);
 
+        // Launch/schedule buttons follow the "active" switch: the server-rendered state is
+        // set here, JavaScript (see #enabler handler) keeps it in sync when the switch moves.
+        foreach ([$launchButton, $scheduleButton] as $actionButton) {
+            $actionButton->setTagProperties([
+                'data-href' => $actionButton->getTagProperty('href'),
+                'data-disabled-title' => _('RunTemplate is disabled'),
+            ]);
+            $actionButton->addTagClass('rt-launch-btn');
+        }
+
+        if (!$runtemplate->getDataValue('active')) {
+            foreach ([$launchButton, $scheduleButton] as $disabledButton) {
+                $disabledButton->setTagProperties(['href' => '#', 'aria-disabled' => 'true', 'tabindex' => '-1', 'title' => _('RunTemplate is disabled'), 'style' => $disabledButton->getTagProperty('style').' pointer-events: none; opacity: 0.4; filter: grayscale(1);']);
+                $disabledButton->addTagClass('disabled');
+            }
+        }
+
         $statsCards = new \MultiFlexi\Ui\RunTemplateStatsCards($runtemplate);
 
         $runtemplateJobs = new \MultiFlexi\Ui\RuntemplateJobsListing($runtemplate);
@@ -503,6 +520,28 @@ $.ajax({
         },
             type: 'POST'
         });
+});
+
+EOD);
+
+        $this->addJavaScript(<<<'EOD'
+
+function setLaunchButtons(active) {
+    $('.rt-launch-btn').each(function () {
+        var $btn = $(this);
+
+        if (active) {
+            $btn.attr('href', $btn.attr('data-href')).removeAttr('aria-disabled').removeAttr('tabindex').removeAttr('title').removeClass('disabled');
+            $btn.css({'pointer-events': '', 'opacity': '', 'filter': ''});
+        } else {
+            $btn.attr({'href': '#', 'aria-disabled': 'true', 'tabindex': '-1', 'title': $btn.attr('data-disabled-title')}).addClass('disabled');
+            $btn.css({'pointer-events': 'none', 'opacity': '0.4', 'filter': 'grayscale(1)'});
+        }
+    });
+}
+
+$('#enabler').on('change', function () {
+    setLaunchButtons($(this).prop('checked'));
 });
 
 EOD);
