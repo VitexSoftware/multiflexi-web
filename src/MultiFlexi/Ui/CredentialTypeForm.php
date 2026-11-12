@@ -130,6 +130,24 @@ class CredentialTypeForm extends SecureForm
     {
     }
 
+    /**
+     * Boolean flag input: hidden 0 first so an unchecked box is still submitted.
+     */
+    private static function flagCheckbox(string $name, string $label, bool $checked): \Ease\Html\DivTag
+    {
+        $properties = ['type' => 'checkbox', 'id' => 'flag_'.preg_replace('/\W+/', '_', $name)];
+
+        if ($checked) {
+            $properties['checked'] = 'checked';
+        }
+
+        return new \Ease\Html\DivTag([
+            new \Ease\Html\InputHiddenTag($name, '0'),
+            new \Ease\Html\InputTag($name, '1', $properties),
+            new \Ease\Html\LabelTag($properties['id'], ' '.$label, ['style' => 'font-size: 0.8em']),
+        ]);
+    }
+
     private function credTypeField(string $credTypeId, \MultiFlexi\ConfigFieldWithHelper $field): \Ease\TWB4\Row
     {
         $credTypeFieldRow = new \Ease\TWB4\Row();
@@ -140,6 +158,10 @@ class CredentialTypeForm extends SecureForm
             $credTypeFieldRow->addColumn(2, new \Ease\TWB4\FormGroup(_('Field Type'), new CfgFieldTypeSelect($credTypeId.'[type]', $field->getType())));
             $credTypeFieldRow->addColumn(2, new \Ease\TWB4\FormGroup(_('Field Hint'), new \Ease\Html\InputTextTag($credTypeId.'[hint]', $field->getHint())));
             $credTypeFieldRow->addColumn(2, new \Ease\TWB4\FormGroup(_('Field Default Value'), new \Ease\Html\InputTextTag($credTypeId.'[defval]', $field->getDefaultValue())));
+            $credTypeFieldRow->addColumn(1, [
+                self::flagCheckbox($credTypeId.'[required]', _('Required'), $field->isRequired()),
+                self::flagCheckbox($credTypeId.'[secret]', _('Secret'), $field->isSecret()),
+            ]);
         }
 
         $helper = $this->credType->getPrototype();
