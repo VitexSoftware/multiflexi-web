@@ -99,23 +99,6 @@ class CredentialForm extends SecureForm
 
                 if (class_exists($uiHelperClassName)) {
                     $formContents[] = (string) (new $uiHelperClassName($kredenc));
-                } elseif (null !== $kredenc->getMyKey()) {
-                    // getPrototype()->load() only pulls credential-type-level defaults
-                    // (CrTypeOption, scoped by credential_type_id); overlay this specific
-                    // credential's actual stored values before checking availability.
-                    // Prototypes keep values either in internal or in provided fields
-                    // (e.g. FioBank vs. Realpad/AbraFlexi); fill both.
-                    $rawValues = $kredenc->getFields()->getRawEnvArray();
-
-                    if (method_exists($credtypeHelper, 'fieldsInternal')) {
-                        $credtypeHelper->fieldsInternal()->arrayToValues($rawValues);
-                    }
-
-                    if (method_exists($credtypeHelper, 'fieldsProvided')) {
-                        $credtypeHelper->fieldsProvided()->arrayToValues($rawValues);
-                    }
-
-                    $formContents[] = self::availabilityPanel($credtypeHelper->checkAvailability());
                 }
             }
         }
@@ -226,6 +209,55 @@ class CredentialForm extends SecureForm
         }
 
         return $credTypeFieldRow;
+    }
+
+    /**
+     * Availability check box: a separate CSRF-protected POST form (outbound probes
+     * must never run merely because the edit form was rendered).
+     */
+    public static function availabilityCheck(Credential $kredenc): ?DivTag
+    {
+        $typeId = (int) $kredenc->getDataValue('credential_type_id');
+
+        if (null === $kredenc->getMyKey() || !$typeId) {
+            return null;
+        }
+
+        $credtypeHelper = (new CredentialType($typeId))->getPrototype();
+
+        if (!$credtypeHelper || class_exists('MultiFlexi\\Ui\\CredentialType\\'.\Ease\Functions::baseClassName($credtypeHelper))) {
+            return null;
+        }
+
+        $box = new DivTag(null, ['class' => 'mt-3']);
+        $box->addItem(new SecureForm(['action' => 'credential.php'], ['method' => 'POST'], [
+            new InputHiddenTag('id', (string) $kredenc->getMyKey()),
+            new InputHiddenTag('checkavailability', '1'),
+            new SubmitButton('🩺 '._('Check availability'), 'secondary btn-sm', ['title' => _('Contact the service and verify the credential')]),
+        ]));
+
+        if (WebPage::singleton()->isPosted() && null !== WebPage::getRequestValue('checkavailability')) {
+            // Prototypes keep values either in internal or in provided fields
+            // (e.g. FioBank vs. Realpad/AbraFlexi); fill both.
+            $rawValues = $kredenc->getFields()->getRawEnvArray();
+
+            if (method_exists($credtypeHelper, 'fieldsInternal')) {
+                $credtypeHelper->fieldsInternal()->arrayToValues($rawValues);
+            }
+
+            if (method_exists($credtypeHelper, 'fieldsProvided')) {
+                $credtypeHelper->fieldsProvided()->arrayToValues($rawValues);
+            }
+
+            try {
+                $box->addItem(self::availabilityPanel($credtypeHelper->checkAvailability()));
+            } catch (\Throwable $exc) {
+                error_log(sprintf('Credential availability check failed (id=%d): %s', (int) $kredenc->getMyKey(), $exc->getMessage()));
+                $box->addItem(new DivTag('🔴 '._('Availability check failed'), ['class' => 'alert alert-danger mt-2']));
+            }
+        }
+
+        return $box;
     }
 
     private static function availabilityPanel(\MultiFlexi\CredentialCheckResult $result): DivTag
