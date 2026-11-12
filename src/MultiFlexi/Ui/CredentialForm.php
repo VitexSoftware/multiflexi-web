@@ -103,8 +103,16 @@ class CredentialForm extends SecureForm
                     // getPrototype()->load() only pulls credential-type-level defaults
                     // (CrTypeOption, scoped by credential_type_id); overlay this specific
                     // credential's actual stored values before checking availability.
+                    // Prototypes keep values either in internal or in provided fields
+                    // (e.g. FioBank vs. Realpad/AbraFlexi); fill both.
+                    $rawValues = $kredenc->getFields()->getRawEnvArray();
+
                     if (method_exists($credtypeHelper, 'fieldsInternal')) {
-                        $credtypeHelper->fieldsInternal()->arrayToValues($kredenc->getFields()->getRawEnvArray());
+                        $credtypeHelper->fieldsInternal()->arrayToValues($rawValues);
+                    }
+
+                    if (method_exists($credtypeHelper, 'fieldsProvided')) {
+                        $credtypeHelper->fieldsProvided()->arrayToValues($rawValues);
                     }
 
                     $formContents[] = self::availabilityPanel($credtypeHelper->checkAvailability());
@@ -169,7 +177,16 @@ class CredentialForm extends SecureForm
     #[\Override]
     public function finalize(): void
     {
-        $this->fillUp((array) $this->kredenc->getData());
+        $data = (array) $this->kredenc->getData();
+
+        // Never echo secrets back into the page; blank password input keeps the stored value.
+        foreach ($this->kredenc->getFields()->getFields() as $field) {
+            if ($field->isRedactable()) {
+                unset($data[$field->getCode()]);
+            }
+        }
+
+        $this->fillUp($data);
         parent::finalize();
     }
 
@@ -187,9 +204,19 @@ class CredentialForm extends SecureForm
             $inputProperties[] = 'disabled';
         }
 
+        if ($field->isRedactable()) {
+            $input = new \Ease\Html\InputTag($field->getCode(), '', array_merge($inputProperties, [
+                'type' => 'password',
+                'autocomplete' => 'new-password',
+                'placeholder' => ConfigField::maskValue($field->getValue()),
+            ]));
+        } else {
+            $input = new InputTextTag($field->getCode(), $field->getValue(), $inputProperties);
+        }
+
         $credTypeFieldRow->addColumn(4, new FormGroup(
             $field->getName(),
-            new InputTextTag($field->getCode(), $field->getValue(), $inputProperties),
+            $input,
             $field->getHint(),
             $field->getDefaultValue(),
         ));
