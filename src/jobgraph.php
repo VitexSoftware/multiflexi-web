@@ -24,11 +24,13 @@ $runtemplateId = WebPage::getRequestValue('runtemplate_id', 'int');
 $appId = WebPage::getRequestValue('app_id', 'int');
 $width = WebPage::getRequestValue('width', 'int') ?: 20;
 $height = WebPage::getRequestValue('height', 'int') ?: 10;
+$showAll = (bool) WebPage::getRequestValue('all', 'int');
+$maxSide = 1500; // safety cap for "all" mode
 
 $jobber = new \MultiFlexi\Job();
 
 // Build query based on provided parameters
-$query = $jobber->listingQuery()->select('exitcode', true)->limit($width * $height)->orderBy('id DESC');
+$query = $jobber->listingQuery()->select('exitcode', true)->limit($showAll ? $maxSide * $maxSide : $width * $height)->orderBy('id DESC');
 
 if ($runtemplateId) {
     $query->where('runtemplate_id', $runtemplateId);
@@ -43,6 +45,11 @@ if ($runtemplateId) {
 }
 
 $todaysJobs = $query->fetchAll();
+
+if ($showAll) {
+    // Size the spiral so every job fits (+2 for the spiral's centre offset)
+    $width = $height = min($maxSide, max(1, (int) ceil(sqrt(\count($todaysJobs)))) + 2);
+}
 
 $jobGraph = new JobGraph($width, $height, $todaysJobs);
 $jobGraph->generateImage();

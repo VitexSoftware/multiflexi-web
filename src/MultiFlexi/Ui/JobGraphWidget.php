@@ -41,6 +41,7 @@ class JobGraphWidget extends \Ease\Html\DivTag
      * @param int                          $width       Grid width in cells (default: 20)
      * @param int                          $height      Grid height in cells (default: 10)
      * @param array                        $properties  HTML element properties
+     * @param bool                         $all         Show all jobs in scope; grid size is computed from job count
      */
     public function __construct(
         ?\MultiFlexi\RunTemplate $runtemplate = null,
@@ -49,6 +50,7 @@ class JobGraphWidget extends \Ease\Html\DivTag
         int $width = 20,
         int $height = 10,
         array $properties = [],
+        bool $all = false,
     ) {
         $this->runtemplate = $runtemplate;
         $this->companyId = $companyId;
@@ -70,6 +72,10 @@ class JobGraphWidget extends \Ease\Html\DivTag
             }
         } elseif ($appId) {
             $params['app_id'] = $appId;
+        }
+
+        if ($all) {
+            $params['all'] = 1;
         }
 
         $graphUrl = 'jobgraph.php?'.http_build_query($params);
