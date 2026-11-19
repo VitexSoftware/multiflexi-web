@@ -154,7 +154,7 @@ class CredentialForm extends SecureForm
 
         $formContents[] = $submitRow;
 
-        parent::__construct(['action' => 'credential.php'], ['method' => 'POST'], $formContents);
+        parent::__construct(['action' => 'credential.php', 'method' => 'POST'], $formContents);
     }
 
     #[\Override]
@@ -197,12 +197,21 @@ class CredentialForm extends SecureForm
             $input = new InputTextTag($field->getCode(), $field->getValue(), $inputProperties);
         }
 
-        $credTypeFieldRow->addColumn(4, new FormGroup(
-            $field->getName(),
-            $input,
-            $field->getHint(),
-            $field->getDefaultValue(),
-        ));
+        // FormGroup's 3rd argument overrides the input placeholder; for secrets
+        // keep the "set / not set" mask there and show the hint as help text.
+        $credTypeFieldRow->addColumn(4, $field->isRedactable()
+            ? new FormGroup(
+                $field->getName(),
+                $input,
+                ConfigField::maskValue($field->getValue()),
+                $field->getHint(),
+            )
+            : new FormGroup(
+                $field->getName(),
+                $input,
+                $field->getHint(),
+                $field->getDefaultValue(),
+            ));
 
         if ($field->isManual() === false) {
             $credTypeFieldRow->addColumn(4, [_('Populated by Credential type'), $field->getSource()]);
@@ -230,7 +239,7 @@ class CredentialForm extends SecureForm
         }
 
         $box = new DivTag(null, ['class' => 'mt-3']);
-        $box->addItem(new SecureForm(['action' => 'credential.php'], ['method' => 'POST'], [
+        $box->addItem(new SecureForm(['action' => 'credential.php', 'method' => 'POST'], [
             new InputHiddenTag('id', (string) $kredenc->getMyKey()),
             new InputHiddenTag('checkavailability', '1'),
             new SubmitButton('🩺 '._('Check availability'), 'secondary btn-sm', ['title' => _('Contact the service and verify the credential')]),

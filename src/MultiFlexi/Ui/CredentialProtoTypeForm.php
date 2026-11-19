@@ -473,7 +473,7 @@ JS;
         $newFieldLocalizationDiv->addItem($newFieldLocalizationContainer);
         $formContents[] = $newFieldLocalizationDiv;
 
-        parent::__construct(['action' => 'credentialprototype.php'], ['method' => 'POST'], $formContents);
+        parent::__construct(['action' => 'credentialprototype.php', 'method' => 'POST'], $formContents);
 
         // Add CSS for hidden utility class
         \Ease\WebPage::singleton()->addCSS('.hidden{display:none !important;} .language-section{margin-bottom:0;} .field-language-section{margin-bottom:10px;}');
