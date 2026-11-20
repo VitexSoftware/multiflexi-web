@@ -50,7 +50,7 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
     {
         $state = 'default';
         $companyId = $runtemplate->getDataValue('company_id');
-        $adders = new \Ease\TWB4\Row();
+        $adders = new \Ease\Html\DivTag(null, ['class' => 'd-flex flex-column']);
         $widget = new \Ease\Html\DivTag();
 
         $credProtoHelper = new \MultiFlexi\CredentialProtoType();
@@ -64,7 +64,7 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
 
                 if (\array_key_exists($requirement, $this->assignedCredentials)) {
                     $credId = (int) $this->assignedCredentials[$requirement]['credentials_id'];
-                    $adders->addColumn(4, new \Ease\TWB4\LinkButton('credential.php?id='.$credId, sprintf(_('Edit credential %s'), $requirement), 'secondary'));
+                    $adders->addItem(new \Ease\TWB4\LinkButton('credential.php?id='.$credId, '✏️ '.sprintf(_('Edit credential %s'), $requirement), 'secondary btn-sm btn-block text-wrap mb-1'));
 
                     $cred = new \MultiFlexi\Credential($credId);
                     $prototype = $cred->getCredentialType()?->getPrototype();
@@ -96,7 +96,7 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
                 $credTypes = $helper->listingQuery()->where('company_id', $companyId)->where('prototype', $requirement);
 
                 foreach ($credTypes as $myCredType) {
-                    $adders->addColumn(4, new \Ease\TWB4\LinkButton('credential.php?company_id='.$companyId.'&credential_type_id='.$myCredType['id'], '️➕ 🔐'.sprintf(_('Create credential based on %s type'), $myCredType['name']), 'info btn-sm btn-block'));
+                    $adders->addItem(new \Ease\TWB4\LinkButton('credential.php?company_id='.$companyId.'&credential_type_id='.$myCredType['id'], '➕ 🔐 '.sprintf(_('Create credential based on %s type'), $myCredType['name']), 'info btn-sm btn-block text-wrap mb-1'));
                 }
 
                 if (\array_key_exists($requirement, $this->assignedCredentials) === false) {
@@ -104,13 +104,13 @@ class RuntemplateRequirementsChoser extends \Ease\Html\DivTag
                 }
             } else {
                 $state = 'warning';
-                $adders->addColumn(4, new \Ease\TWB4\LinkButton('credentialtype.php?company_id='.$companyId.'&prototype='.$requirement, '️➕ 🔐'._('Create Credential type'), 'success btn-sm', ['title' => _('New Credential Type')]));
+                $adders->addItem(new \Ease\TWB4\LinkButton('credentialtype.php?company_id='.$companyId.'&prototype='.$requirement, '➕ 🔐 '._('Create Credential type'), 'success btn-sm btn-block text-wrap mb-1', ['title' => _('New Credential Type')]));
                 $runtemplate->addStatusMessage(sprintf(_('Please, define The Credential type using %s'), $requirement));
             }
         } else {
             $state = 'danger';
             $runtemplate->addStatusMessage(sprintf(_('Install "%s" extension'), '<strong>'.$requirement.'</strong>'));
-            $adders->addColumn(4, _('Provider not found'));
+            $adders->addItem(new \Ease\Html\SpanTag(_('Provider not found'), ['class' => 'text-muted']));
         }
 
         $panelTitle = new \Ease\Html\SpanTag();
